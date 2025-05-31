@@ -10,11 +10,11 @@ export default function App() {
     <Routes>
       <Route 
         path="/auth" 
-        element={!user ? <AuthScreen /> : <Navigate to="/\" replace />} 
+        element={!user ? <AuthScreen /> : <Navigate to="/" replace />} 
       />
       <Route 
         path="/*" 
-        element={user ? <TabLayout /> : <Navigate to="/auth\" replace />} 
+        element={user ? <TabLayout /> : <Navigate to="/auth" replace />} 
       />
     </Routes>
   );
