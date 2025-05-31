@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --color-background-primary: #121626;
   --color-background-secondary: #1E2035;
@@ -6,12 +10,6 @@
   --color-text-secondary: #B6B8C2;
   --color-accent-500: #d323ff;
   --color-accent-700: #b100e3;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
 }
 
 body {
@@ -23,14 +21,4 @@ body {
 
 #root {
   min-height: 100vh;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 }
