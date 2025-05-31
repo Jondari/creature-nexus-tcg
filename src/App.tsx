@@ -8,8 +8,8 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/auth" element={!user ? <AuthScreen /> : <Navigate to="/\" replace />} />
-      <Route path="/*" element={user ? <TabLayout /> : <Navigate to="/auth\" replace />} />
+      <Route path="/auth" element={!user ? <AuthScreen /> : <Navigate to="/" replace />} />
+      <Route path="/*" element={user ? <TabLayout /> : <Navigate to="/auth" replace />} />
     </Routes>
   );
 }
