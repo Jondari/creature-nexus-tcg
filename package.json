@@ -1,7 +1,7 @@
 {
   "name": "creature-nexus-tcg",
   "main": "expo-router/entry",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "EXPO_NO_TELEMETRY=1 expo start",
@@ -11,7 +11,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-	"release": "standard-version"
+    "release": "standard-version"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.3",
