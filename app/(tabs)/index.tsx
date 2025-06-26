@@ -154,7 +154,17 @@ export default function OpenPackScreen() {
             <Text style={styles.statLabel}>Packs Opened</Text>
           </View>
         </View>
-        
+
+        {/* A supprimer */}
+        {__DEV__ && (
+            <TouchableOpacity onPress={handleOpenPack} style={{ marginTop: 16, alignItems: 'center' }}>
+              <Text style={{ color: 'orange', fontWeight: 'bold' }}>
+                ⚠ Force open pack (DEV only)
+              </Text>
+            </TouchableOpacity>
+        )}
+
+
         <View style={styles.infoContainer}>
           <Text style={styles.infoTitle}>Card Rarities</Text>
           <View style={styles.rarityList}>

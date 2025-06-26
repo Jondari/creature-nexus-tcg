@@ -42,3 +42,6 @@ firebase-debug.log
 
 expo-env.d.ts
 # @end expo-cli
+
+# ide
+.idea/
