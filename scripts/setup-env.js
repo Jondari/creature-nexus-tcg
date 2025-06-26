@@ -40,4 +40,35 @@ function setupEnv() {
   }
 }
 
+function createNetlifyRedirects() {
+  const distPath = path.join(__dirname, '..', 'dist');
+  const redirectsPath = path.join(distPath, 'server', '_redirects');
+  
+  if (!fs.existsSync(path.join(distPath, 'server'))) {
+    console.log('⚠️  Skipping _redirects creation - server folder not found');
+    return;
+  }
+
+  const redirectsContent = `# Static assets
+/_expo/* /client/_expo/:splat 200
+/assets/* /client/assets/:splat 200
+/favicon.ico /client/favicon.ico 200
+
+# Route handling
+/ /(tabs)/index.html 200
+/collection /(tabs)/collection.html 200
+/profile /(tabs)/profile.html 200
+
+# Catch-all fallback
+/* /+not-found.html 404`;
+
+  try {
+    fs.writeFileSync(redirectsPath, redirectsContent);
+    console.log('✅ Netlify _redirects file created successfully');
+  } catch (error) {
+    console.error('Error creating _redirects file:', error.message);
+  }
+}
+
 setupEnv();
+createNetlifyRedirects();
