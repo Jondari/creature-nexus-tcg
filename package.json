@@ -5,7 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "EXPO_NO_TELEMETRY=1 expo start",
-    "build": "node scripts/setup-env.js && expo export --platform web",
+    "setup-env": "node scripts/setup-env.js",
+    "create-redirects": "node scripts/create-redirects.js",
+    "build": "npm run setup-env && npm run build:web",
+    "build:netlify": "npm run build && npm run create-redirects",
     "build:web": "expo export --platform web",
     "lint": "expo lint",
     "deploy": "firebase deploy",
