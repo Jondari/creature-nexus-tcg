@@ -8,7 +8,7 @@ import Colors from '@/constants/Colors';
 import CustomAlert from '@/components/CustomAlert';
 
 export default function ProfileScreen() {
-  const { user, signOut, linkWithEmail, deleteAccount, isAnonymous } = useAuth();
+  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
   const router = useRouter();
   
   // Debug auth state
@@ -102,6 +102,19 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleLinkWithGoogle = async () => {
+    try {
+      setLoading(true);
+      await linkWithGoogle();
+      showAlert('Success', 'Your account has been saved with Google! You can now sign in with Google on any device.', 'success');
+    } catch (error: any) {
+      console.error('Error linking with Google:', error);
+      showAlert('Error', 'Failed to link with Google. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     console.log('Delete account button pressed');
     console.log('User:', user);
@@ -187,7 +200,15 @@ export default function ProfileScreen() {
               activeOpacity={0.8}
             >
               <Save size={20} color={Colors.text.primary} />
-              <Text style={styles.saveProgressText}>Create Account</Text>
+              <Text style={styles.saveProgressText}>Create Account with Email</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.saveProgressButton, styles.googleSaveButton]}
+              onPress={handleLinkWithGoogle}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.googleIcon}>G</Text>
+              <Text style={styles.googleSaveText}>Save with Google</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -473,6 +494,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: Colors.text.primary,
+    marginLeft: 8,
+  },
+  googleSaveButton: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dadce0',
+    marginTop: 8,
+  },
+  googleIcon: {
+    fontSize: 16,
+    fontFamily: 'Poppins-Bold',
+    color: '#4285f4',
+    backgroundColor: 'transparent',
+  },
+  googleSaveText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#3c4043',
     marginLeft: 8,
   },
   modalOverlay: {

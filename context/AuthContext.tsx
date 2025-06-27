@@ -9,11 +9,14 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  deleteUser
+  deleteUser,
+  signInWithCredential
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +25,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   linkWithEmail: (email: string, password: string) => Promise<void>;
   linkWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   createAccountWithEmail: (email: string, password: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -35,11 +39,15 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   linkWithEmail: async () => {},
   linkWithGoogle: async () => {},
+  signInWithGoogle: async () => {},
   signInWithEmail: async () => {},
   createAccountWithEmail: async () => {},
   deleteAccount: async () => {},
   isAnonymous: false,
 });
+
+// Configure WebBrowser for auth session
+WebBrowser.maybeCompleteAuthSession();
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -152,20 +160,93 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const performGoogleAuth = async () => {
+    try {
+      // Configure Google Auth Session using modern API
+      const redirectUri = AuthSession.makeRedirectUri({
+        useProxy: true,
+      });
+
+      const request = new AuthSession.AuthRequest({
+        clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+        scopes: ['openid', 'profile', 'email'],
+        responseType: AuthSession.ResponseType.IdToken,
+        redirectUri,
+        additionalParameters: {
+          nonce: 'nonce'
+        },
+      });
+
+      const result = await request.promptAsync({
+        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+      });
+
+      if (result.type === 'success' && result.params.id_token) {
+        const credential = GoogleAuthProvider.credential(result.params.id_token);
+        return credential;
+      } else {
+        throw new Error('Google sign-in was cancelled or failed');
+      }
+    } catch (error) {
+      console.error('Error with Google auth:', error);
+      throw error;
+    }
+  };
+
   const linkWithGoogle = async () => {
     if (!user || !user.isAnonymous) {
       throw new Error('No anonymous user to link');
     }
 
     try {
-      // Note: Google sign-in requires additional setup for web/mobile
-      // This is a placeholder - you'll need to implement Google sign-in provider
-      const provider = new GoogleAuthProvider();
-      // Implementation depends on platform (web vs mobile)
-      console.log('Google linking not yet implemented');
-      throw new Error('Google linking requires additional setup');
+      const credential = await performGoogleAuth();
+      const result = await linkWithCredential(user, credential);
+      
+      // Update user document to mark as non-anonymous
+      const userDocRef = doc(db, 'users', result.user.uid);
+      await updateDoc(userDocRef, {
+        email: result.user.email,
+        displayName: result.user.displayName,
+        photoURL: result.user.photoURL,
+        isAnonymous: false,
+        linkedAt: serverTimestamp()
+      });
+
+      // Clear anonymous flag from storage since user is now permanent
+      await AsyncStorage.removeItem(ANONYMOUS_USER_KEY);
+      
+      // Force update the user state and anonymous flag to trigger re-render
+      setUser(result.user);
+      setIsAnonymous(false);
     } catch (error) {
       console.error('Error linking with Google:', error);
+      throw error;
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const credential = await performGoogleAuth();
+      const result = await signInWithCredential(auth, credential);
+      
+      // Check if user document exists, create if not
+      const userDocRef = doc(db, 'users', result.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          createdAt: serverTimestamp(),
+          lastPackOpened: null,
+          cards: [],
+          isAnonymous: false
+        });
+      }
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
       throw error;
     }
   };
@@ -245,6 +326,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signOut: handleSignOut,
         linkWithEmail,
         linkWithGoogle,
+        signInWithGoogle,
         signInWithEmail,
         createAccountWithEmail,
         deleteAccount,

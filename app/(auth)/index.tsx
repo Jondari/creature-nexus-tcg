@@ -9,7 +9,7 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 import CustomAlert from '@/components/CustomAlert';
 
 export default function AuthScreen() {
-  const { user, loading, signInAnonymously, signInWithEmail } = useAuth();
+  const { user, loading, signInAnonymously, signInWithEmail, signInWithGoogle } = useAuth();
   const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [email, setEmail] = useState('');
@@ -91,6 +91,15 @@ export default function AuthScreen() {
       setLoginLoading(false);
     }
   };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error: any) {
+      console.error('Error signing in with Google:', error);
+      showAlert('Error', 'Failed to sign in with Google. Please try again.');
+    }
+  };
   
   if (loading) {
     return <LoadingOverlay message="Getting things ready..." />;
@@ -146,6 +155,15 @@ export default function AuthScreen() {
         >
           <Mail size={20} color={Colors.accent[500]} />
           <Text style={styles.loginButtonText}>Sign In with Email</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.loginButton, styles.googleButton]} 
+          onPress={handleGoogleSignIn}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.googleIcon}>G</Text>
+          <Text style={styles.googleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
         
         <Text style={styles.termsText}>
@@ -308,6 +326,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Medium',
     color: Colors.accent[500],
+    marginLeft: 8,
+  },
+  googleButton: {
+    backgroundColor: '#ffffff',
+    borderColor: '#dadce0',
+    marginBottom: 16,
+  },
+  googleIcon: {
+    fontSize: 18,
+    fontFamily: 'Poppins-Bold',
+    color: '#4285f4',
+    backgroundColor: 'transparent',
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#3c4043',
     marginLeft: 8,
   },
   modalOverlay: {
