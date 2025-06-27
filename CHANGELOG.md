@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.1.2...v0.1.3) (2025-06-27)
+
+
+### Features
+
+* add Google authentication for web and anonymous account linking ([8375293](https://github.com/Jondari/creature-nexus-tcg/commit/837529361404e25ed295d49e671bf6ed47dc803b))
+* implement complete authentication and profile management system ([0de1396](https://github.com/Jondari/creature-nexus-tcg/commit/0de1396f2e6078fdd2f693a5f26756544cd9a9a5))
+
 ### [0.1.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.1.1...v0.1.2) (2025-06-27)
 
 
