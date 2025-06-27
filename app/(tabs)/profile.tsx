@@ -1,21 +1,137 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Modal } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/config/firebase';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { LogOut, Github, Globe } from 'lucide-react-native';
+import { LogOut, Github, Globe, Mail, Save, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
+import CustomAlert from '@/components/CustomAlert';
 
 export default function ProfileScreen() {
-  const { user } = useAuth();
+  const { user, signOut, linkWithEmail, deleteAccount, isAnonymous } = useAuth();
+  const router = useRouter();
+  
+  // Debug auth state
+  console.log('Profile Screen - User:', user);
+  console.log('Profile Screen - Is Anonymous:', isAnonymous);
+  console.log('Profile Screen - User exists:', !!user);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  // Alert state
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'warning';
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error'
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'warning' = 'error') => {
+    setAlert({
+      visible: true,
+      title,
+      message,
+      type
+    });
+  };
+
+  const hideAlert = () => {
+    setAlert(prev => ({ ...prev, visible: false }));
+  };
   
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await signOut();
+      router.replace('/(auth)');
     } catch (error) {
       console.error('Error signing out:', error);
-      Alert.alert('Error', 'Failed to sign out. Please try again.');
+      showAlert('Error', 'Failed to sign out. Please try again.');
+    }
+  };
+
+  const getErrorMessage = (error: any) => {
+    if (error.code) {
+      switch (error.code) {
+        case 'auth/weak-password':
+          return 'Password should be at least 6 characters long.';
+        case 'auth/email-already-in-use':
+          return 'This email is already registered. Please use a different email or sign in instead.';
+        case 'auth/invalid-email':
+          return 'Please enter a valid email address.';
+        case 'auth/credential-already-in-use':
+          return 'This email is already linked to another account.';
+        default:
+          return error.message || 'Failed to save account. Please try again.';
+      }
+    }
+    return error.message || 'Failed to save account. Please try again.';
+  };
+
+  const handleLinkWithEmail = async () => {
+    if (!email || !password) {
+      showAlert('Error', 'Please enter both email and password.');
+      return;
+    }
+
+    if (password.length < 6) {
+      showAlert('Error', 'Password should be at least 6 characters long.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await linkWithEmail(email, password);
+      setShowLinkModal(false);
+      setEmail('');
+      setPassword('');
+      showAlert('Success', 'Your account has been saved! You can now sign in with this email on any device.', 'success');
+    } catch (error: any) {
+      console.error('Error linking account:', error);
+      showAlert('Error', getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    console.log('Delete account button pressed');
+    console.log('User:', user);
+    console.log('Is anonymous:', isAnonymous);
+    
+    if (!user) {
+      console.log('No user found, showing modal anyway for debugging');
+    }
+    
+    if (isAnonymous) {
+      console.log('User is anonymous, showing modal anyway for debugging');
+    }
+    
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    console.log('User confirmed deletion');
+    try {
+      setDeleteLoading(true);
+      console.log('Calling deleteAccount...');
+      await deleteAccount();
+      console.log('Account deleted successfully');
+      setShowDeleteModal(false);
+      router.replace('/(auth)');
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      showAlert('Error', 'Failed to delete account. Please try again.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
   
@@ -42,8 +158,14 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Account Type</Text>
-            <Text style={styles.infoValue}>Anonymous</Text>
+            <Text style={styles.infoValue}>{isAnonymous ? 'Anonymous' : 'Registered'}</Text>
           </View>
+          {!isAnonymous && user?.email && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoValue}>{user.email}</Text>
+            </View>
+          )}
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Created</Text>
             <Text style={styles.infoValue}>{user?.metadata.creationTime 
@@ -51,6 +173,24 @@ export default function ProfileScreen() {
               : 'Unknown'}</Text>
           </View>
         </View>
+        
+        {isAnonymous && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>⚠️ Save Your Progress</Text>
+            <Text style={styles.cardText}>
+              You're playing as an anonymous user. Create an account to save your progress 
+              and access your collection from any device!
+            </Text>
+            <TouchableOpacity
+              style={styles.saveProgressButton}
+              onPress={() => setShowLinkModal(true)}
+              activeOpacity={0.8}
+            >
+              <Save size={20} color={Colors.text.primary} />
+              <Text style={styles.saveProgressText}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About Creature Nexus TCG</Text>
@@ -81,9 +221,117 @@ export default function ProfileScreen() {
           <LogOut size={20} color={Colors.text.primary} />
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
+
+        {!isAnonymous && (
+          <TouchableOpacity 
+            style={styles.deleteAccountButton} 
+            onPress={handleDeleteAccount}
+            activeOpacity={0.8}
+          >
+            <Trash2 size={20} color={Colors.error || '#ff4444'} />
+            <Text style={styles.deleteAccountText}>Delete Account</Text>
+          </TouchableOpacity>
+        )}
         
         <Text style={styles.versionText}>Creature Nexus TCG v1.0.0</Text>
       </ScrollView>
+
+      <Modal
+        visible={showLinkModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowLinkModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Create Account</Text>
+            <Text style={styles.modalSubtitle}>
+              Save your progress and access your collection from any device
+            </Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor={Colors.text.secondary}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor={Colors.text.secondary}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowLinkModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleLinkWithEmail}
+                disabled={loading}
+              >
+                <Text style={styles.saveButtonText}>
+                  {loading ? 'Saving...' : 'Save Account'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Delete Account</Text>
+            <Text style={styles.modalSubtitle}>
+              Are you sure you want to permanently delete your account? This action cannot be undone and you will lose all your cards and progress.
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.deleteButton]}
+                onPress={confirmDeleteAccount}
+                disabled={deleteLoading}
+              >
+                <Text style={styles.deleteButtonText}>
+                  {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <CustomAlert
+        visible={alert.visible}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+        onClose={hideAlert}
+      />
     </View>
   );
 }
@@ -187,11 +435,119 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     marginLeft: 8,
   },
+  deleteAccountButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.error || '#ff4444',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 12,
+  },
+  deleteAccountText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: Colors.error || '#ff4444',
+    marginLeft: 8,
+  },
   versionText: {
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     color: Colors.text.secondary,
     textAlign: 'center',
     marginTop: 40,
-  }
+  },
+  saveProgressButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.accent[500],
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+  },
+  saveProgressText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+    marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: Colors.background.card,
+    borderRadius: 12,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
+    color: Colors.text.primary,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: Colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: Colors.text.primary,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: Colors.background.secondary,
+    marginRight: 8,
+  },
+  saveButton: {
+    backgroundColor: Colors.accent[500],
+    marginLeft: 8,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.secondary,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+  },
+  deleteButton: {
+    backgroundColor: Colors.error || '#ff4444',
+    marginLeft: 8,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+  },
 });
