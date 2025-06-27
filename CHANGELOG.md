@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.1.1...v0.1.2) (2025-06-27)
+
+
+### Features
+
+* add Netlify redirects generation to build process ([5cb549b](https://github.com/Jondari/creature-nexus-tcg/commit/5cb549b1a31463f5d5e018a1e0f7fdbf1808529d))
+
+
+### Bug Fixes
+
+* switch to static output to resolve deployment issues ([13b8ce7](https://github.com/Jondari/creature-nexus-tcg/commit/13b8ce7b081461e4b6b23fa0dddf54be8cd97e31))
+* update redirects to cover all routes and improve env handling ([2d67f5a](https://github.com/Jondari/creature-nexus-tcg/commit/2d67f5aa1d4b44fac550f441dbff63aea4b2e8e5))
+
 ### [0.1.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.1.0...v0.1.1) (2025-05-31)
 
 #### Added
