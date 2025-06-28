@@ -57,16 +57,16 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
   
   return (
     <Animated.View style={[styles.container, backgroundStyle]}>
-      <TouchableOpacity 
+      <View 
         style={styles.backgroundTouchable}
-        onPress={onComplete}
-        activeOpacity={1}
+        onTouchStart={onComplete} // For mobile web
+        onClick={onComplete} // For desktop web
       >
         <LinearGradient
           colors={['rgba(0,0,0,0.8)', 'rgba(18, 22, 38, 0.95)']}
           style={styles.background}
         />
-      </TouchableOpacity>
+      </View>
       
       {/* Content area that prevents touch propagation */}
       <TouchableOpacity 
