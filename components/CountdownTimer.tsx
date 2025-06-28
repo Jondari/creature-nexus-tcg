@@ -29,7 +29,7 @@ export default function CountdownTimer({ timeRemaining, onComplete }: CountdownT
   }, [timeRemaining]);
   
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     
     if (remainingTime > 0) {
       interval = setInterval(() => {

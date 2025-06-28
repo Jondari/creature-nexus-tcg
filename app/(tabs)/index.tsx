@@ -173,7 +173,7 @@ export default function OpenPackScreen() {
                 <View 
                   style={[
                     styles.rarityDot, 
-                    { backgroundColor: Colors[rarity as keyof typeof Colors] }
+                    { backgroundColor: Colors[rarity as keyof typeof Colors] as string }
                   ]}
                 />
                 <Text style={styles.rarityText}>

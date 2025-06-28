@@ -163,19 +163,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const performGoogleAuth = async () => {
     try {
       // Configure Google Auth Session using modern API
-      const redirectUri = AuthSession.makeRedirectUri({
-        useProxy: true,
-      });
+      const redirectUri = AuthSession.makeRedirectUri({});
 
       const request = new AuthSession.AuthRequest({
-        clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+        clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID!,
         scopes: ['openid', 'profile', 'email'],
         responseType: AuthSession.ResponseType.IdToken,
         redirectUri,
-        additionalParameters: {
+        extraParams: {
           nonce: 'nonce'
         },
-      });
+      } as any);
 
       const result = await request.promptAsync({
         authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',

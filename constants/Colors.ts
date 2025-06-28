@@ -41,11 +41,12 @@ export default {
   primary: primaryColors,
   accent: accentColors,
   neutral: neutralColors,
-  common: '#5c9668', // Green for common cards
+  common: '#8e919f', // Grey for common cards
   rare: '#3e7cc9', // Blue for rare cards
   epic: '#9855d4', // Purple for epic cards
   legendary: '#df8c2b', // Orange for legendary cards
   mythic: '#e84b55', // Red for mythic cards
+  error: '#e84b55', // Red for error states
   text: {
     primary: '#FFFFFF',
     secondary: '#B6B8C2',

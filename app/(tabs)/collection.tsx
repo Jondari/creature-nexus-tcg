@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
@@ -19,6 +20,15 @@ export default function CollectionScreen() {
       fetchUserCards();
     }
   }, [user]);
+
+  // Refetch cards when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        fetchUserCards();
+      }
+    }, [user])
+  );
   
   const fetchUserCards = async () => {
     try {

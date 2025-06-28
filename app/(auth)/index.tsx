@@ -8,6 +8,32 @@ import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import CustomAlert from '@/components/CustomAlert';
 
+// Premium monster showcase images
+const PREMIUM_MONSTERS = {
+  // Mythic monsters
+  Mythanor: require('../../assets/images/mythic/Mythanor.png'),
+  Mythelgotn: require('../../assets/images/mythic/Mythelgotn.png'),
+  Mytholzak: require('../../assets/images/mythic/Mytholzak.png'),
+  Mythunden: require('../../assets/images/mythic/Mythunden.png'),
+  Mythévor: require('../../assets/images/mythic/Mythévor.png'),
+  // Legendary monsters
+  Golrok: require('../../assets/images/legendary/Golrok.png'),
+  Selel: require('../../assets/images/legendary/Selel.png'),
+  Solen: require('../../assets/images/legendary/Solen.png'),
+  Stonelorn: require('../../assets/images/legendary/Stonelorn.png'),
+  Zephun: require('../../assets/images/legendary/Zephun.png'),
+};
+
+// Get 2 random different monsters for showcase
+const getRandomShowcaseMonsters = () => {
+  const monsterNames = Object.keys(PREMIUM_MONSTERS);
+  const shuffled = [...monsterNames].sort(() => Math.random() - 0.5);
+  return [
+    PREMIUM_MONSTERS[shuffled[0] as keyof typeof PREMIUM_MONSTERS],
+    PREMIUM_MONSTERS[shuffled[1] as keyof typeof PREMIUM_MONSTERS]
+  ];
+};
+
 export default function AuthScreen() {
   const { user, loading, signInAnonymously, signInWithEmail, signInWithGoogle } = useAuth();
   const router = useRouter();
@@ -15,6 +41,9 @@ export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  
+  // Random showcase monsters (2 different ones)
+  const [showcaseMonsters] = useState(() => getRandomShowcaseMonsters());
   
   // Alert state
   const [alert, setAlert] = useState<{
@@ -124,11 +153,11 @@ export default function AuthScreen() {
         
         <View style={styles.cardsPreviewContainer}>
           <Image
-            source={{ uri: 'https://images.pexels.com/photos/3270223/pexels-photo-3270223.jpeg' }}
+            source={showcaseMonsters[0]}
             style={[styles.cardPreview, { transform: [{ rotate: '-10deg' }, { translateX: -20 }] }]}
           />
           <Image
-            source={{ uri: 'https://images.pexels.com/photos/1144687/pexels-photo-1144687.jpeg' }}
+            source={showcaseMonsters[1]}
             style={[styles.cardPreview, { transform: [{ rotate: '5deg' }, { translateX: 20 }] }]}
           />
         </View>

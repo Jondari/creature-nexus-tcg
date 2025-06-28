@@ -1,4 +1,4 @@
-import { Card, CardRarity, RARITY_WEIGHTS, CARD_NAMES, CARD_DESCRIPTIONS, CARD_IMAGES } from '../models/Card';
+import { Card, CardRarity, Element, RARITY_WEIGHTS, CARDS_DATABASE, getRandomCardByRarity } from '../models/Card';
 
 // Generate a random rarity based on weights
 export const generateRandomRarity = (): CardRarity => {
@@ -24,17 +24,16 @@ const getRandomElement = <T>(array: T[]): T => {
 // Generate a single random card
 export const generateRandomCard = (): Card => {
   const rarity = generateRandomRarity();
-  const name = getRandomElement(CARD_NAMES[rarity]);
-  const description = getRandomElement(CARD_DESCRIPTIONS[rarity]);
-  const imageUrl = getRandomElement(CARD_IMAGES[rarity]);
+  const baseCard = getRandomCardByRarity(rarity);
   
   return {
+    ...baseCard,
     id: `${rarity}_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
-    name,
-    description,
-    rarity,
-    imageUrl,
-    createdAt: new Date()
+    element: baseCard.element as Element,
+    rarity: baseCard.rarity as CardRarity,
+    maxHp: baseCard.hp,
+    isMythic: rarity === 'mythic',
+    // Note: removed createdAt as it's not part of battle engine Card model
   };
 };
 

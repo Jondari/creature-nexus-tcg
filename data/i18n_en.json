@@ -1,0 +1,101 @@
+{
+  "elements": {
+    "fire": "Fire",
+    "water": "Water",
+    "air": "Air",
+    "earth": "Earth",
+    "all": "All"
+  },
+  "rarities": {
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary",
+    "mythic": "Mythic"
+  },
+  "attacks": {
+    "flare": "Flare",
+    "ascension": "Ascension",
+    "ember": "Ember",
+    "mist": "Mist",
+    "convergence": "Convergence",
+    "dissolution": "Dissolution",
+    "surge": "Surge",
+    "blaze": "Blaze",
+    "foliage": "Foliage",
+    "bloom": "Bloom",
+    "fusion": "Fusion",
+    "frost": "Frost",
+    "implosion": "Implosion",
+    "glow": "Glow",
+    "tide": "Tide",
+    "nexus": "Nexus",
+    "root": "Root",
+    "gust": "Gust",
+    "boulder": "Boulder",
+    "break": "Break",
+    "resurgence": "Resurgence",
+    "breath": "Breath",
+    "loam": "Loam",
+    "wind": "Wind",
+    "swirl": "Swirl",
+    "bark": "Bark",
+    "foam": "Foam",
+    "rush": "Rush",
+    "awakening": "Awakening",
+    "burrow": "Burrow",
+    "rootlash": "Rootlash",
+    "crush": "Crush",
+    "boulderfall": "Boulderfall"
+  },
+  "game": {
+    "title": "Creature Nexus TCG",
+    "loading": "Loading...",
+    "error": "Error",
+    "newGame": "New Game",
+    "playAgain": "Play Again",
+    "quit": "Quit"
+  },
+  "player": {
+    "you": "You",
+    "opponent": "Opponent",
+    "energy": "Energy",
+    "points": "Points",
+    "hp": "HP",
+    "deck": "Deck",
+    "hand": "Hand",
+    "field": "Field"
+  },
+  "actions": {
+    "play": "Play",
+    "attack": "Attack",
+    "retire": "Retire",
+    "endTurn": "End Turn",
+    "selectTarget": "Select Target",
+    "directAttack": "Direct Attack"
+  },
+  "combat": {
+    "damage": "Damage",
+    "advantage": "Advantage",
+    "disadvantage": "Disadvantage",
+    "cannotAttack": "Cannot Attack",
+    "mythicCooldown": "Mythic Cooldown",
+    "notEnoughEnergy": "Not Enough Energy"
+  },
+  "game_over": {
+    "victory": "Victory!",
+    "defeat": "Defeat!",
+    "winner": "Winner",
+    "reason": {
+      "points": "Reached 4 points",
+      "noCards": "Opponent has no cards left",
+      "noMonsters": "Opponent has no monsters"
+    }
+  },
+  "phases": {
+    "draw": "Draw Phase",
+    "main": "Main Phase",
+    "combat": "Combat Phase",
+    "end": "End Phase"
+  }
+}

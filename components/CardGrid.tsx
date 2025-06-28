@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Text, TouchableOpacity } from 'react-native';
-import CardItem from './CardItem';
+import { CardComponent } from './CardComponent';
 import { Card, CardRarity, RARITY_COLORS } from '../models/Card';
 import { groupCardsByName } from '../utils/cardUtils';
 import Colors from '../constants/Colors';
@@ -56,24 +56,29 @@ export default function CardGrid({ cards, filter, onFilterChange }: CardGridProp
   
   return (
     <View style={styles.container}>
-      {renderFilterButtons()}
+      <View style={styles.filterSection}>
+        {renderFilterButtons()}
+      </View>
       
-      {filteredGroups.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No cards found</Text>
-          <Text style={styles.emptySubtext}>Open some packs to add cards to your collection</Text>
-        </View>
-      ) : (
-        <ScrollView contentContainerStyle={styles.gridContainer}>
-          {filteredGroups.map(([name, cardGroup]) => (
-            <CardItem 
-              key={name} 
-              card={cardGroup[0]} 
-              count={cardGroup.length}
-            />
-          ))}
-        </ScrollView>
-      )}
+      <View style={styles.contentSection}>
+        {filteredGroups.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No cards found</Text>
+            <Text style={styles.emptySubtext}>Open some packs to add cards to your collection</Text>
+          </View>
+        ) : (
+          <ScrollView contentContainerStyle={styles.gridContainer}>
+            {filteredGroups.map(([name, cardGroup]) => (
+              <CardComponent 
+                key={name} 
+                card={cardGroup[0]} 
+                viewMode="collection"
+                count={cardGroup.length}
+              />
+            ))}
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 }
@@ -82,10 +87,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  filterSection: {
+    backgroundColor: Colors.background.primary,
+    zIndex: 1, // Ensure filters stay on top
+  },
+  contentSection: {
+    flex: 1,
+  },
   filterContainer: {
     flexDirection: 'row',
     paddingHorizontal: 12,
     paddingVertical: 12,
+    minHeight: 56, // Fixed height to prevent size variation
   },
   filterButton: {
     paddingHorizontal: 16,
@@ -93,6 +106,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 8,
     backgroundColor: Colors.background.card,
+    height: 32, // Fixed height for consistent button size
+    justifyContent: 'center', // Center text vertically
   },
   filterButtonActive: {
     backgroundColor: Colors.primary[500],
