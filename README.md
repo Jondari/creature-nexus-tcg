@@ -1,5 +1,7 @@
 # Creature Nexus TCG
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/7f369d2a-ba9a-46d9-982a-7b74f39c05b8/deploy-status)](https://app.netlify.com/projects/creature-nexus/deploys)
+
 A digital trading card game featuring mythical creatures built with Expo and React Native.
 
 ## Features
