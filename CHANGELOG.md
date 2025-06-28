@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.1.3...v0.2.0) (2025-06-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Added full battle system with game engine and UI improvements
+
+Major Features:
+- Complete battle system with AI opponent and combat mechanics
+- Game state management with card interactions and animations
+- Battle UI components including GameBoard and ActionLog
+- Deck management system with DeckBuilder component
+- Audio integration with impact sound effects
+
+UX Enhancements:
+- Horizontal pack opening layout with user-controlled dismissal
+- Click-to-dismiss and Continue button functionality
+- Real-time collection synchronization between screens
+- Responsive card sizing with small/normal modes
+- Enhanced card detail modals with proper scaling
+
+Visual Improvements:
+- Unified card model using battle engine Card interface
+- Grey color scheme for common cards matching design standards
+- Fixed filter button sizing across all screen states
+- Proportional element scaling for small cards
+- Professional card animations and transitions
+
+Technical Changes:
+- Integrated battle engine types and game logic
+- Added context providers for game and deck state
+- Implemented card generation using battle engine data
+- Enhanced navigation with Battle and Decks tabs
+- Improved state management across multiple screens
+
+### Features
+
+* integrate complete battle system with enhanced UX ([a69e182](https://github.com/Jondari/creature-nexus-tcg/commit/a69e1821364eb5cb595c802c589f33c5c7c002ab))
+
 ### [0.1.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.1.2...v0.1.3) (2025-06-27)
 
 
