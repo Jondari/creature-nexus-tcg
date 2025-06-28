@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.0...v0.2.1) (2025-06-28)
+
+
+### Features
+
+* add card size preferences and fix profile links ([1adf61f](https://github.com/Jondari/creature-nexus-tcg/commit/1adf61fd10ff29d39a5efb56703d6fb7523d703a))
+
+
+### Bug Fixes
+
+* resolve mobile web click-away issue in pack opening modal ([dfd53de](https://github.com/Jondari/creature-nexus-tcg/commit/dfd53de0dcdc813739671f45af11daffaba71966))
+
 ## [0.2.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.1.3...v0.2.0) (2025-06-28)
 
 
