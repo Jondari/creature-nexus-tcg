@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Modal } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LogOut, Github, Globe, Mail, Save, Trash2 } from 'lucide-react-native';
@@ -9,6 +10,7 @@ import CustomAlert from '@/components/CustomAlert';
 
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
+  const { cardSize, setCardSize } = useSettings();
   const router = useRouter();
   
   // Debug auth state
@@ -214,6 +216,48 @@ export default function ProfileScreen() {
         )}
         
         <View style={styles.card}>
+          <Text style={styles.cardTitle}>Game Settings</Text>
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Card Size</Text>
+              <Text style={styles.settingDescription}>
+                Choose how cards are displayed throughout the game
+              </Text>
+            </View>
+            <View style={styles.settingButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  cardSize === 'small' && styles.settingButtonActive
+                ]}
+                onPress={() => setCardSize('small')}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  cardSize === 'small' && styles.settingButtonTextActive
+                ]}>
+                  Small
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  cardSize === 'normal' && styles.settingButtonActive
+                ]}
+                onPress={() => setCardSize('normal')}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  cardSize === 'normal' && styles.settingButtonTextActive
+                ]}>
+                  Normal
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.card}>
           <Text style={styles.cardTitle}>About Creature Nexus TCG</Text>
           <Text style={styles.cardText}>
             Creature Nexus is a digital trading card game featuring mythical creatures and 
@@ -222,12 +266,30 @@ export default function ProfileScreen() {
           </Text>
           
           <View style={styles.links}>
-            <TouchableOpacity style={styles.linkButton}>
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={() => {
+                // Open GitHub repository
+                const url = 'https://github.com/Jondari/creature-nexus-tcg';
+                if (typeof window !== 'undefined') {
+                  window.open(url, '_blank');
+                }
+              }}
+            >
               <Github size={20} color={Colors.text.primary} />
               <Text style={styles.linkText}>GitHub Repository</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.linkButton}>
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={() => {
+                // Open official website
+                const url = 'https://creature-nexus.netlify.app';
+                if (typeof window !== 'undefined') {
+                  window.open(url, '_blank');
+                }
+              }}
+            >
               <Globe size={20} color={Colors.text.primary} />
               <Text style={styles.linkText}>Official Website</Text>
             </TouchableOpacity>
@@ -423,6 +485,52 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     lineHeight: 22,
     marginBottom: 16,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  settingInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  settingLabel: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+    marginBottom: 4,
+  },
+  settingDescription: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: Colors.text.secondary,
+    lineHeight: 16,
+  },
+  settingButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  settingButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: Colors.background.secondary,
+    minWidth: 70,
+    alignItems: 'center',
+  },
+  settingButtonActive: {
+    backgroundColor: Colors.accent[600],
+  },
+  settingButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.secondary,
+  },
+  settingButtonTextActive: {
+    color: Colors.text.primary,
+    fontWeight: 'bold',
   },
   links: {
     marginTop: 8,

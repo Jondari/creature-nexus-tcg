@@ -3,15 +3,17 @@ import { StyleSheet, View, ScrollView, Text, TouchableOpacity } from 'react-nati
 import { CardComponent } from './CardComponent';
 import { Card, CardRarity, RARITY_COLORS } from '../models/Card';
 import { groupCardsByName } from '../utils/cardUtils';
+import { CardSize } from '../context/SettingsContext';
 import Colors from '../constants/Colors';
 
 interface CardGridProps {
   cards: Card[];
   filter: CardRarity | 'all';
   onFilterChange: (filter: CardRarity | 'all') => void;
+  cardSize?: CardSize;
 }
 
-export default function CardGrid({ cards, filter, onFilterChange }: CardGridProps) {
+export default function CardGrid({ cards, filter, onFilterChange, cardSize = 'small' }: CardGridProps) {
   // Group cards by name to count duplicates
   const groupedCards = groupCardsByName(cards);
   
@@ -74,6 +76,7 @@ export default function CardGrid({ cards, filter, onFilterChange }: CardGridProp
                 card={cardGroup[0]} 
                 viewMode="collection"
                 count={cardGroup.length}
+                size={cardSize}
               />
             ))}
           </ScrollView>

@@ -133,6 +133,7 @@ export function DeckBuilder({
                 <CardComponent
                   card={cards[0]}
                   onPress={() => removeCardFromDeck(cards[0].id)}
+                  size="small"
                 />
                 <View style={styles.cardCount}>
                   <Text style={styles.cardCountText}>{cards.length}</Text>
@@ -175,6 +176,7 @@ export function DeckBuilder({
                       card={cardGroup[0]}
                       onPress={() => canAdd && addCardToDeck(cardGroup[0])}
                       disabled={!canAdd}
+                      size="small"
                     />
                     <View style={styles.cardInfo}>
                       <Text style={styles.cardStats}>
@@ -289,6 +291,7 @@ const styles = StyleSheet.create({
   filterScroll: {
     flexDirection: 'row',
     marginBottom: 16,
+    minHeight: 48, // Fixed height to prevent size variation
   },
   filterButton: {
     paddingHorizontal: 16,
@@ -296,6 +299,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 8,
     backgroundColor: Colors.background.card,
+    height: 32, // Fixed height for consistent button size
+    justifyContent: 'center', // Center text vertically
   },
   filterButtonActive: {
     backgroundColor: Colors.primary[600],

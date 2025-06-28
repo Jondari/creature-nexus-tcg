@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
+import { useSettings } from '../context/SettingsContext';
 import { CardComponent } from './CardComponent';
 import { ActionLog } from './ActionLog';
 import { Card } from '../types/game';
@@ -24,6 +25,7 @@ export function GameBoard() {
     initializeGame
   } = useGame();
   const { activeDeck } = useDecks();
+  const { cardSize, setCardSize } = useSettings();
   const { playCard, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
@@ -294,6 +296,7 @@ export function GameBoard() {
               onPress={() => handleCardPress(card)}
               disabled={!isPlayerTurn || !attackMode}
               damageAnimation={getDamageAnimationForCard(card.id!)}
+              size={cardSize}
             />
           ))}
           {playerAtTop.field.length === 0 && (
@@ -304,10 +307,22 @@ export function GameBoard() {
 
       {/* Game Info */}
       <View style={styles.gameInfo}>
-        <Text style={styles.turnInfo}>
-          Turn {gameState.turnNumber} - {isPlayerTurn ? 'Your Turn' : 'AI Turn'}
-        </Text>
-        <Text style={styles.phaseInfo}>Phase: {t(`phases.${gameState.phase}`)}</Text>
+        <View style={styles.gameInfoContent}>
+          <View>
+            <Text style={styles.turnInfo}>
+              Turn {gameState.turnNumber} - {isPlayerTurn ? 'Your Turn' : 'AI Turn'}
+            </Text>
+            <Text style={styles.phaseInfo}>Phase: {t(`phases.${gameState.phase}`)}</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.sizeToggle}
+            onPress={() => setCardSize(cardSize === 'small' ? 'normal' : 'small')}
+          >
+            <Text style={styles.sizeToggleText}>
+              {cardSize === 'small' ? '⊞' : '⊟'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Bottom Player Field */}
@@ -324,6 +339,7 @@ export function GameBoard() {
               showActions={currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard === card.id}
               disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
               damageAnimation={getDamageAnimationForCard(card.id!)}
+              size={cardSize}
             />
           ))}
           {playerAtBottom.field.length === 0 && (
@@ -353,6 +369,7 @@ export function GameBoard() {
               selected={selectedCard === card.id}
               onPress={() => setSelectedCard(card.id === selectedCard ? null : card.id!)}
               disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
+              size={cardSize}
             />
           ))}
         </ScrollView>
@@ -502,7 +519,25 @@ const styles = StyleSheet.create({
     padding: 12,
     margin: 8,
     borderRadius: 8,
+  },
+  gameInfoContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  sizeToggle: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: 8,
+    padding: 8,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sizeToggleText: {
+    fontSize: 18,
+    color: Colors.text.primary,
+    fontWeight: 'bold',
   },
   turnInfo: {
     fontSize: 16,
