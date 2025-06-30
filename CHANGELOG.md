@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.1...v0.2.2) (2025-06-30)
+
+
+### Bug Fixes
+
+* disable Google auth buttons temporarily ([89a14af](https://github.com/Jondari/creature-nexus-tcg/commit/89a14af8638adc2009b730af20fb4ec389332036))
+* restore proper TouchableOpacity pattern and add close button for mobile ([91217eb](https://github.com/Jondari/creature-nexus-tcg/commit/91217eb254c6f88d013084ca6502f9bac458c30f))
+
 ### [0.2.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.0...v0.2.1) (2025-06-28)
 
 
