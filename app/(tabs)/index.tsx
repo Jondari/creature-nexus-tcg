@@ -114,7 +114,7 @@ export default function OpenPackScreen() {
         activeOpacity={0.8}
       >
         <Image 
-          source={require('@/reference/white_circle_360x360.png')}
+          source={require('@/assets/images/white_circle_360x360.png')}
           style={styles.boltBadgeImage}
           resizeMode="contain"
         />
