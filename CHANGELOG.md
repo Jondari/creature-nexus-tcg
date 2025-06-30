@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.3...v0.2.4) (2025-06-30)
+
+
+### Bug Fixes
+
+* move Bolt badge to assets folder for proper build inclusion ([6d15cf9](https://github.com/Jondari/creature-nexus-tcg/commit/6d15cf9990a05694f03052d4839e491bea60186c))
+
 ### [0.2.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.2...v0.2.3) (2025-06-30)
 
 
