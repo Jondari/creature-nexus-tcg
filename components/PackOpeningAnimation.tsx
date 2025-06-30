@@ -57,16 +57,25 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
   
   return (
     <Animated.View style={[styles.container, backgroundStyle]}>
-      <View 
+      <TouchableOpacity 
         style={styles.backgroundTouchable}
-        onTouchStart={onComplete} // For mobile web
-        onClick={onComplete} // For desktop web
+        onPress={onComplete}
+        activeOpacity={1}
       >
         <LinearGradient
           colors={['rgba(0,0,0,0.8)', 'rgba(18, 22, 38, 0.95)']}
           style={styles.background}
         />
-      </View>
+      </TouchableOpacity>
+      
+      {/* Close button */}
+      <TouchableOpacity 
+        style={styles.closeButton}
+        onPress={onComplete}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.closeButtonText}>✕</Text>
+      </TouchableOpacity>
       
       {/* Content area that prevents touch propagation */}
       <TouchableOpacity 
@@ -245,5 +254,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 101,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: Colors.text.primary,
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });
