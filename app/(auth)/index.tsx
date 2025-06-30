@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, TextInput, Modal } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, TextInput, Modal, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -142,6 +142,19 @@ export default function AuthScreen() {
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
       />
+      
+      {/* Bolt Hackathon Badge */}
+      <TouchableOpacity 
+        style={styles.boltBadge}
+        onPress={() => Linking.openURL('https://bolt.new/')}
+        activeOpacity={0.8}
+      >
+        <Image 
+          source={require('@/reference/white_circle_360x360.png')}
+          style={styles.boltBadgeImage}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
       
       <View style={styles.content}>
         <View style={styles.logoContainer}>
@@ -439,5 +452,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Medium',
     color: Colors.text.primary,
+  },
+  boltBadge: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 100,
+    width: 50,
+    height: 50,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  boltBadgeImage: {
+    width: 50,
+    height: 50,
   },
 });

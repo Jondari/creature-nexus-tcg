@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Image } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { doc, getDoc, updateDoc, arrayUnion, Timestamp } from 'firebase/firestore';
@@ -106,6 +106,19 @@ export default function OpenPackScreen() {
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 0.5 }}
       />
+      
+      {/* Bolt Hackathon Badge */}
+      <TouchableOpacity 
+        style={styles.boltBadge}
+        onPress={() => Linking.openURL('https://bolt.new/')}
+        activeOpacity={0.8}
+      >
+        <Image 
+          source={require('@/reference/white_circle_360x360.png')}
+          style={styles.boltBadgeImage}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
@@ -311,5 +324,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: Colors.text.secondary,
+  },
+  boltBadge: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 100,
+    width: 50,
+    height: 50,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  boltBadgeImage: {
+    width: 50,
+    height: 50,
   },
 });
