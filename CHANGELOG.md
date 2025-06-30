@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.2...v0.2.3) (2025-06-30)
+
+
+### Features
+
+* add Bolt hackathon badge to home and auth pages ([f5534d4](https://github.com/Jondari/creature-nexus-tcg/commit/f5534d44ff83612e2a87de8d187d03d9c9165609))
+
 ### [0.2.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.1...v0.2.2) (2025-06-30)
 
 
