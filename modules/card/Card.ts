@@ -34,6 +34,7 @@ export class CardUtils {
     return {
       ...card,
       hp: newHp,
+      maxHp: card.maxHp || card.hp, // Set maxHp to original HP if not already set
     };
   }
 

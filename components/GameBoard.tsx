@@ -68,7 +68,7 @@ export function GameBoard() {
 
   // Auto-process AI turns
   useEffect(() => {
-    if (!gameState || !gameEngine || gameState.isGameOver) return;
+    if (!gameState || !gameEngine || gameState.isGameOver || aiVisualState.isActive) return;
     
     const currentPlayer = gameEngine.getCurrentPlayer();
     console.log(`Turn ${gameState.turnNumber}: Current player is ${currentPlayer.name} (AI: ${currentPlayer.isAI}), Phase: ${gameState.phase}`);
@@ -81,7 +81,7 @@ export function GameBoard() {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [gameState?.currentPlayerIndex, gameState?.phase, gameState?.turnNumber, processAITurn, gameEngine, gameState]);
+  }, [gameState?.currentPlayerIndex, gameState?.phase, gameState?.turnNumber, processAITurn, gameEngine, gameState, aiVisualState.isActive]);
 
   // Auto-clear damage animations after duration
   useEffect(() => {

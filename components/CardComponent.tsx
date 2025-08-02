@@ -191,7 +191,13 @@ export function CardComponent({
                   {card.name}
                 </Text>
                 <View style={styles.hpSection}>
-                  <Text style={[hpTextStyle, { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' }]}>
+                  <Text style={[
+                    hpTextStyle, 
+                    { 
+                      color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text, 
+                      textShadowColor: 'rgba(0,0,0,0.8)' 
+                    }
+                  ]}>
                     HP {card.hp}
                   </Text>
                   {isElementSymbolCard && getElementSymbol(card.element) ? (
@@ -313,7 +319,12 @@ export function CardComponent({
                   {card.name}
                 </Text>
                 <View style={styles.hpSection}>
-                  <Text style={[hpTextStyle, { color: colors.text }]}>
+                  <Text style={[
+                    hpTextStyle, 
+                    { 
+                      color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text 
+                    }
+                  ]}>
                     HP {card.hp}
                   </Text>
                   {isElementSymbolCard && getElementSymbol(card.element) ? (
