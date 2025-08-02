@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { GameState, Player, Card, GameAction, ActionLogEntry, DamageAnimation } from '../types/game';
+import { GameState, Player, Card, GameAction, ActionLogEntry, DamageAnimation, AIVisualState, AIStatus } from '../types/game';
 import { GameEngine } from '../modules/game';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
@@ -10,6 +10,7 @@ interface GameContextState {
   gameState: GameState | null;
   actionLog: ActionLogEntry[];
   damageAnimations: DamageAnimation[];
+  aiVisualState: AIVisualState;
   isLoading: boolean;
   error: string | null;
 }
@@ -21,6 +22,9 @@ interface GameContextActions {
   resetGame: () => void;
   triggerDamageAnimation: (cardId: string, duration?: number) => void;
   clearDamageAnimation: (cardId: string) => void;
+  setAIStatus: (status: AIStatus, message?: string) => void;
+  setAIHighlight: (cardId?: string, targetCardId?: string) => void;
+  clearAIVisuals: () => void;
 }
 
 type GameContextType = GameContextState & GameContextActions;
@@ -33,6 +37,9 @@ type GameAction_Context =
   | { type: 'ADD_ACTION_LOG'; payload: ActionLogEntry }
   | { type: 'ADD_DAMAGE_ANIMATION'; payload: DamageAnimation }
   | { type: 'CLEAR_DAMAGE_ANIMATION'; payload: string }
+  | { type: 'SET_AI_STATUS'; payload: { status: AIStatus; message?: string } }
+  | { type: 'SET_AI_HIGHLIGHT'; payload: { cardId?: string; targetCardId?: string } }
+  | { type: 'CLEAR_AI_VISUALS' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'RESET_GAME' };
@@ -42,6 +49,10 @@ const initialState: GameContextState = {
   gameState: null,
   actionLog: [],
   damageAnimations: [],
+  aiVisualState: {
+    status: 'idle',
+    isActive: false,
+  },
   isLoading: false,
   error: null,
 };
@@ -75,6 +86,33 @@ function gameReducer(state: GameContextState, action: GameAction_Context): GameC
       return {
         ...state,
         damageAnimations: state.damageAnimations.filter(anim => anim.cardId !== action.payload),
+      };
+    case 'SET_AI_STATUS':
+      return {
+        ...state,
+        aiVisualState: {
+          ...state.aiVisualState,
+          status: action.payload.status,
+          message: action.payload.message,
+          isActive: action.payload.status !== 'idle',
+        },
+      };
+    case 'SET_AI_HIGHLIGHT':
+      return {
+        ...state,
+        aiVisualState: {
+          ...state.aiVisualState,
+          highlightedCardId: action.payload.cardId,
+          targetCardId: action.payload.targetCardId,
+        },
+      };
+    case 'CLEAR_AI_VISUALS':
+      return {
+        ...state,
+        aiVisualState: {
+          status: 'idle',
+          isActive: false,
+        },
       };
     case 'SET_LOADING':
       return {
@@ -211,7 +249,7 @@ export function GameProvider({ children }: GameProviderProps) {
     }
   };
 
-  const executeAITurn = () => {
+  const executeAITurn = async () => {
     console.log('=== executeAITurn called ===');
     if (!state.gameEngine || !state.gameState) {
       console.log('No game engine or game state');
@@ -226,9 +264,12 @@ export function GameProvider({ children }: GameProviderProps) {
     }
     
     try {
-      // AI should continue making actions until it ends its turn
+      // Show AI is starting its turn
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'thinking', message: 'AI is planning their turn...' } });
+      await delay(1700); // 1200 + 500
+      
       let actionsPerformed = 0;
-      const maxActions = 10; // Prevent infinite loops
+      const maxActions = 10;
       
       console.log(`Starting AI turn loop, max actions: ${maxActions}`);
       
@@ -237,17 +278,38 @@ export function GameProvider({ children }: GameProviderProps) {
         const currentState = state.gameEngine.getGameState();
         const currentPlayerInLoop = state.gameEngine.getCurrentPlayer();
         
-        // If it's no longer the AI's turn, break
         if (!currentPlayerInLoop.isAI) {
           break;
         }
         
+        // AI analyzing phase
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'analyzing_hand', message: 'Analyzing available options...' } });
+        await delay(1300); // 800 + 500
+        
         const aiDecision = AIEngine.makeDecision(currentState);
         console.log(`AI Decision: ${aiDecision.action.type} - ${aiDecision.reasoning}`);
+        
+        // Show what AI is doing based on action type
+        await showAIActionVisuals(aiDecision.action, dispatch);
         
         const players = state.gameEngine.getPlayers();
         const aiPlayer = players.find(p => p.id === currentPlayerInLoop.id);
         const description = aiDecision.reasoning || getActionDescription(aiDecision.action, state.gameEngine);
+        
+        // Execute the action
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'executing_action', message: 'Executing action...' } });
+        
+        // Trigger damage animation for AI attacks
+        if (aiDecision.action.type === 'ATTACK' && aiDecision.action.targetCardId) {
+          dispatch({ 
+            type: 'ADD_DAMAGE_ANIMATION', 
+            payload: { 
+              cardId: aiDecision.action.targetCardId, 
+              isActive: true, 
+              duration: 1000 
+            } 
+          });
+        }
         
         const success = state.gameEngine.executeAction(aiDecision.action);
         
@@ -262,16 +324,25 @@ export function GameProvider({ children }: GameProviderProps) {
         
         dispatch({ type: 'ADD_ACTION_LOG', payload: logEntry });
         
+        // Clear highlights and show result
+        dispatch({ type: 'CLEAR_AI_VISUALS' });
+        await delay(1300); // 800 + 500
+        
         if (success) {
           actionsPerformed++;
           
-          // If AI ended turn or attacked (which auto-ends turn), break the loop
+          // Update game state after each action
+          const newGameState = state.gameEngine.getGameState();
+          dispatch({ type: 'UPDATE_GAME_STATE', payload: newGameState });
+          
           if (aiDecision.action.type === 'END_TURN' || aiDecision.action.type === 'ATTACK') {
             break;
           }
+          
+          // Small pause between actions
+          await delay(1000); // 500 + 500
         } else {
           console.log(`AI action failed: ${aiDecision.action.type}, forcing end turn`);
-          // If action failed, force end turn
           const endTurnSuccess = state.gameEngine.executeAction({
             type: 'END_TURN',
             playerId: currentPlayerInLoop.id,
@@ -283,7 +354,6 @@ export function GameProvider({ children }: GameProviderProps) {
         }
       }
       
-      // Safety check - if we hit max actions, force end turn
       if (actionsPerformed >= maxActions) {
         console.warn('AI hit max actions limit, forcing end turn');
         const currentPlayerAfterLoop = state.gameEngine.getCurrentPlayer();
@@ -295,10 +365,15 @@ export function GameProvider({ children }: GameProviderProps) {
         }
       }
       
+      // Final game state update
       const newGameState = state.gameEngine.getGameState();
       dispatch({ type: 'UPDATE_GAME_STATE', payload: newGameState });
       
+      // Clear all AI visuals
+      dispatch({ type: 'CLEAR_AI_VISUALS' });
+      
     } catch (error) {
+      dispatch({ type: 'CLEAR_AI_VISUALS' });
       dispatch({ 
         type: 'SET_ERROR', 
         payload: error instanceof Error ? error.message : 'AI turn failed' 
@@ -324,6 +399,18 @@ export function GameProvider({ children }: GameProviderProps) {
     dispatch({ type: 'CLEAR_DAMAGE_ANIMATION', payload: cardId });
   };
 
+  const setAIStatus = (status: AIStatus, message?: string) => {
+    dispatch({ type: 'SET_AI_STATUS', payload: { status, message } });
+  };
+
+  const setAIHighlight = (cardId?: string, targetCardId?: string) => {
+    dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId, targetCardId } });
+  };
+
+  const clearAIVisuals = () => {
+    dispatch({ type: 'CLEAR_AI_VISUALS' });
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -334,12 +421,69 @@ export function GameProvider({ children }: GameProviderProps) {
         resetGame,
         triggerDamageAnimation,
         clearDamageAnimation,
+        setAIStatus,
+        setAIHighlight,
+        clearAIVisuals,
       }}
     >
       {children}
     </GameContext.Provider>
   );
 }
+
+// Helper functions for AI visuals
+const delay = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+const showAIActionVisuals = async (action: GameAction, dispatch: React.Dispatch<GameAction_Context>) => {
+  switch (action.type) {
+    case 'PLAY_CARD':
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_card_to_play', message: 'Selecting card to play...' } });
+      if (action.cardId) {
+        dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId } });
+      }
+      await delay(1700); // 1200 + 500
+      break;
+      
+    case 'ATTACK':
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_attacker', message: 'Choosing attacker...' } });
+      if (action.cardId) {
+        dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId } });
+      }
+      await delay(1500); // 1000 + 500
+      
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_attack', message: `Preparing ${action.attackName}...` } });
+      await delay(1300); // 800 + 500
+      
+      if (action.targetCardId) {
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_target', message: 'Selecting target...' } });
+        dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId, targetCardId: action.targetCardId } });
+        await delay(1500); // 1000 + 500
+      } else {
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_target', message: 'Attacking directly...' } });
+        await delay(1300); // 800 + 500
+      }
+      break;
+      
+    case 'RETIRE_CARD':
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_card_to_play', message: 'Selecting card to retire...' } });
+      if (action.cardId) {
+        dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId } });
+      }
+      await delay(1000);
+      break;
+      
+    case 'END_TURN':
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'ending_turn', message: 'Ending turn...' } });
+      await delay(600);
+      break;
+      
+    default:
+      await delay(500);
+      break;
+  }
+};
 
 export function useGame(): GameContextType {
   const context = useContext(GameContext);

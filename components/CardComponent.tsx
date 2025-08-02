@@ -22,6 +22,7 @@ interface CardComponentProps {
   disabled?: boolean;
   showActions?: boolean;
   selected?: boolean;
+  aiHighlight?: 'selected' | 'target' | null;
   damageAnimation?: DamageAnimation;
   viewMode?: 'battle' | 'collection' | 'deck';
   count?: number; // For collection view to show duplicate count
@@ -39,6 +40,7 @@ export function CardComponent({
   disabled = false, 
   showActions = false,
   selected = false,
+  aiHighlight = null,
   damageAnimation,
   viewMode = 'battle',
   count = 1,
@@ -138,6 +140,8 @@ export function CardComponent({
             style={[
               containerStyle,
               selected && styles.selected,
+              aiHighlight === 'selected' && styles.aiHighlightSelected,
+              aiHighlight === 'target' && styles.aiHighlightTarget,
               disabled && styles.disabled
             ]}
             onPress={onPress}
@@ -289,6 +293,8 @@ export function CardComponent({
         style={[
           containerStyle,
           selected && styles.selected,
+          aiHighlight === 'selected' && styles.aiHighlightSelected,
+          aiHighlight === 'target' && styles.aiHighlightTarget,
           disabled && styles.disabled
         ]}
         onPress={onPress}
@@ -934,5 +940,23 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  aiHighlightSelected: {
+    borderColor: '#4CAF50',
+    borderWidth: 4,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  aiHighlightTarget: {
+    borderColor: '#FF5722',
+    borderWidth: 4,
+    shadowColor: '#FF5722',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

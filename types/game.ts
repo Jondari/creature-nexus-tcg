@@ -77,3 +77,22 @@ export interface DamageAnimation {
   isActive: boolean;
   duration: number;
 }
+
+export type AIStatus = 
+  | 'idle'
+  | 'thinking'
+  | 'analyzing_hand'
+  | 'selecting_card_to_play'
+  | 'selecting_attacker'
+  | 'selecting_attack'
+  | 'selecting_target'
+  | 'executing_action'
+  | 'ending_turn';
+
+export interface AIVisualState {
+  status: AIStatus;
+  highlightedCardId?: string;
+  targetCardId?: string;
+  message?: string;
+  isActive: boolean;
+}

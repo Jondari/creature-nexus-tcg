@@ -17,6 +17,7 @@ export function GameBoard() {
     gameEngine, 
     actionLog, 
     damageAnimations,
+    aiVisualState,
     isLoading, 
     error,
     triggerDamageAnimation,
@@ -76,7 +77,7 @@ export function GameBoard() {
       console.log('Triggering AI turn...');
       const timeoutId = setTimeout(() => {
         processAITurn();
-      }, 1000);
+      }, 1500);
       
       return () => clearTimeout(timeoutId);
     }
@@ -224,6 +225,32 @@ export function GameBoard() {
     return damageAnimations.find(anim => anim.cardId === cardId);
   };
 
+  const isCardHighlighted = (cardId: string) => {
+    return aiVisualState.isActive && 
+           (aiVisualState.highlightedCardId === cardId || aiVisualState.targetCardId === cardId);
+  };
+
+  const getCardHighlightType = (cardId: string) => {
+    if (!aiVisualState.isActive) return null;
+    if (aiVisualState.highlightedCardId === cardId) return 'selected';
+    if (aiVisualState.targetCardId === cardId) return 'target';
+    return null;
+  };
+
+  const getAIStatusMessage = (status: string) => {
+    switch (status) {
+      case 'thinking': return 'Thinking...';
+      case 'analyzing_hand': return 'Analyzing hand...';
+      case 'selecting_card_to_play': return 'Selecting card to play...';
+      case 'selecting_attacker': return 'Choosing attacker...';
+      case 'selecting_attack': return 'Choosing attack...';
+      case 'selecting_target': return 'Selecting target...';
+      case 'executing_action': return 'Executing action...';
+      case 'ending_turn': return 'Ending turn...';
+      default: return 'Processing...';
+    }
+  };
+
   // Always show current player at bottom, opponent at top regardless of whose turn it is
   const playerAtBottom = gameEngine.getPlayers()[0]; // Player 1 (human)
   const playerAtTop = gameEngine.getPlayers()[1]; // Player 2 (opponent)
@@ -295,6 +322,7 @@ export function GameBoard() {
               card={card}
               onPress={() => handleCardPress(card)}
               disabled={!isPlayerTurn || !attackMode}
+              aiHighlight={getCardHighlightType(card.id!)}
               damageAnimation={getDamageAnimationForCard(card.id!)}
               size={cardSize}
             />
@@ -313,6 +341,11 @@ export function GameBoard() {
               Turn {gameState.turnNumber} - {isPlayerTurn ? 'Your Turn' : 'AI Turn'}
             </Text>
             <Text style={styles.phaseInfo}>Phase: {t(`phases.${gameState.phase}`)}</Text>
+            {aiVisualState.isActive && (
+              <Text style={styles.aiStatusText}>
+                🤖 {aiVisualState.message || getAIStatusMessage(aiVisualState.status)}
+              </Text>
+            )}
           </View>
           <TouchableOpacity 
             style={styles.sizeToggle}
@@ -338,6 +371,7 @@ export function GameBoard() {
               onAttack={(attackName) => handleAttack(card.id!, attackName)}
               showActions={currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard === card.id}
               disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
+              aiHighlight={getCardHighlightType(card.id!)}
               damageAnimation={getDamageAnimationForCard(card.id!)}
               size={cardSize}
             />
@@ -369,6 +403,7 @@ export function GameBoard() {
               selected={selectedCard === card.id}
               onPress={() => setSelectedCard(card.id === selectedCard ? null : card.id!)}
               disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
+              aiHighlight={getCardHighlightType(card.id!)}
               size={cardSize}
             />
           ))}
@@ -548,6 +583,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.text.secondary,
     marginTop: 4,
+  },
+  aiStatusText: {
+    fontSize: 14,
+    color: '#4CAF50',
+    marginTop: 4,
+    fontWeight: '600',
   },
   actions: {
     flexDirection: 'row',
