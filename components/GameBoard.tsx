@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import CustomAlert from './CustomAlert';
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
@@ -31,6 +32,7 @@ export function GameBoard() {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
   const [showDeckSelection, setShowDeckSelection] = useState(false);
+  const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; type?: 'error' | 'warning' }>({ visible: false, title: '', message: '' });
 
   // Show deck selection if no game is active
   useEffect(() => {
@@ -51,12 +53,14 @@ export function GameBoard() {
     if (activeDeck && activeDeck.cards.length >= 20) {
       startGameWithDeck(activeDeck.cards);
     } else {
-      Alert.alert(
-        'Invalid Deck', 
-        activeDeck 
+      setAlert({
+        visible: true,
+        title: 'Invalid Deck',
+        message: activeDeck 
           ? 'Your active deck must have at least 20 cards.' 
-          : 'No active deck selected. Please create a deck first.'
-      );
+          : 'No active deck selected. Please create a deck first.',
+        type: 'error'
+      });
     }
   };
 
@@ -190,11 +194,39 @@ export function GameBoard() {
   };
 
   const handlePlayCard = (cardId: string) => {
+    // Validate field space before playing card
+    const currentPlayer = gameEngine.getCurrentPlayer();
+    
+    if (currentPlayer.field.length >= 4) {
+      setAlert({
+        visible: true,
+        title: 'Field Full',
+        message: 'You cannot have more than 4 creatures on the field at once.',
+        type: 'warning'
+      });
+      return;
+    }
+    
     playCard(cardId);
     setSelectedCard(null);
   };
 
   const handleAttack = (cardId: string, attackName: string) => {
+    // Validate energy before allowing attack
+    const currentPlayer = gameEngine.getCurrentPlayer();
+    const attackerCard = currentPlayer.field.find(c => c.id === cardId);
+    const attack = attackerCard?.attacks.find(a => a.name === attackName);
+    
+    if (!attack || currentPlayer.energy < attack.energy) {
+      setAlert({
+        visible: true,
+        title: 'Insufficient Energy',
+        message: `This attack requires ${attack?.energy || 0} energy, but you only have ${currentPlayer.energy}.`,
+        type: 'warning'
+      });
+      return;
+    }
+    
     const opponent = gameEngine.getOpponent();
     if (opponent.field.length === 0) {
       // Direct attack
@@ -204,7 +236,12 @@ export function GameBoard() {
     } else {
       // Select target
       setAttackMode({ cardId, attackName });
-      Alert.alert(t('actions.selectTarget'), 'Tap an opponent creature to attack');
+      setAlert({
+        visible: true,
+        title: t('actions.selectTarget'),
+        message: 'Tap an opponent creature to attack',
+        type: 'warning'
+      });
     }
   };
 
@@ -452,6 +489,14 @@ export function GameBoard() {
       <View style={styles.actionLogContainer}>
         <ActionLog logs={actionLog} />
       </View>
+      
+      <CustomAlert
+        visible={alert.visible}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ visible: false, title: '', message: '' })}
+      />
     </View>
   );
 }
