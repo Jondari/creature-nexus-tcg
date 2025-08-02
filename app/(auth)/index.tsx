@@ -12,7 +12,7 @@ import CustomAlert from '@/components/CustomAlert';
 const PREMIUM_MONSTERS = {
   // Mythic monsters
   Mythanor: require('../../assets/images/mythic/Mythanor.png'),
-  Mythelgotn: require('../../assets/images/mythic/Mythelgotn.png'),
+  Mythelgotn: require('../../assets/images/mythic/Mythelgorn.png'),
   Mytholzak: require('../../assets/images/mythic/Mytholzak.png'),
   Mythunden: require('../../assets/images/mythic/Mythunden.png'),
   Mythévor: require('../../assets/images/mythic/Mythévor.png'),

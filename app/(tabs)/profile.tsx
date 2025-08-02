@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { LogOut, Github, Globe, Mail, Save, Trash2 } from 'lucide-react-native';
+import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import CustomAlert from '@/components/CustomAlert';
 
@@ -256,7 +256,27 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
-        
+
+        {/* A supprimer */}
+        {__DEV__ && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Development Tools</Text>
+          <Text style={styles.cardText}>
+            Testing and debugging utilities for the development team.
+          </Text>
+          
+          <View style={styles.links}>
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={() => router.push('/card-test' as any)}
+            >
+              <TestTube size={20} color={Colors.text.primary} />
+              <Text style={styles.linkText}>Card Illustrations Test</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        )}
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About Creature Nexus TCG</Text>
           <Text style={styles.cardText}>

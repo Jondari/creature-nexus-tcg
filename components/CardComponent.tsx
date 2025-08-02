@@ -295,35 +295,36 @@ export function CardComponent({
         disabled={disabled}
       >
         <View style={[cardStyle, styles.standardCard, { borderColor: colors.border as string }]}>
-          {/* Content area with header on top */}
           <LinearGradient
             colors={colors.background as any}
-            style={contentAreaStyle}
+            style={styles.cardContentContainer}
           >
-            {/* Header on top */}
-            <View style={styles.cardHeaderTop}>
-              <Text style={[creatureNameStyle, { color: colors.text }]}>
-                {card.name}
-              </Text>
-              <View style={styles.hpSection}>
-                <Text style={[hpTextStyle, { color: colors.text }]}>
-                  HP {card.hp}
+            {/* Content area with header on top */}
+            <View style={contentAreaStyle}>
+              {/* Header on top */}
+              <View style={styles.cardHeaderTop}>
+                <Text style={[creatureNameStyle, { color: colors.text }]}>
+                  {card.name}
                 </Text>
-                {isElementSymbolCard && getElementSymbol(card.element) ? (
-                  <Image
-                    source={getElementSymbol(card.element)}
-                    style={elementSymbolStyle}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <View style={[elementIconStyle, { backgroundColor: elementColor }]} />
-                )}
+                <View style={styles.hpSection}>
+                  <Text style={[hpTextStyle, { color: colors.text }]}>
+                    HP {card.hp}
+                  </Text>
+                  {isElementSymbolCard && getElementSymbol(card.element) ? (
+                    <Image
+                      source={getElementSymbol(card.element)}
+                      style={elementSymbolStyle}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <View style={[elementIconStyle, { backgroundColor: elementColor }]} />
+                  )}
+                </View>
               </View>
             </View>
-          </LinearGradient>
 
-          {/* Contained artwork */}
-          <View style={artworkStyle}>
+            {/* Contained artwork */}
+            <View style={artworkStyle}>
             {cardImage ? (
               <Image
                 source={cardImage}
@@ -344,13 +345,10 @@ export function CardComponent({
                 </View>
               </View>
             )}
-          </View>
-          
-          {/* Content area with attacks */}
-          <LinearGradient
-            colors={colors.background as any}
-            style={styles.contentAreaBottom}
-          >
+            </View>
+            
+            {/* Content area with attacks */}
+            <View style={styles.contentAreaBottom}>
             {/* Attacks */}
             <View style={cardFooterStyle}>
               {/* Display all attacks for standard cards */}
@@ -419,6 +417,7 @@ export function CardComponent({
                 </View>
               </View>
             </View>
+            </View>
           </LinearGradient>
         </View>
         
@@ -439,10 +438,49 @@ function getCardImage(card: Card) {
   const cardImages = {
     // Common
     common_generic: require('../assets/images/common/common_generic.png'),
+    Barkyn: require('../assets/images/common/Barkyn.png'),
+    Caelel: require('../assets/images/common/Caelel.png'),
+    Cryil: require('../assets/images/common/Cryil.png'),
+    Draleth: require('../assets/images/common/Draleth.png'),
+    Flareen: require('../assets/images/common/Flareen.png'),
+    Flareor: require('../assets/images/common/Flareor.png'),
+    Glacis: require('../assets/images/common/Glacis.png'),
+    Hydys: require('../assets/images/common/Hydys.png'),
+    Ignen: require('../assets/images/common/Ignen.png'),
+    Ignys: require('../assets/images/common/Ignys.png'),
+    Lumel: require('../assets/images/common/Lumel.png'),
+    Lumen: require('../assets/images/common/Lumen.png'),
+    Lumion: require('../assets/images/common/Lumion.png'),
+    Lumoth: require('../assets/images/common/Lumoth.png'),
+    Miriion: require('../assets/images/common/Miriion.png'),
+    Miriys: require('../assets/images/common/Miriys.png'),
+    Mossil: require('../assets/images/common/Mossil.png'),
+    Nixor: require('../assets/images/common/Nixor.png'),
+    Radeth: require('../assets/images/common/Radeth.png'),
+    Venten: require('../assets/images/common/Venten.png'),
+    Ventun: require('../assets/images/common/Ventun.png'),
+    Ventyn: require('../assets/images/common/Ventyn.png'),
+    Whisun: require('../assets/images/common/Whisun.png'),
+    Zarel: require('../assets/images/common/Zarel.png'),
+    Zephor: require('../assets/images/common/Zephor.png'),
     
-    // Rare - no rare images available yet
+    // Rare
+    rare_generic: require('../assets/images/rare/rare_generic.png'),
+    Ashion: require('../assets/images/rare/Ashion.png'),
+    Caeloth: require('../assets/images/rare/Caeloth.png'),
+    Cryel: require('../assets/images/rare/Cryel.png'),
+    Eileth: require('../assets/images/rare/Eileth.png'),
+    Miriis: require('../assets/images/rare/Miriis.png'),
+    Mossion: require('../assets/images/rare/Mossion.png'),
+    Mossor: require('../assets/images/rare/Mossor.png'),
+    Pyrrun: require('../assets/images/rare/Pyrrun.png'),
+    Seleth: require('../assets/images/rare/Seleth.png'),
+    Silen: require('../assets/images/rare/Silen.png'),
+    Solor: require('../assets/images/rare/Solor.png'),
+    Verdil: require('../assets/images/rare/Verdil.png'),
     
-    // Epic  
+    // Epic
+    epic_generic: require('../assets/images/epic/epic_generic.png'),
     Barkys: require('../assets/images/epic/Barkys.png'),
     Caelun: require('../assets/images/epic/Caelun.png'),
     Dralis: require('../assets/images/epic/Dralis.png'),
@@ -458,7 +496,7 @@ function getCardImage(card: Card) {
     
     // Mythic
     Mythanor: require('../assets/images/mythic/Mythanor.png'),
-    Mythelgotn: require('../assets/images/mythic/Mythelgotn.png'),
+    Mythelgorn: require('../assets/images/mythic/Mythelgorn.png'),
     Mytholzak: require('../assets/images/mythic/Mytholzak.png'),
     Mythunden: require('../assets/images/mythic/Mythunden.png'),
     Mythévor: require('../assets/images/mythic/Mythévor.png'),
@@ -483,9 +521,11 @@ function getCardImage(card: Card) {
   // Fallback to generic images based on rarity
   switch (card.rarity) {
     case 'common':
-    case 'rare':
       return cardImages.common_generic;
+    case 'rare':
+      return cardImages.rare_generic;
     case 'epic':
+      return cardImages.epic_generic;
     case 'legendary':
     case 'mythic':
     default:
@@ -615,6 +655,7 @@ const styles = StyleSheet.create({
     height: 30, // Half of original 50
     paddingHorizontal: 8,
     paddingTop: 5,
+    backgroundColor: 'transparent', // Transparent since parent has LinearGradient
   },
   cardFooterStandardSmall: {
     flex: 1,
@@ -623,7 +664,13 @@ const styles = StyleSheet.create({
   artworkFrameBelowSmall: {
     width: '100%',
     height: 80, // Half of original 160
-    backgroundColor: Colors.neutral[700],
+    paddingLeft: 5,
+    paddingRight: 5,
+    overflow: 'hidden',
+  },
+  cardContentContainer: {
+    flex: 1,
+    borderRadius: 15,
     overflow: 'hidden',
   },
   standardCard: {
@@ -803,6 +850,7 @@ const styles = StyleSheet.create({
     height: 50,
     paddingHorizontal: 15,
     paddingTop: 10,
+    backgroundColor: 'transparent', // Transparent since parent has LinearGradient
   },
   cardHeaderTop: {
     flexDirection: 'row',
@@ -811,13 +859,15 @@ const styles = StyleSheet.create({
   },
   artworkFrameBelow: {
     width: '100%',
-    height: 160,
-    backgroundColor: Colors.neutral[700],
+    height: 190,
+    paddingLeft: 10,
+    paddingRight: 10,
     overflow: 'hidden',
   },
   contentAreaBottom: {
     flex: 1,
     padding: 15,
+    backgroundColor: 'transparent', // Transparent since parent has LinearGradient
   },
   cardFooterStandard: {
     flex: 1,
