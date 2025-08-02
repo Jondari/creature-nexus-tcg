@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.3...v0.2.5) (2025-08-02)
+
+
+### Features
+
+* update card design and add monster illustrations ([3d380f2](https://github.com/Jondari/creature-nexus-tcg/commit/3d380f23873ab82fc1703ee27131d9d87c526ade))
+
+
+### Bug Fixes
+
+* move Bolt badge to assets folder for proper build inclusion ([402db58](https://github.com/Jondari/creature-nexus-tcg/commit/402db58912ca6043107ff88fcc22003b354c6702))
+
 ### [0.2.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.3...v0.2.4) (2025-06-30)
 
 
