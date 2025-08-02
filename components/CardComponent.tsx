@@ -139,9 +139,9 @@ export function CardComponent({
           <TouchableOpacity
             style={[
               containerStyle,
-              selected && styles.selected,
-              aiHighlight === 'selected' && styles.aiHighlightSelected,
-              aiHighlight === 'target' && styles.aiHighlightTarget,
+              selected && (size === 'small' ? styles.selectedSmall : styles.selected),
+              aiHighlight === 'selected' && (size === 'small' ? styles.aiHighlightSelectedSmall : styles.aiHighlightSelected),
+              aiHighlight === 'target' && (size === 'small' ? styles.aiHighlightTargetSmall : styles.aiHighlightTarget),
               disabled && styles.disabled
             ]}
             onPress={onPress}
@@ -292,9 +292,9 @@ export function CardComponent({
       <TouchableOpacity
         style={[
           containerStyle,
-          selected && styles.selected,
-          aiHighlight === 'selected' && styles.aiHighlightSelected,
-          aiHighlight === 'target' && styles.aiHighlightTarget,
+          selected && (size === 'small' ? styles.selectedSmall : styles.selected),
+          aiHighlight === 'selected' && (size === 'small' ? styles.aiHighlightSelectedSmall : styles.aiHighlightSelected),
+          aiHighlight === 'target' && (size === 'small' ? styles.aiHighlightTargetSmall : styles.aiHighlightTarget),
           disabled && styles.disabled
         ]}
         onPress={onPress}
@@ -612,6 +612,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: 280,
     marginBottom: 20,
+    marginHorizontal: 8,
   },
   card: {
     width: 280,
@@ -622,6 +623,7 @@ const styles = StyleSheet.create({
   cardContainerSmall: {
     width: 140, // Half size
     marginBottom: 10,
+    marginHorizontal: 4,
   },
   cardSmall: {
     width: 140,
@@ -919,6 +921,12 @@ const styles = StyleSheet.create({
   selected: {
     borderColor: Colors.accent[400],
     borderWidth: 3,
+    borderRadius: 15,
+  },
+  selectedSmall: {
+    borderColor: Colors.accent[400],
+    borderWidth: 2,
+    borderRadius: 8,
   },
   disabled: {
     opacity: 0.6,
@@ -944,6 +952,7 @@ const styles = StyleSheet.create({
   aiHighlightSelected: {
     borderColor: '#4CAF50',
     borderWidth: 4,
+    borderRadius: 15,
     shadowColor: '#4CAF50',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.7,
@@ -953,10 +962,31 @@ const styles = StyleSheet.create({
   aiHighlightTarget: {
     borderColor: '#FF5722',
     borderWidth: 4,
+    borderRadius: 15,
     shadowColor: '#FF5722',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.7,
     shadowRadius: 8,
     elevation: 8,
+  },
+  aiHighlightSelectedSmall: {
+    borderColor: '#4CAF50',
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  aiHighlightTargetSmall: {
+    borderColor: '#FF5722',
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: '#FF5722',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });
