@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.5...v0.2.6) (2025-08-06)
+
+
+### Features
+
+* add UI validation to prevent invalid actions and replace native alerts with custom modal ([f9bd5cb](https://github.com/Jondari/creature-nexus-tcg/commit/f9bd5cb1feda6d7c17e8af55b3cbd026ff79caad))
+
+
+### Bug Fixes
+
+* implement comprehensive human-like AI battle system with visual feedback and damage animations ([593c5c4](https://github.com/Jondari/creature-nexus-tcg/commit/593c5c4c2fc46eb67a88e6246cc063a147aad8ed))
+* improve card's highlighting ([f68bb4c](https://github.com/Jondari/creature-nexus-tcg/commit/f68bb4cd777ce7cc51f2df6ecf31cd69c89e1db3))
+* resolve mythic card damage calculation and add red HP indicator for damaged cards ([9adffb5](https://github.com/Jondari/creature-nexus-tcg/commit/9adffb525f1142ab5f7211682161372d06b53b78))
+
 ### [0.2.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.3...v0.2.5) (2025-08-02)
 
 
