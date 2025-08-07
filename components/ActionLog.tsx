@@ -8,7 +8,7 @@ interface ActionLogProps {
 }
 
 export function ActionLog({ logs }: ActionLogProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const formatActionDescription = (entry: ActionLogEntry): string => {
     const { action } = entry;
