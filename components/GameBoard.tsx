@@ -27,7 +27,7 @@ export function GameBoard() {
     initializeGame
   } = useGame();
   const { activeDeck } = useDecks();
-  const { cardSize, setCardSize } = useSettings();
+  const { cardSize, setCardSize, showBattleLog } = useSettings();
   const { playCard, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
@@ -486,9 +486,11 @@ export function GameBoard() {
       )}
       </ScrollView>
       
-      <View style={styles.actionLogContainer}>
-        <ActionLog logs={actionLog} />
-      </View>
+      {showBattleLog && (
+        <View style={styles.actionLogContainer}>
+          <ActionLog logs={actionLog} />
+        </View>
+      )}
       
       <CustomAlert
         visible={alert.visible}

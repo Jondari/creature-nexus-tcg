@@ -10,7 +10,7 @@ import CustomAlert from '@/components/CustomAlert';
 
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
-  const { cardSize, setCardSize } = useSettings();
+  const { cardSize, setCardSize, showBattleLog, setShowBattleLog } = useSettings();
   const router = useRouter();
   
   // Debug auth state
@@ -251,6 +251,45 @@ export default function ProfileScreen() {
                   cardSize === 'normal' && styles.settingButtonTextActive
                 ]}>
                   Normal
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Battle Log</Text>
+              <Text style={styles.settingDescription}>
+                Show or hide the battle log during gameplay
+              </Text>
+            </View>
+            <View style={styles.settingButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  !showBattleLog && styles.settingButtonActive
+                ]}
+                onPress={() => setShowBattleLog(false)}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  !showBattleLog && styles.settingButtonTextActive
+                ]}>
+                  Hidden
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  showBattleLog && styles.settingButtonActive
+                ]}
+                onPress={() => setShowBattleLog(true)}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  showBattleLog && styles.settingButtonTextActive
+                ]}>
+                  Visible
                 </Text>
               </TouchableOpacity>
             </View>

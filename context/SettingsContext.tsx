@@ -6,6 +6,8 @@ export type CardSize = 'small' | 'normal';
 interface SettingsContextType {
   cardSize: CardSize;
   setCardSize: (size: CardSize) => void;
+  showBattleLog: boolean;
+  setShowBattleLog: (show: boolean) => void;
   loading: boolean;
 }
 
@@ -15,10 +17,12 @@ const SETTINGS_STORAGE_KEY = '@creature_nexus_settings';
 
 interface Settings {
   cardSize: CardSize;
+  showBattleLog: boolean;
 }
 
 const defaultSettings: Settings = {
   cardSize: 'small', // Default to small for better UX
+  showBattleLog: false, // Disabled by default
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -58,10 +62,17 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveSettings(newSettings);
   };
 
+  const setShowBattleLog = (show: boolean) => {
+    const newSettings = { ...settings, showBattleLog: show };
+    saveSettings(newSettings);
+  };
+
   return (
     <SettingsContext.Provider value={{
       cardSize: settings.cardSize,
       setCardSize,
+      showBattleLog: settings.showBattleLog,
+      setShowBattleLog,
       loading,
     }}>
       {children}
