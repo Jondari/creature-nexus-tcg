@@ -340,15 +340,26 @@ export function CardComponent({
       <TouchableOpacity
         style={[
           containerStyle,
-          selected && (size === 'small' ? styles.selectedSmall : styles.selected),
-          aiHighlight === 'selected' && (size === 'small' ? styles.aiHighlightSelectedSmall : styles.aiHighlightSelected),
-          aiHighlight === 'target' && (size === 'small' ? styles.aiHighlightTargetSmall : styles.aiHighlightTarget),
           disabled && styles.disabled
         ]}
         onPress={onPress}
         disabled={disabled}
       >
-        <View style={[cardStyle, styles.standardCard, { borderColor: colors.border as string }]}>
+        <View style={[
+          cardStyle, 
+          styles.standardCard, 
+          { borderColor: selected 
+              ? Colors.accent[400] 
+              : aiHighlight === 'selected' 
+                ? '#4CAF50' 
+                : aiHighlight === 'target' 
+                  ? '#FF5722' 
+                  : colors.border as string 
+          },
+          selected && (size === 'small' ? styles.selectedCardSmall : styles.selectedCard),
+          aiHighlight === 'selected' && (size === 'small' ? styles.aiHighlightCardSelectedSmall : styles.aiHighlightCardSelected),
+          aiHighlight === 'target' && (size === 'small' ? styles.aiHighlightCardTargetSmall : styles.aiHighlightCardTarget)
+        ]}>
           <LinearGradient
             colors={colors.background as any}
             style={styles.cardContentContainer}
@@ -986,15 +997,22 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     fontWeight: 'bold',
   },
-  selected: {
-    borderColor: Colors.accent[400],
-    borderWidth: 3,
-    borderRadius: 15,
+  // Selection styles for standard cards (applied to inner card, not container)
+  selectedCard: {
+    borderWidth: 4, // Slightly thicker for better visibility
+    shadowColor: Colors.accent[400],
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  selectedSmall: {
-    borderColor: Colors.accent[400],
-    borderWidth: 2,
-    borderRadius: 8,
+  selectedCardSmall: {
+    borderWidth: 3,
+    shadowColor: Colors.accent[400],
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 3,
+    elevation: 2,
   },
   disabled: {
     opacity: 0.6,
@@ -1016,6 +1034,50 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  // AI highlight styles for standard cards (applied to inner card)
+  aiHighlightCardSelected: {
+    borderWidth: 4,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  aiHighlightCardTarget: {
+    borderWidth: 4,
+    shadowColor: '#FF5722',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  aiHighlightCardSelectedSmall: {
+    borderWidth: 3,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  aiHighlightCardTargetSmall: {
+    borderWidth: 3,
+    shadowColor: '#FF5722',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  // Original selection/highlight styles (container-based) - restored for premium cards
+  selected: {
+    borderColor: Colors.accent[400],
+    borderWidth: 3,
+    borderRadius: 15,
+  },
+  selectedSmall: {
+    borderColor: Colors.accent[400],
+    borderWidth: 2,
+    borderRadius: 8,
   },
   aiHighlightSelected: {
     borderColor: '#4CAF50',
