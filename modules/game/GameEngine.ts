@@ -89,7 +89,8 @@ export class GameEngine {
     const attackerCard = attackerPlayer.field.find(c => c.id === attackerCardId);
     if (!attackerCard) return false;
 
-    if (!CardUtils.canAttack(attackerCard, this.gameState.turnNumber)) return false;
+    const isFirstPlayer = attackerPlayerIndex === 0;
+    if (!CardUtils.canAttack(attackerCard, this.gameState.turnNumber, isFirstPlayer)) return false;
 
     const attack = attackerCard.attacks.find(a => a.name === attackName);
     if (!attack) return false;

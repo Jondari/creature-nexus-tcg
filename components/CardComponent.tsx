@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Card, DamageAnimation } from '../types/game';
+import { Card, DamageAnimation, Attack } from '../types/game';
 import { DamageEffect } from './DamageEffect';
 import { t } from '../utils/i18n';
 import Colors from '../constants/Colors';
+import { CardUtils } from '../modules/card';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -31,6 +32,11 @@ interface CardComponentProps {
   index?: number;
   // Size control
   size?: 'small' | 'normal';
+  // Energy for attack availability checking
+  playerEnergy?: number;
+  // Turn information for first-turn restriction
+  currentTurn?: number;
+  isFirstPlayer?: boolean;
 }
 
 export function CardComponent({ 
@@ -46,7 +52,10 @@ export function CardComponent({
   count = 1,
   showAnimation = false,
   index = 0,
-  size = 'normal'
+  size = 'normal',
+  playerEnergy = 0,
+  currentTurn = 1,
+  isFirstPlayer = false
 }: CardComponentProps) {
   const isPremium = card.rarity === 'legendary' || card.rarity === 'mythic';
   const isElementSymbolCard = true; // Always show element symbols
@@ -128,6 +137,24 @@ export function CardComponent({
   };
 
   const placeholderStyle = getPlaceholderStyle(card.element, card.rarity);
+
+  // Check if an attack is available based on player's energy and game rules
+  const isAttackAvailable = (attack: Attack): boolean => {
+    if (!showActions) return false; // No highlighting when actions are disabled
+    
+    // Check if card can attack based on game rules (first turn restriction, mythic cooldown)
+    if (!CardUtils.canAttack(card, currentTurn, isFirstPlayer)) {
+      return false;
+    }
+    
+    // Check energy requirements
+    if (attack.energy !== undefined) {
+      return playerEnergy >= attack.energy;
+    } else if (attack.energyCost && attack.energyCost.length > 0) {
+      return playerEnergy >= attack.energyCost.length;
+    }
+    return false; // Default to unavailable if no energy requirements specified
+  };
 
   if (isPremium) {
     return (
@@ -215,13 +242,19 @@ export function CardComponent({
               {/* Footer */}
               <View style={styles.cardFooter}>
                 {/* Display all attacks for premium cards */}
-                {card.attacks.map((attack, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.energyAttackSection}
-                    onPress={() => showActions && onAttack?.(attack.name)}
-                    disabled={!showActions}
-                  >
+                {card.attacks.map((attack, index) => {
+                  const attackAvailable = isAttackAvailable(attack);
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.energyAttackSection,
+                        attackAvailable && (size === 'small' ? styles.availableAttackSmall : styles.availableAttack),
+                        !attackAvailable && showActions && (size === 'small' ? styles.unavailableAttackSmall : styles.unavailableAttack)
+                      ]}
+                      onPress={() => showActions && attackAvailable && onAttack?.(attack.name)}
+                      disabled={!showActions || !attackAvailable}
+                    >
                     <View style={styles.energyCost}>
                       {/* Show energy cost or energy icons */}
                       {attack.energy !== undefined ? (
@@ -261,15 +294,24 @@ export function CardComponent({
                       ) : null}
                     </View>
                     <View style={styles.attackInfoPremium}>
-                      <Text style={[attackNameStyle, { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' }]}>
+                      <Text style={[
+                        attackNameStyle, 
+                        { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' },
+                        attackAvailable && showActions && (size === 'small' ? styles.availableAttackTextSmall : styles.availableAttackText)
+                      ]}>
                         {attack.name || 'Basic Attack'}
                       </Text>
-                      <Text style={[attackDamageStyle, { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' }]}>
+                      <Text style={[
+                        attackDamageStyle, 
+                        { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' },
+                        attackAvailable && showActions && (size === 'small' ? styles.availableDamageTextSmall : styles.availableDamageText)
+                      ]}>
                         {attack.damage || '??'}
                       </Text>
                     </View>
                   </TouchableOpacity>
-                ))}
+                  );
+                })}
                 
                 <View style={styles.cardBottomTags}>
                   <View style={styles.retreatTag}>
@@ -369,13 +411,19 @@ export function CardComponent({
             {/* Attacks */}
             <View style={cardFooterStyle}>
               {/* Display all attacks for standard cards */}
-              {card.attacks.map((attack, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.energyAttackSectionStandard}
-                  onPress={() => showActions && onAttack?.(attack.name)}
-                  disabled={!showActions}
-                >
+              {card.attacks.map((attack, index) => {
+                const attackAvailable = isAttackAvailable(attack);
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.energyAttackSectionStandard,
+                      attackAvailable && (size === 'small' ? styles.availableAttackSmall : styles.availableAttack),
+                      !attackAvailable && showActions && (size === 'small' ? styles.unavailableAttackSmall : styles.unavailableAttack)
+                    ]}
+                    onPress={() => showActions && attackAvailable && onAttack?.(attack.name)}
+                    disabled={!showActions || !attackAvailable}
+                  >
                   <View style={styles.energyCost}>
                     {/* Show energy cost or energy icons */}
                     {attack.energy !== undefined ? (
@@ -415,15 +463,24 @@ export function CardComponent({
                     ) : null}
                   </View>
                   <View style={styles.attackInfoStandard}>
-                    <Text style={[attackNameStyle, { color: colors.text }]}>
+                    <Text style={[
+                      attackNameStyle, 
+                      { color: colors.text },
+                      attackAvailable && showActions && (size === 'small' ? styles.availableAttackTextSmall : styles.availableAttackText)
+                    ]}>
                       {attack.name || 'Basic Attack'}
                     </Text>
-                    <Text style={[attackDamageStyle, { color: colors.text }]}>
+                    <Text style={[
+                      attackDamageStyle, 
+                      { color: colors.text },
+                      attackAvailable && showActions && (size === 'small' ? styles.availableDamageTextSmall : styles.availableDamageText)
+                    ]}>
                       {attack.damage || '??'}
                     </Text>
                   </View>
                 </TouchableOpacity>
-              ))}
+                );
+              })}
               
               <View style={styles.cardBottomTags}>
                 <View style={styles.retreatTag}>
@@ -999,5 +1056,83 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.7,
     shadowRadius: 4,
     elevation: 4,
+  },
+  // Attack availability styles - normal size
+  availableAttack: {
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginVertical: 2,
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  unavailableAttack: {
+    backgroundColor: 'rgba(158, 158, 158, 0.1)',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginVertical: 2,
+    opacity: 0.5,
+  },
+  availableAttackText: {
+    color: '#4CAF50',
+    fontWeight: '700',
+    textShadowColor: 'rgba(76, 175, 80, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  availableDamageText: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+    fontSize: 26,
+    textShadowColor: 'rgba(76, 175, 80, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  // Attack availability styles - small size
+  availableAttackSmall: {
+    top: 5,
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    borderRadius: 4,
+    paddingHorizontal: 3,
+    paddingVertical: 2,
+    marginVertical: 1,
+    borderWidth: 1,
+    borderColor: '#4CAF50',
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  unavailableAttackSmall: {
+    top: 3,
+    backgroundColor: 'rgba(158, 158, 158, 0.1)',
+    borderRadius: 4,
+    paddingHorizontal: 3,
+    paddingVertical: 2,
+    marginVertical: 1,
+    opacity: 0.5,
+  },
+  availableAttackTextSmall: {
+    color: '#4CAF50',
+    fontWeight: '700',
+    textShadowColor: 'rgba(76, 175, 80, 0.3)',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
+  },
+  availableDamageTextSmall: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+    fontSize: 14,
+    textShadowColor: 'rgba(76, 175, 80, 0.3)',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1.5,
   },
 });

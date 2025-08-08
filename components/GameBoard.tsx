@@ -241,20 +241,24 @@ export function GameBoard() {
     
     const opponent = gameEngine.getOpponent();
     if (opponent.field.length === 0) {
-      // Direct attack
-      attack(cardId, attackName);
-      setAttackMode(null);
-      setSelectedCard(null);
-    } else {
-      // Select target
-      setAttackMode({ cardId, attackName });
+      // No targets available
       setAlert({
         visible: true,
-        title: t('actions.selectTarget'),
-        message: 'Tap an opponent creature to attack',
+        title: 'No Targets',
+        message: 'There are no enemy creatures to attack',
         type: 'warning'
       });
+      return;
     }
+    
+    // Select target
+    setAttackMode({ cardId, attackName });
+    setAlert({
+      visible: true,
+      title: t('actions.selectTarget'),
+      message: 'Tap an opponent creature to attack',
+      type: 'warning'
+    });
   };
 
   const handleRetire = (cardId: string) => {
@@ -436,6 +440,9 @@ export function GameBoard() {
               aiHighlight={getCardHighlightType(card.id!)}
               damageAnimation={getDamageAnimationForCard(card.id!)}
               size={cardSize}
+              playerEnergy={playerAtBottom.energy}
+              currentTurn={gameState.turnNumber}
+              isFirstPlayer={playerAtBottom.id === gameState.players[0].id}
             />
           ))}
           {playerAtBottom.field.length === 0 && (

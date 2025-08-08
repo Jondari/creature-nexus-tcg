@@ -21,12 +21,20 @@ export class CardUtils {
     };
   }
 
-  static canAttack(card: Card, currentTurn: number): boolean {
-    if (!card.isMythic) return true;
+  static canAttack(card: Card, currentTurn: number, isFirstPlayer: boolean = false): boolean {
+    // First player cannot attack on turn 1
+    if (currentTurn === 1 && isFirstPlayer) {
+      return false;
+    }
     
-    if (card.lastAttackTurn === undefined) return true;
+    // Mythic card restriction: can only attack every 4 turns
+    if (card.isMythic) {
+      if (card.lastAttackTurn === undefined) return true;
+      return currentTurn - card.lastAttackTurn >= 4;
+    }
     
-    return currentTurn - card.lastAttackTurn >= 4;
+    // Non-mythic cards can attack normally (after turn 1 restriction)
+    return true;
   }
 
   static takeDamage(card: Card, damage: number): Card {
