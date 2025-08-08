@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.6...v0.2.7) (2025-08-08)
+
+
+### Features
+
+* add energy-based attack highlighting with first-turn restrictions and responsive design ([32f8ea7](https://github.com/Jondari/creature-nexus-tcg/commit/32f8ea746eef0be263e132c18e202f2e89ef4d60))
+* add profile option to toggle battle log display with default disabled state ([e83dc70](https://github.com/Jondari/creature-nexus-tcg/commit/e83dc7088331486958b175f49016d37b13087dc4))
+* add reusable sidebar component with gesture support for battle log display ([1c09174](https://github.com/Jondari/creature-nexus-tcg/commit/1c0917405d17a0c4f92c1ea0549b996f49eaf5b9))
+* make battle log start collapsed by default to reduce UI clutter ([61a1f14](https://github.com/Jondari/creature-nexus-tcg/commit/61a1f1487d4a7d49ea9c8eca07faaf14cc5fd295))
+
+
+### Bug Fixes
+
+* implement hybrid highlighting system to resolve card selection border alignment issues ([c04caec](https://github.com/Jondari/creature-nexus-tcg/commit/c04caec0f2efe413f9515675f21658e21b87710a))
+
 ### [0.2.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.5...v0.2.6) (2025-08-06)
 
 
