@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Platform } from 'react-native';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import CustomAlert from './CustomAlert';
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
@@ -7,6 +8,7 @@ import { useDecks } from '../context/DeckContext';
 import { useSettings } from '../context/SettingsContext';
 import { CardComponent } from './CardComponent';
 import { ActionLog } from './ActionLog';
+import { Sidebar } from './Sidebar';
 import { Card } from '../types/game';
 import { t } from '../utils/i18n';
 import { CardLoader } from '../utils/game/cardLoader';
@@ -33,6 +35,16 @@ export function GameBoard() {
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
   const [showDeckSelection, setShowDeckSelection] = useState(false);
   const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; type?: 'error' | 'warning' }>({ visible: false, title: '', message: '' });
+  
+  // Gesture and animation state
+  const screenWidth = Dimensions.get('window').width;
+  const isMobile = screenWidth <= 768;
+  const isWeb = Platform.OS === 'web';
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const translateX = new Animated.Value(isMobile ? screenWidth : 0);
+
+  const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
+  const closeSidebar = () => setSidebarVisible(false);
 
   // Show deck selection if no game is active
   useEffect(() => {
@@ -384,14 +396,27 @@ export function GameBoard() {
               </Text>
             )}
           </View>
-          <TouchableOpacity 
-            style={styles.sizeToggle}
-            onPress={() => setCardSize(cardSize === 'small' ? 'normal' : 'small')}
-          >
-            <Text style={styles.sizeToggleText}>
-              {cardSize === 'small' ? '⊞' : '⊟'}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.controlsBar}>
+            <TouchableOpacity 
+              style={styles.sizeToggle}
+              onPress={() => setCardSize(cardSize === 'small' ? 'normal' : 'small')}
+            >
+              <Text style={styles.sizeToggleText}>
+                {cardSize === 'small' ? '⊞' : '⊟'}
+              </Text>
+            </TouchableOpacity>
+            
+            {showBattleLog && (
+              <TouchableOpacity 
+                style={[styles.sizeToggle, styles.logToggle, sidebarVisible && styles.logToggleActive]}
+                onPress={toggleSidebar}
+              >
+                <Text style={[styles.sizeToggleText, sidebarVisible && styles.logToggleTextActive]}>
+                  📋
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
 
@@ -486,10 +511,15 @@ export function GameBoard() {
       )}
       </ScrollView>
       
+      {/* Reusable Sidebar */}
       {showBattleLog && (
-        <View style={styles.actionLogContainer}>
-          <ActionLog logs={actionLog} />
-        </View>
+        <Sidebar
+          visible={sidebarVisible}
+          onClose={closeSidebar}
+          title="Action Log"
+        >
+          <ActionLog logs={actionLog} sidebarMode={true} />
+        </Sidebar>
       )}
       
       <CustomAlert
@@ -512,12 +542,6 @@ const styles = StyleSheet.create({
   gameContainer: {
     flex: 1,
     backgroundColor: Colors.background.primary,
-  },
-  actionLogContainer: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    zIndex: 1000,
   },
   container: {
     flex: 1,
@@ -607,6 +631,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  controlsBar: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   sizeToggle: {
     backgroundColor: Colors.background.primary,
     borderRadius: 8,
@@ -615,6 +643,15 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logToggle: {
+    backgroundColor: Colors.background.primary,
+  },
+  logToggleActive: {
+    backgroundColor: Colors.accent[500],
+  },
+  logToggleTextActive: {
+    color: Colors.text.primary,
   },
   sizeToggleText: {
     fontSize: 18,

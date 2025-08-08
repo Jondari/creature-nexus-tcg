@@ -5,9 +5,10 @@ import { t } from '../utils/i18n';
 
 interface ActionLogProps {
   logs: ActionLogEntry[];
+  sidebarMode?: boolean; // When true, skip the collapsible header
 }
 
-export function ActionLog({ logs }: ActionLogProps) {
+export function ActionLog({ logs, sidebarMode = false }: ActionLogProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const formatActionDescription = (entry: ActionLogEntry): string => {
@@ -44,33 +45,55 @@ export function ActionLog({ logs }: ActionLogProps) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
+  // In sidebar mode, always show content (no collapse)
+  const showContent = sidebarMode || !isCollapsed;
+
   return (
-    <View style={[styles.container, isCollapsed && styles.collapsed]}>
-      <TouchableOpacity 
-        style={styles.header}
-        onPress={() => setIsCollapsed(!isCollapsed)}
-      >
-        <Text style={styles.title}>Action Log</Text>
-        <Text style={styles.toggleIcon}>{isCollapsed ? '▶' : '▼'}</Text>
-      </TouchableOpacity>
+    <View style={[
+      styles.container, 
+      isCollapsed && !sidebarMode && styles.collapsed,
+      sidebarMode && styles.sidebarContainer
+    ]}>
+      {!sidebarMode && (
+        <TouchableOpacity 
+          style={styles.header}
+          onPress={() => setIsCollapsed(!isCollapsed)}
+        >
+          <Text style={styles.title}>Action Log</Text>
+          <Text style={styles.toggleIcon}>{isCollapsed ? '▶' : '▼'}</Text>
+        </TouchableOpacity>
+      )}
       
-      {!isCollapsed && (
-        <ScrollView style={styles.logContainer} showsVerticalScrollIndicator={true}>
+      {showContent && (
+        <ScrollView 
+          style={[styles.logContainer, sidebarMode && styles.sidebarLogContainer]} 
+          showsVerticalScrollIndicator={true}
+        >
           {logs.length === 0 ? (
-            <Text style={styles.emptyText}>No actions yet...</Text>
+            <Text style={[styles.emptyText, sidebarMode && styles.sidebarEmptyText]}>
+              No actions yet...
+            </Text>
           ) : (
             logs.map((entry) => (
-              <View key={entry.id} style={[styles.logEntry, !entry.success && styles.failedEntry]}>
+              <View key={entry.id} style={[
+                styles.logEntry, 
+                !entry.success && styles.failedEntry,
+                sidebarMode && styles.sidebarLogEntry
+              ]}>
                 <View style={styles.logHeader}>
-                  <Text style={styles.playerName}>
+                  <Text style={[styles.playerName, sidebarMode && styles.sidebarPlayerName]}>
                     {getActionIcon(entry.action.type, entry.success)} {entry.playerName}
                   </Text>
-                  <Text style={styles.timestamp}>{formatTime(entry.timestamp)}</Text>
+                  <Text style={[styles.timestamp, sidebarMode && styles.sidebarTimestamp]}>
+                    {formatTime(entry.timestamp)}
+                  </Text>
                 </View>
-                <Text style={styles.actionDescription}>
+                <Text style={[styles.actionDescription, sidebarMode && styles.sidebarActionDescription]}>
                   {formatActionDescription(entry)}
                 </Text>
-                <Text style={styles.turnInfo}>Turn {entry.turn}</Text>
+                <Text style={[styles.turnInfo, sidebarMode && styles.sidebarTurnInfo]}>
+                  Turn {entry.turn}
+                </Text>
               </View>
             ))
           )}
@@ -162,5 +185,46 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#888',
     fontStyle: 'italic',
+  },
+  // Sidebar-specific styles
+  sidebarContainer: {
+    width: '100%',
+    backgroundColor: 'transparent',
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    elevation: 0,
+    maxHeight: '100%',
+    borderRadius: 0,
+  },
+  sidebarLogContainer: {
+    flex: 1,
+    maxHeight: '100%',
+    padding: 16,
+  },
+  sidebarLogEntry: {
+    backgroundColor: 'rgba(245, 245, 245, 0.8)',
+    marginVertical: 4,
+    padding: 12,
+  },
+  sidebarEmptyText: {
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
+    padding: 40,
+    fontSize: 16,
+  },
+  sidebarPlayerName: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  sidebarTimestamp: {
+    fontSize: 11,
+  },
+  sidebarActionDescription: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  sidebarTurnInfo: {
+    fontSize: 11,
   },
 });
