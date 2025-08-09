@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Modal } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Modal, Linking } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useRouter } from 'expo-router';
@@ -330,9 +330,7 @@ export default function ProfileScreen() {
               onPress={() => {
                 // Open GitHub repository
                 const url = 'https://github.com/Jondari/creature-nexus-tcg';
-                if (typeof window !== 'undefined') {
-                  window.open(url, '_blank');
-                }
+                Linking.openURL(url);
               }}
             >
               <Github size={20} color={Colors.text.primary} />
@@ -344,9 +342,7 @@ export default function ProfileScreen() {
               onPress={() => {
                 // Open official website
                 const url = 'https://creature-nexus.netlify.app';
-                if (typeof window !== 'undefined') {
-                  window.open(url, '_blank');
-                }
+                Linking.openURL(url);
               }}
             >
               <Globe size={20} color={Colors.text.primary} />
