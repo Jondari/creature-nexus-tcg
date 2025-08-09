@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.8](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.7...v0.2.8) (2025-08-09)
+
+
+### Features
+
+* migrate from expo-av to expo-audio and update Expo packages to compatible versions ([c95d094](https://github.com/Jondari/creature-nexus-tcg/commit/c95d094daa831497322e2a7a2fd849e6a845ce18))
+
+
+### Bug Fixes
+
+* add cross-platform compatibility for Android builds ([493eade](https://github.com/Jondari/creature-nexus-tcg/commit/493eadeeda535ad52e3d21fbe772d9219f294343))
+* add Metro config to resolve Firebase Auth component registration on Android ([6eb0f25](https://github.com/Jondari/creature-nexus-tcg/commit/6eb0f25e63191754da14441bc13b3afc04dd9568))
+
 ### [0.2.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.6...v0.2.7) (2025-08-08)
 
 
