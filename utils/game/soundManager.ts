@@ -1,30 +1,28 @@
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
+import type { AudioPlayer } from 'expo-audio';
 
 class SoundManager {
-  private sounds: Map<string, Audio.Sound> = new Map();
+  private sounds: Map<string, AudioPlayer> = new Map();
   private isEnabled: boolean = true;
 
-  async loadSound(name: string, source: any): Promise<void> {
+  loadSound(name: string, source: any): void {
     try {
-      const { sound } = await Audio.Sound.createAsync(source, {
-        shouldPlay: false,
-        isLooping: false,
-      });
-      this.sounds.set(name, sound);
+      const player = createAudioPlayer(source);
+      this.sounds.set(name, player);
     } catch (error) {
       console.warn(`Failed to load sound ${name}:`, error);
     }
   }
 
-  async playSound(name: string): Promise<void> {
+  playSound(name: string): void {
     if (!this.isEnabled) return;
 
     try {
-      const sound = this.sounds.get(name);
-      if (sound) {
+      const player = this.sounds.get(name);
+      if (player) {
         // Reset to beginning and play
-        await sound.setPositionAsync(0);
-        await sound.playAsync();
+        player.seekTo(0);
+        player.play();
       } else {
         console.warn(`Sound ${name} not found`);
       }
@@ -41,10 +39,10 @@ class SoundManager {
     return this.isEnabled;
   }
 
-  async unloadAllSounds(): Promise<void> {
-    for (const [name, sound] of this.sounds) {
+  unloadAllSounds(): void {
+    for (const [name, player] of this.sounds) {
       try {
-        await sound.unloadAsync();
+        player.release();
       } catch (error) {
         console.warn(`Failed to unload sound ${name}:`, error);
       }
@@ -57,21 +55,10 @@ class SoundManager {
 export const soundManager = new SoundManager();
 
 // Initialize sounds
-export const initializeSounds = async (): Promise<void> => {
+export const initializeSounds = (): void => {
   try {
-    // Set audio mode for better mobile compatibility
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      staysActiveInBackground: false,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      playThroughEarpieceAndroid: false,
-    });
-
     // Load impact sound
-    await soundManager.loadSound('impact', require('../../assets/impact.wav'));
-    
-    console.log('Sounds initialized successfully');
+    soundManager.loadSound('impact', require('../../assets/impact.wav'));
   } catch (error) {
     console.warn('Failed to initialize sounds:', error);
   }
