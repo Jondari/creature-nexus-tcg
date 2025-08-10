@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
 import { Card, CardRarity } from '../models/Card';
 import { CardComponent } from './CardComponent';
+import { Sidebar } from './Sidebar';
 import { groupCardsByName } from '../utils/cardUtils';
 import Colors from '../constants/Colors';
 
@@ -27,6 +28,7 @@ export function DeckBuilder({
   const [currentDeck, setCurrentDeck] = useState<Card[]>(initialDeck);
   const [deckName, setDeckName] = useState(initialDeckName);
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   // Group available cards by name
   const groupedAvailable = groupCardsByName(availableCards);
@@ -106,9 +108,19 @@ export function DeckBuilder({
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Deck Builder</Text>
-        <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-          <Text style={styles.saveText}>Save</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            onPress={() => setSidebarVisible(true)} 
+            style={styles.deckButton}
+          >
+            <Text style={styles.deckButtonText}>
+              Deck ({currentDeck.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+            <Text style={styles.saveText}>Save</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Deck Info */}
@@ -124,31 +136,18 @@ export function DeckBuilder({
       </View>
 
       <View style={styles.content}>
-        {/* Current Deck */}
-        <View style={styles.deckSection}>
-          <Text style={styles.sectionTitle}>Current Deck</Text>
-          <ScrollView horizontal style={styles.deckScroll}>
-            {Object.entries(groupedDeck).map(([name, cards]) => (
-              <View key={name} style={styles.deckCardContainer}>
-                <CardComponent
-                  card={cards[0]}
-                  onPress={() => removeCardFromDeck(cards[0].id)}
-                  size="small"
-                />
-                <View style={styles.cardCount}>
-                  <Text style={styles.cardCountText}>{cards.length}</Text>
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Available Cards */}
+        {/* Available Cards - Using collection-style layout */}
         <View style={styles.collectionSection}>
           <Text style={styles.sectionTitle}>Your Collection</Text>
-          
-          {/* Filter */}
-          <ScrollView horizontal style={styles.filterScroll}>
+        </View>
+
+        {/* Filter Section */}
+        <View style={styles.filterSection}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterContainer}
+          >
             {filterOptions.map((option) => (
               <TouchableOpacity
                 key={option}
@@ -161,38 +160,106 @@ export function DeckBuilder({
               </TouchableOpacity>
             ))}
           </ScrollView>
+        </View>
 
-          {/* Cards Grid */}
-          <ScrollView style={styles.cardsGrid}>
-            <View style={styles.cardsRow}>
-              {filteredGroups.map(([name, cardGroup]) => {
-                const inDeck = getCardCountInDeck(name);
-                const available = getAvailableCount(name);
-                const canAdd = canAddCard(name);
+        {/* Cards Grid - Using collection-style layout */}
+        <View style={styles.cardsSection}>
+          <ScrollView contentContainerStyle={styles.gridContainer}>
+            {filteredGroups.map(([name, cardGroup]) => {
+              const inDeck = getCardCountInDeck(name);
+              const available = getAvailableCount(name);
+              const canAdd = canAddCard(name);
 
-                return (
-                  <View key={name} style={styles.cardContainer}>
-                    <CardComponent
-                      card={cardGroup[0]}
-                      onPress={() => canAdd && addCardToDeck(cardGroup[0])}
-                      disabled={!canAdd}
-                      size="small"
-                    />
-                    <View style={styles.cardInfo}>
-                      <Text style={styles.cardStats}>
-                        In Deck: {inDeck}/{MAX_COPIES_PER_CARD}
-                      </Text>
-                      <Text style={styles.cardStats}>
-                        Available: {available}
-                      </Text>
-                    </View>
+              return (
+                <View key={name} style={styles.cardContainer}>
+                  <CardComponent
+                    card={cardGroup[0]}
+                    onPress={() => canAdd && addCardToDeck(cardGroup[0])}
+                    disabled={!canAdd}
+                    size="small"
+                  />
+                  <View style={styles.cardInfo}>
+                    <Text style={styles.cardStats}>
+                      In Deck: {inDeck}/{MAX_COPIES_PER_CARD}
+                    </Text>
+                    <Text style={styles.cardStats}>
+                      Available: {available}
+                    </Text>
                   </View>
-                );
-              })}
-            </View>
+                </View>
+              );
+            })}
           </ScrollView>
         </View>
       </View>
+
+      {/* Deck Sidebar */}
+      <Sidebar
+        visible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+        title="Current Deck"
+        width={400}
+      >
+        <View style={styles.sidebarContent}>
+          {/* Deck Name Input */}
+          <View style={styles.deckNameSection}>
+            <Text style={styles.deckNameLabel}>Deck Name:</Text>
+            <TextInput
+              style={styles.deckNameInput}
+              value={deckName}
+              onChangeText={setDeckName}
+              placeholder="Enter deck name..."
+              placeholderTextColor={Colors.text.secondary}
+            />
+          </View>
+
+          {/* Deck Stats */}
+          <View style={styles.deckStats}>
+            <Text style={styles.deckStatsText}>
+              Total Cards: {currentDeck.length}/{DECK_SIZE_MAX}
+            </Text>
+            <Text style={[
+              styles.deckStatsText,
+              currentDeck.length >= DECK_SIZE_MIN ? styles.validDeck : styles.invalidDeck
+            ]}>
+              {currentDeck.length < DECK_SIZE_MIN 
+                ? `Need ${DECK_SIZE_MIN - currentDeck.length} more cards` 
+                : 'Deck is valid'}
+            </Text>
+          </View>
+
+          {/* Deck Cards */}
+          <ScrollView style={styles.sidebarDeckList}>
+            {Object.entries(groupedDeck).length === 0 ? (
+              <Text style={styles.emptyDeckText}>
+                No cards in deck. Start adding cards from your collection!
+              </Text>
+            ) : (
+              Object.entries(groupedDeck).map(([name, cards]) => (
+                <View key={name} style={styles.sidebarDeckCard}>
+                  <CardComponent
+                    card={cards[0]}
+                    onPress={() => removeCardFromDeck(cards[0].id)}
+                    size="small"
+                  />
+                  <View style={styles.sidebarCardInfo}>
+                    <Text style={styles.sidebarCardName}>{name}</Text>
+                    <Text style={styles.sidebarCardCount}>
+                      Quantity: {cards.length}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.removeCardButton}
+                      onPress={() => removeCardFromDeck(cards[0].id)}
+                    >
+                      <Text style={styles.removeCardText}>Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
+          </ScrollView>
+        </View>
+      </Sidebar>
     </View>
   );
 }
@@ -210,6 +277,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.neutral[700],
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   closeButton: {
     padding: 8,
   },
@@ -222,6 +294,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.text.primary,
   },
+  deckButton: {
+    backgroundColor: Colors.accent[600],
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  deckButtonText: {
+    color: Colors.text.primary,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   saveButton: {
     backgroundColor: Colors.primary[600],
     paddingHorizontal: 16,
@@ -231,6 +314,10 @@ const styles = StyleSheet.create({
   saveText: {
     color: Colors.text.primary,
     fontWeight: 'bold',
+  },
+  content: {
+    flex: 1,
+    padding: 16,
   },
   deckInfo: {
     padding: 16,
@@ -249,49 +336,25 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     marginTop: 4,
   },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  deckSection: {
-    marginBottom: 24,
-  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.text.primary,
     marginBottom: 12,
   },
-  deckScroll: {
-    flexDirection: 'row',
-  },
-  deckCardContainer: {
-    marginRight: 8,
-    position: 'relative',
-  },
-  cardCount: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardCountText: {
-    color: Colors.text.primary,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
   collectionSection: {
-    flex: 1,
+    paddingHorizontal: 16,
   },
-  filterScroll: {
+  // Collection-style layout
+  filterSection: {
+    backgroundColor: Colors.background.primary,
+    zIndex: 1,
+  },
+  filterContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
-    minHeight: 48, // Fixed height to prevent size variation
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    minHeight: 56,
   },
   filterButton: {
     paddingHorizontal: 16,
@@ -299,8 +362,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 8,
     backgroundColor: Colors.background.card,
-    height: 32, // Fixed height for consistent button size
-    justifyContent: 'center', // Center text vertically
+    height: 32,
+    justifyContent: 'center',
   },
   filterButtonActive: {
     backgroundColor: Colors.primary[600],
@@ -312,16 +375,18 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: Colors.text.primary,
   },
-  cardsGrid: {
+  cardsSection: {
     flex: 1,
   },
-  cardsRow: {
+  gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
+    paddingHorizontal: 8,
+    paddingBottom: 80,
   },
   cardContainer: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   cardInfo: {
     marginTop: 8,
@@ -330,5 +395,90 @@ const styles = StyleSheet.create({
   cardStats: {
     fontSize: 12,
     color: Colors.text.secondary,
+  },
+  // Sidebar styles
+  sidebarContent: {
+    flex: 1,
+    padding: 16,
+  },
+  deckNameSection: {
+    marginBottom: 16,
+  },
+  deckNameLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: Colors.text.primary,
+    marginBottom: 8,
+  },
+  deckNameInput: {
+    backgroundColor: Colors.background.primary,
+    borderWidth: 1,
+    borderColor: Colors.neutral[700],
+    borderRadius: 8,
+    padding: 12,
+    color: Colors.text.primary,
+    fontSize: 14,
+  },
+  deckStats: {
+    backgroundColor: Colors.background.primary,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  deckStatsText: {
+    fontSize: 14,
+    color: Colors.text.primary,
+    marginBottom: 4,
+  },
+  validDeck: {
+    color: Colors.success,
+  },
+  invalidDeck: {
+    color: Colors.error,
+  },
+  sidebarDeckList: {
+    flex: 1,
+  },
+  emptyDeckText: {
+    textAlign: 'center',
+    color: Colors.text.secondary,
+    fontSize: 14,
+    marginTop: 32,
+    fontStyle: 'italic',
+  },
+  sidebarDeckCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.background.primary,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  sidebarCardInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  sidebarCardName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: Colors.text.primary,
+    marginBottom: 4,
+  },
+  sidebarCardCount: {
+    fontSize: 12,
+    color: Colors.text.secondary,
+    marginBottom: 8,
+  },
+  removeCardButton: {
+    backgroundColor: Colors.error,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  removeCardText: {
+    color: Colors.text.primary,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
