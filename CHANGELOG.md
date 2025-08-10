@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.9](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.8...v0.2.9) (2025-08-10)
+
+
+### Features
+
+* add visual count indicators to deck builder collection cards ([a038753](https://github.com/Jondari/creature-nexus-tcg/commit/a0387538a912d43f1d2283075069f3147b035253))
+* improve deck builder UI with sidebar and optimized layout ([cd1697c](https://github.com/Jondari/creature-nexus-tcg/commit/cd1697c44b931c7b0d955a4971314267885c8cce))
+
 ### [0.2.8](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.7...v0.2.8) (2025-08-09)
 
 
