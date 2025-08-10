@@ -172,12 +172,19 @@ export function DeckBuilder({
 
               return (
                 <View key={name} style={styles.cardContainer}>
-                  <CardComponent
-                    card={cardGroup[0]}
-                    onPress={() => canAdd && addCardToDeck(cardGroup[0])}
-                    disabled={!canAdd}
-                    size="small"
-                  />
+                  <View style={styles.cardWithIndicator}>
+                    <CardComponent
+                      card={cardGroup[0]}
+                      onPress={() => canAdd && addCardToDeck(cardGroup[0])}
+                      disabled={!canAdd}
+                      size="small"
+                    />
+                    {inDeck > 0 && (
+                      <View style={styles.deckIndicator}>
+                        <Text style={styles.deckIndicatorText}>{inDeck}</Text>
+                      </View>
+                    )}
+                  </View>
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardStats}>
                       In Deck: {inDeck}/{MAX_COPIES_PER_CARD}
@@ -387,6 +394,27 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     marginBottom: 12,
+  },
+  cardWithIndicator: {
+    position: 'relative',
+  },
+  deckIndicator: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: Colors.primary[600],
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.background.primary,
+  },
+  deckIndicatorText: {
+    color: Colors.text.primary,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   cardInfo: {
     marginTop: 8,
