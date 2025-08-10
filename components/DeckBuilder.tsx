@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Card, CardRarity } from '../models/Card';
 import { CardComponent } from './CardComponent';
 import { Sidebar } from './Sidebar';
 import { groupCardsByName } from '../utils/cardUtils';
+import { showErrorAlert } from '@/utils/alerts';
 import Colors from '../constants/Colors';
 
 interface DeckBuilderProps {
@@ -44,12 +45,12 @@ export function DeckBuilder({
     const cardsOfSameName = currentDeck.filter(c => c.name === card.name);
     
     if (cardsOfSameName.length >= MAX_COPIES_PER_CARD) {
-      Alert.alert('Deck Limit', `You can only have ${MAX_COPIES_PER_CARD} copies of ${card.name} in your deck.`);
+      showErrorAlert('Deck Limit', `You can only have ${MAX_COPIES_PER_CARD} copies of ${card.name} in your deck.`);
       return;
     }
 
     if (currentDeck.length >= DECK_SIZE_MAX) {
-      Alert.alert('Deck Full', `Your deck cannot exceed ${DECK_SIZE_MAX} cards.`);
+      showErrorAlert('Deck Full', `Your deck cannot exceed ${DECK_SIZE_MAX} cards.`);
       return;
     }
 
@@ -86,12 +87,12 @@ export function DeckBuilder({
 
   const handleSave = () => {
     if (currentDeck.length < DECK_SIZE_MIN) {
-      Alert.alert('Deck Too Small', `Your deck must have at least ${DECK_SIZE_MIN} cards.`);
+      showErrorAlert('Deck Too Small', `Your deck must have at least ${DECK_SIZE_MIN} cards.`);
       return;
     }
 
     if (!deckName.trim()) {
-      Alert.alert('Deck Name Required', 'Please enter a name for your deck.');
+      showErrorAlert('Deck Name Required', 'Please enter a name for your deck.');
       return;
     }
 

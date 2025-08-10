@@ -3,6 +3,12 @@ import { StyleSheet, View, Text, TouchableOpacity, Modal } from 'react-native';
 import { AlertTriangle, CheckCircle, X } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 
+export interface AlertButton {
+  text: string;
+  onPress?: () => void;
+  style?: 'default' | 'cancel' | 'destructive';
+}
+
 interface CustomAlertProps {
   visible: boolean;
   title: string;
@@ -12,6 +18,7 @@ interface CustomAlertProps {
   confirmText?: string;
   onConfirm?: () => void;
   showCancel?: boolean;
+  buttons?: AlertButton[];
 }
 
 export default function CustomAlert({
@@ -22,7 +29,8 @@ export default function CustomAlert({
   onClose,
   confirmText = 'OK',
   onConfirm,
-  showCancel = false
+  showCancel = false,
+  buttons
 }: CustomAlertProps) {
   const handleConfirm = () => {
     if (onConfirm) {
@@ -31,6 +39,12 @@ export default function CustomAlert({
       onClose();
     }
   };
+
+  // Use custom buttons if provided, otherwise fall back to legacy props
+  const alertButtons = buttons || [
+    ...(showCancel ? [{ text: 'Cancel', style: 'cancel' as const, onPress: onClose }] : []),
+    { text: confirmText, style: 'default' as const, onPress: handleConfirm }
+  ];
 
   const getIcon = () => {
     switch (type) {
@@ -84,28 +98,38 @@ export default function CustomAlert({
           <Text style={styles.message}>{message}</Text>
           
           <View style={styles.buttons}>
-            {showCancel && (
-              <TouchableOpacity
-                style={[styles.button, styles.cancelButton]}
-                onPress={onClose}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            )}
-            
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.confirmButton,
-                { backgroundColor: colors.button },
-                !showCancel && styles.singleButton
-              ]}
-              onPress={handleConfirm}
-            >
-              <Text style={[styles.confirmButtonText, { color: colors.text }]}>
-                {confirmText}
-              </Text>
-            </TouchableOpacity>
+            {alertButtons.map((button, index) => {
+              const isCancel = button.style === 'cancel';
+              const isDestructive = button.style === 'destructive';
+              const isSingle = alertButtons.length === 1;
+
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.button,
+                    isCancel ? styles.cancelButton : styles.confirmButton,
+                    isDestructive ? { backgroundColor: '#ef4444' } : 
+                    !isCancel ? { backgroundColor: colors.button } : {},
+                    isSingle && styles.singleButton
+                  ]}
+                  onPress={() => {
+                    if (button.onPress) {
+                      button.onPress();
+                    } else {
+                      onClose();
+                    }
+                  }}
+                >
+                  <Text style={[
+                    isCancel ? styles.cancelButtonText : styles.confirmButtonText,
+                    !isCancel ? { color: colors.text } : {}
+                  ]}>
+                    {button.text}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       </View>

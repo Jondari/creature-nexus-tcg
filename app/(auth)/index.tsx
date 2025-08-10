@@ -4,9 +4,9 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, LogIn } from 'lucide-react-native';
+import { showErrorAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
-import CustomAlert from '@/components/CustomAlert';
 
 // Premium monster showcase images
 const PREMIUM_MONSTERS = {
@@ -45,31 +45,6 @@ export default function AuthScreen() {
   // Random showcase monsters (2 different ones)
   const [showcaseMonsters] = useState(() => getRandomShowcaseMonsters());
   
-  // Alert state
-  const [alert, setAlert] = useState<{
-    visible: boolean;
-    title: string;
-    message: string;
-    type: 'success' | 'error' | 'warning';
-  }>({
-    visible: false,
-    title: '',
-    message: '',
-    type: 'error'
-  });
-
-  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'warning' = 'error') => {
-    setAlert({
-      visible: true,
-      title,
-      message,
-      type
-    });
-  };
-
-  const hideAlert = () => {
-    setAlert(prev => ({ ...prev, visible: false }));
-  };
   
   useEffect(() => {
     if (user) {
@@ -103,7 +78,7 @@ export default function AuthScreen() {
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
-      showAlert('Error', 'Please enter both email and password.');
+      showErrorAlert('Error', 'Please enter both email and password.');
       return;
     }
 
@@ -115,7 +90,7 @@ export default function AuthScreen() {
       setPassword('');
     } catch (error: any) {
       console.error('Error signing in:', error);
-      showAlert('Error', getSignInErrorMessage(error));
+      showErrorAlert('Error', getSignInErrorMessage(error));
     } finally {
       setLoginLoading(false);
     }
@@ -126,7 +101,7 @@ export default function AuthScreen() {
       await signInWithGoogle();
     } catch (error: any) {
       console.error('Error signing in with Google:', error);
-      showAlert('Error', 'Failed to sign in with Google. Please try again.');
+      showErrorAlert('Error', 'Failed to sign in with Google. Please try again.');
     }
   };
   
@@ -266,14 +241,6 @@ export default function AuthScreen() {
           </View>
         </View>
       </Modal>
-
-      <CustomAlert
-        visible={alert.visible}
-        title={alert.title}
-        message={alert.message}
-        type={alert.type}
-        onClose={hideAlert}
-      />
     </View>
   );
 }

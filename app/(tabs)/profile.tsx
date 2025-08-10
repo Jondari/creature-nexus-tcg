@@ -5,8 +5,8 @@ import { useSettings } from '@/context/SettingsContext';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube } from 'lucide-react-native';
+import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
-import CustomAlert from '@/components/CustomAlert';
 
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
@@ -24,31 +24,7 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   
-  // Alert state
-  const [alert, setAlert] = useState<{
-    visible: boolean;
-    title: string;
-    message: string;
-    type: 'success' | 'error' | 'warning';
-  }>({
-    visible: false,
-    title: '',
-    message: '',
-    type: 'error'
-  });
 
-  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'warning' = 'error') => {
-    setAlert({
-      visible: true,
-      title,
-      message,
-      type
-    });
-  };
-
-  const hideAlert = () => {
-    setAlert(prev => ({ ...prev, visible: false }));
-  };
   
   const handleSignOut = async () => {
     try {
@@ -56,7 +32,7 @@ export default function ProfileScreen() {
       router.replace('/(auth)');
     } catch (error) {
       console.error('Error signing out:', error);
-      showAlert('Error', 'Failed to sign out. Please try again.');
+      showErrorAlert('Error', 'Failed to sign out. Please try again.');
     }
   };
 
@@ -80,12 +56,12 @@ export default function ProfileScreen() {
 
   const handleLinkWithEmail = async () => {
     if (!email || !password) {
-      showAlert('Error', 'Please enter both email and password.');
+      showErrorAlert('Error', 'Please enter both email and password.');
       return;
     }
 
     if (password.length < 6) {
-      showAlert('Error', 'Password should be at least 6 characters long.');
+      showErrorAlert('Error', 'Password should be at least 6 characters long.');
       return;
     }
 
@@ -95,10 +71,10 @@ export default function ProfileScreen() {
       setShowLinkModal(false);
       setEmail('');
       setPassword('');
-      showAlert('Success', 'Your account has been saved! You can now sign in with this email on any device.', 'success');
+      showSuccessAlert('Success', 'Your account has been saved! You can now sign in with this email on any device.');
     } catch (error: any) {
       console.error('Error linking account:', error);
-      showAlert('Error', getErrorMessage(error));
+      showErrorAlert('Error', getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -108,10 +84,10 @@ export default function ProfileScreen() {
     try {
       setLoading(true);
       await linkWithGoogle();
-      showAlert('Success', 'Your account has been saved with Google! You can now sign in with Google on any device.', 'success');
+      showSuccessAlert('Success', 'Your account has been saved with Google! You can now sign in with Google on any device.');
     } catch (error: any) {
       console.error('Error linking with Google:', error);
-      showAlert('Error', 'Failed to link with Google. Please try again.');
+      showErrorAlert('Error', 'Failed to link with Google. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -144,7 +120,7 @@ export default function ProfileScreen() {
       router.replace('/(auth)');
     } catch (error: any) {
       console.error('Error deleting account:', error);
-      showAlert('Error', 'Failed to delete account. Please try again.');
+      showErrorAlert('Error', 'Failed to delete account. Please try again.');
     } finally {
       setDeleteLoading(false);
     }
@@ -462,14 +438,6 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-
-      <CustomAlert
-        visible={alert.visible}
-        title={alert.title}
-        message={alert.message}
-        type={alert.type}
-        onClose={hideAlert}
-      />
     </View>
   );
 }

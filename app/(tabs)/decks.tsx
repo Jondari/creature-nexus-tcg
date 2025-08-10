@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { useDecks } from '@/context/DeckContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { Card } from '@/models/Card';
 import { DeckBuilder } from '@/components/DeckBuilder';
+import { showSuccessAlert, showErrorAlert, showConfirmAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
 
@@ -58,40 +59,36 @@ export default function DecksScreen() {
       await saveDeck(cards, deckName, editingDeck?.id);
       setShowDeckBuilder(false);
       setEditingDeck(null);
-      Alert.alert('Success', 'Deck saved successfully!');
+      showSuccessAlert('Success', 'Deck saved successfully!');
     } catch (error) {
-      Alert.alert('Error', 'Failed to save deck. Please try again.');
+      showErrorAlert('Error', 'Failed to save deck. Please try again.');
     }
   };
 
   const handleDeleteDeck = (deck: any) => {
-    Alert.alert(
+    showConfirmAlert(
       'Delete Deck',
       `Are you sure you want to delete "${deck.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteDeck(deck.id);
-              Alert.alert('Success', 'Deck deleted successfully!');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete deck. Please try again.');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteDeck(deck.id);
+          showSuccessAlert('Success', 'Deck deleted successfully!');
+        } catch (error) {
+          showErrorAlert('Error', 'Failed to delete deck. Please try again.');
+        }
+      },
+      undefined, // onCancel
+      'Delete',
+      'Cancel'
     );
   };
 
   const handleSetActiveDeck = async (deck: any) => {
     try {
       await setActiveDeck(deck.id);
-      Alert.alert('Success', `"${deck.name}" is now your active deck!`);
+      showSuccessAlert('Success', `"${deck.name}" is now your active deck!`);
     } catch (error) {
-      Alert.alert('Error', 'Failed to set active deck. Please try again.');
+      showErrorAlert('Error', 'Failed to set active deck. Please try again.');
     }
   };
 

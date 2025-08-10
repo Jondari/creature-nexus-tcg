@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Platform } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import CustomAlert from './CustomAlert';
+import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
@@ -34,7 +34,6 @@ export function GameBoard() {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
   const [showDeckSelection, setShowDeckSelection] = useState(false);
-  const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; type?: 'error' | 'warning' }>({ visible: false, title: '', message: '' });
   
   // Gesture and animation state
   const screenWidth = Dimensions.get('window').width;
@@ -65,14 +64,12 @@ export function GameBoard() {
     if (activeDeck && activeDeck.cards.length >= 20) {
       startGameWithDeck(activeDeck.cards);
     } else {
-      setAlert({
-        visible: true,
-        title: 'Invalid Deck',
-        message: activeDeck 
+      showErrorAlert(
+        'Invalid Deck', 
+        activeDeck 
           ? 'Your active deck must have at least 20 cards.' 
-          : 'No active deck selected. Please create a deck first.',
-        type: 'error'
-      });
+          : 'No active deck selected. Please create a deck first.'
+      );
     }
   };
 
@@ -210,12 +207,7 @@ export function GameBoard() {
     const currentPlayer = gameEngine.getCurrentPlayer();
     
     if (currentPlayer.field.length >= 4) {
-      setAlert({
-        visible: true,
-        title: 'Field Full',
-        message: 'You cannot have more than 4 creatures on the field at once.',
-        type: 'warning'
-      });
+      showWarningAlert('Field Full', 'You cannot have more than 4 creatures on the field at once.');
       return;
     }
     
@@ -230,35 +222,20 @@ export function GameBoard() {
     const attack = attackerCard?.attacks.find(a => a.name === attackName);
     
     if (!attack || currentPlayer.energy < attack.energy) {
-      setAlert({
-        visible: true,
-        title: 'Insufficient Energy',
-        message: `This attack requires ${attack?.energy || 0} energy, but you only have ${currentPlayer.energy}.`,
-        type: 'warning'
-      });
+      showWarningAlert('Insufficient Energy', `This attack requires ${attack?.energy || 0} energy, but you only have ${currentPlayer.energy}.`);
       return;
     }
     
     const opponent = gameEngine.getOpponent();
     if (opponent.field.length === 0) {
       // No targets available
-      setAlert({
-        visible: true,
-        title: 'No Targets',
-        message: 'There are no enemy creatures to attack',
-        type: 'warning'
-      });
+      showWarningAlert('No Targets', 'There are no enemy creatures to attack');
       return;
     }
     
     // Select target
     setAttackMode({ cardId, attackName });
-    setAlert({
-      visible: true,
-      title: t('actions.selectTarget'),
-      message: 'Tap an opponent creature to attack',
-      type: 'warning'
-    });
+    showWarningAlert(t('actions.selectTarget'), 'Tap an opponent creature to attack');
   };
 
   const handleRetire = (cardId: string) => {
@@ -528,14 +505,6 @@ export function GameBoard() {
           <ActionLog logs={actionLog} sidebarMode={true} />
         </Sidebar>
       )}
-      
-      <CustomAlert
-        visible={alert.visible}
-        title={alert.title}
-        message={alert.message}
-        type={alert.type}
-        onClose={() => setAlert({ visible: false, title: '', message: '' })}
-      />
     </View>
   );
 }
