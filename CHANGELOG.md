@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.10](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.9...v0.2.10) (2025-08-11)
+
+
+### Features
+
+* implement cross-platform alert system with unified API ([1d21bb1](https://github.com/Jondari/creature-nexus-tcg/commit/1d21bb17aa8bad31034c7d4f398ce30c101badff))
+
 ### [0.2.9](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.8...v0.2.9) (2025-08-10)
 
 
