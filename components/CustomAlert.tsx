@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
 import { AlertTriangle, CheckCircle, X } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 
@@ -32,6 +32,23 @@ export default function CustomAlert({
   showCancel = false,
   buttons
 }: CustomAlertProps) {
+  const [contentVisible, setContentVisible] = useState(false);
+
+  // Fix for React Native new architecture modal flash issue (mobile only)
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      // Web doesn't need the flash fix, show content immediately
+      setContentVisible(visible);
+    } else if (visible) {
+      // Mobile: Small delay to prevent the top-left corner flash
+      const timer = setTimeout(() => {
+        setContentVisible(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    } else {
+      setContentVisible(false);
+    }
+  }, [visible]);
   const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();
@@ -81,63 +98,74 @@ export default function CustomAlert({
 
   const colors = getColors();
 
-  return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            {getIcon()}
-            <Text style={styles.title}>{title}</Text>
-          </View>
-          
-          <Text style={styles.message}>{message}</Text>
-          
-          <View style={styles.buttons}>
-            {alertButtons.map((button, index) => {
-              const isCancel = button.style === 'cancel';
-              const isDestructive = button.style === 'destructive';
-              const isSingle = alertButtons.length === 1;
+  // Platform-specific Modal wrapper - only for mobile
+  const ModalWrapper = Platform.OS === 'web' 
+    ? ({ children }: { children: React.ReactNode }) => <>{children}</>
+    : ({ children }: { children: React.ReactNode }) => <View style={styles.modalWrapper}>{children}</View>;
 
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.button,
-                    isCancel ? styles.cancelButton : styles.confirmButton,
-                    isDestructive ? { backgroundColor: '#ef4444' } : 
-                    !isCancel ? { backgroundColor: colors.button } : {},
-                    isSingle && styles.singleButton
-                  ]}
-                  onPress={() => {
-                    if (button.onPress) {
-                      button.onPress();
-                    } else {
-                      onClose();
-                    }
-                  }}
-                >
-                  <Text style={[
-                    isCancel ? styles.cancelButtonText : styles.confirmButtonText,
-                    !isCancel ? { color: colors.text } : {}
-                  ]}>
-                    {button.text}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+  return (
+    <ModalWrapper>
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={onClose}
+      >
+        <View style={styles.overlay}>
+          <View style={[styles.container, { opacity: contentVisible ? 1 : 0 }]}>
+            <View style={styles.header}>
+              {getIcon()}
+              <Text style={styles.title}>{title}</Text>
+            </View>
+            
+            <Text style={styles.message}>{message}</Text>
+            
+            <View style={styles.buttons}>
+              {alertButtons.map((button, index) => {
+                const isCancel = button.style === 'cancel';
+                const isDestructive = button.style === 'destructive';
+                const isSingle = alertButtons.length === 1;
+
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.button,
+                      isCancel ? styles.cancelButton : styles.confirmButton,
+                      isDestructive ? { backgroundColor: '#ef4444' } : 
+                      !isCancel ? { backgroundColor: colors.button } : {},
+                      isSingle && styles.singleButton
+                    ]}
+                    onPress={() => {
+                      if (button.onPress) {
+                        button.onPress();
+                      } else {
+                        onClose();
+                      }
+                    }}
+                  >
+                    <Text style={[
+                      isCancel ? styles.cancelButtonText : styles.confirmButtonText,
+                      !isCancel ? { color: colors.text } : {}
+                    ]}>
+                      {button.text}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+    </ModalWrapper>
   );
 }
 
 const styles = StyleSheet.create({
+  // Mobile-only wrapper to fix React Native new architecture modal positioning issue
+  modalWrapper: {
+    display: 'contents', // Don't interfere with layout
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

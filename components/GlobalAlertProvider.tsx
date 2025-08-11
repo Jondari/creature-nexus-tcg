@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
 import CustomAlert from './CustomAlert';
-import { setWebAlertManager, AlertOptions } from '@/utils/alerts';
+import { setGlobalAlertManager, AlertOptions } from '@/utils/alerts';
 
 interface GlobalAlertProviderProps {
   children: React.ReactNode;
@@ -22,20 +21,18 @@ export default function GlobalAlertProvider({ children }: GlobalAlertProviderPro
   });
 
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      // Register the web alert manager
-      setWebAlertManager({
-        showAlert: (options: AlertOptions) => {
-          setAlertState({
-            visible: true,
-            title: options.title,
-            message: options.message,
-            type: options.type || 'error',
-            buttons: options.buttons
-          });
-        }
-      });
-    }
+    // Register the global alert manager for ALL platforms (mobile and web)
+    setGlobalAlertManager({
+      showAlert: (options: AlertOptions) => {
+        setAlertState({
+          visible: true,
+          title: options.title,
+          message: options.message,
+          type: options.type || 'error',
+          buttons: options.buttons
+        });
+      }
+    });
   }, []);
 
   const hideAlert = () => {
@@ -45,16 +42,15 @@ export default function GlobalAlertProvider({ children }: GlobalAlertProviderPro
   return (
     <>
       {children}
-      {Platform.OS === 'web' && (
-        <CustomAlert
-          visible={alertState.visible}
-          title={alertState.title}
-          message={alertState.message}
-          type={alertState.type}
-          onClose={hideAlert}
-          buttons={alertState.buttons}
-        />
-      )}
+      {/* CustomAlert now renders on ALL platforms */}
+      <CustomAlert
+        visible={alertState.visible}
+        title={alertState.title}
+        message={alertState.message}
+        type={alertState.type}
+        onClose={hideAlert}
+        buttons={alertState.buttons}
+      />
     </>
   );
 }

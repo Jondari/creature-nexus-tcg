@@ -1,5 +1,3 @@
-import { Platform, Alert } from 'react-native';
-
 export interface AlertButton {
   text: string;
   onPress?: () => void;
@@ -13,34 +11,22 @@ export interface AlertOptions {
   type?: 'success' | 'error' | 'warning';
 }
 
-// Global state for web alerts using CustomAlert
-let webAlertManager: {
+// Global CustomAlert manager for all platforms
+let globalAlertManager: {
   showAlert: (options: AlertOptions) => void;
 } | null = null;
 
-export const setWebAlertManager = (manager: { showAlert: (options: AlertOptions) => void }) => {
-  webAlertManager = manager;
+export const setGlobalAlertManager = (manager: { showAlert: (options: AlertOptions) => void }) => {
+  globalAlertManager = manager;
 };
 
 export const showAlert = (title: string, message: string, buttons?: AlertButton[], type: 'success' | 'error' | 'warning' = 'error') => {
-  if (Platform.OS === 'web') {
-    // Use CustomAlert for web
-    if (webAlertManager) {
-      webAlertManager.showAlert({ title, message, buttons, type });
-    } else {
-      // Fallback to browser alert if manager not set
-      console.warn('WebAlertManager not initialized. Using browser alert fallback.');
-      window.alert(`${title}\n\n${message}`);
-    }
+  // Use CustomAlert for ALL platforms (mobile and web)
+  if (globalAlertManager) {
+    globalAlertManager.showAlert({ title, message, buttons, type });
   } else {
-    // Use native Alert for mobile platforms
-    const alertButtons = buttons?.map(button => ({
-      text: button.text,
-      onPress: button.onPress,
-      style: button.style
-    })) || [{ text: 'OK' }];
-    
-    Alert.alert(title, message, alertButtons);
+    // Fallback warning if manager not set
+    console.warn('GlobalAlertManager not initialized. Alert not shown:', title, message);
   }
 };
 
