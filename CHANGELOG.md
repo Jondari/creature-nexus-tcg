@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.11](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.10...v0.2.11) (2025-08-11)
+
+
+### Bug Fixes
+
+* resolve React Native modal positioning and flash issues on Android while preserving web functionality ([32df5f8](https://github.com/Jondari/creature-nexus-tcg/commit/32df5f8dcf982f641c58c29d0fd938205261a2a8))
+
 ### [0.2.10](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.9...v0.2.10) (2025-08-11)
 
 
