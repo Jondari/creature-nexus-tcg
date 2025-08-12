@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.11...v0.3.0) (2025-08-12)
+
+
+### Features
+
+* implement comprehensive booster pack store system ([302c956](https://github.com/Jondari/creature-nexus-tcg/commit/302c9561c27c2d194419396f3896f51f89ea9bad))
+
 ### [0.2.11](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.10...v0.2.11) (2025-08-11)
 
 
