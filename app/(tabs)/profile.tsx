@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube } from 'lucide-react-native';
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
+import { addNexusCoins } from '@/utils/currencyUtils';
 import Colors from '@/constants/Colors';
 
 export default function ProfileScreen() {
@@ -287,6 +288,23 @@ export default function ProfileScreen() {
             >
               <TestTube size={20} color={Colors.text.primary} />
               <Text style={styles.linkText}>Card Illustrations Test</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={async () => {
+                if (user) {
+                  try {
+                    await addNexusCoins(user.uid, 10000);
+                    showSuccessAlert('Dev Tools', 'Added 10,000 Nexus Coins to your account!');
+                  } catch (error) {
+                    showErrorAlert('Dev Tools', 'Failed to add coins. Please try again.');
+                  }
+                }
+              }}
+            >
+              <TestTube size={20} color={'#ffd700'} />
+              <Text style={[styles.linkText, { color: '#ffd700' }]}>Add 10,000 Nexus Coins</Text>
             </TouchableOpacity>
           </View>
         </View>

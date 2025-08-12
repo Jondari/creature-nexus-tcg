@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 import { useDecks } from '@/context/DeckContext';
 import { doc, getDoc } from 'firebase/firestore';
@@ -23,6 +24,15 @@ export default function DecksScreen() {
       fetchUserCards();
     }
   }, [user]);
+
+  // Refresh data when the tab comes into focus (e.g., after purchasing from store)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        fetchUserCards();
+      }
+    }, [user])
+  );
 
   const fetchUserCards = async () => {
     try {

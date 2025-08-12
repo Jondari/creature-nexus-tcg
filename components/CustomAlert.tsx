@@ -139,9 +139,9 @@ export default function CustomAlert({
                     onPress={() => {
                       if (button.onPress) {
                         button.onPress();
-                      } else {
-                        onClose();
                       }
+                      // Always close the modal after button press
+                      onClose();
                     }}
                   >
                     <Text style={[

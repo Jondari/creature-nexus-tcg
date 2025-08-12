@@ -5,12 +5,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { doc, getDoc, updateDoc, arrayUnion, Timestamp } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { generateCardPack, canOpenNewPack, getTimeUntilNextPack } from '@/utils/cardUtils';
+import { generatePackCards } from '@/utils/boosterUtils';
+import { FREE_DAILY_PACK, getPackById } from '@/data/boosterPacks';
+import { getInventoryPacks, removePackFromInventory, InventoryPack } from '@/utils/packInventory';
 import { Card } from '@/models/Card';
 import { PackageOpen } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import CountdownTimer from '@/components/CountdownTimer';
 import PackOpeningAnimation from '@/components/PackOpeningAnimation';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function OpenPackScreen() {
   const { user } = useAuth();
@@ -20,12 +24,22 @@ export default function OpenPackScreen() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [showPackResults, setShowPackResults] = useState(false);
   const [packResults, setPackResults] = useState<Card[]>([]);
+  const [inventoryPacks, setInventoryPacks] = useState<InventoryPack[]>([]);
   
   useEffect(() => {
     if (user) {
       fetchUserData();
     }
   }, [user]);
+
+  // Refresh data when the tab comes into focus (e.g., after purchasing from store)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        fetchUserData();
+      }
+    }, [user])
+  );
   
   const fetchUserData = async () => {
     try {
@@ -49,6 +63,10 @@ export default function OpenPackScreen() {
           }
         }
       }
+      
+      // Load inventory packs
+      const userInventoryPacks = await getInventoryPacks(user.uid);
+      setInventoryPacks(userInventoryPacks);
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
@@ -62,8 +80,8 @@ export default function OpenPackScreen() {
       
       setOpening(true);
       
-      // Generate a new pack of cards
-      const newCards = generateCardPack();
+      // Generate a new free daily pack using the booster system
+      const newCards = generatePackCards(FREE_DAILY_PACK);
       
       // Update Firestore
       const userDocRef = doc(db, 'users', user.uid);
@@ -81,6 +99,46 @@ export default function OpenPackScreen() {
       setTimeRemaining(12 * 60 * 60 * 1000); // 12 hours in milliseconds
     } catch (error) {
       console.error('Error opening pack:', error);
+    } finally {
+      setOpening(false);
+    }
+  };
+
+  const handleOpenInventoryPack = async (inventoryPack: InventoryPack) => {
+    try {
+      if (!user) return;
+      
+      setOpening(true);
+      
+      // Get pack definition
+      const packDef = getPackById(inventoryPack.packId);
+      if (!packDef) {
+        console.error(`Pack ${inventoryPack.packId} not found`);
+        return;
+      }
+      
+      // Generate cards using the booster system
+      const newCards = generatePackCards(packDef);
+      
+      // Update Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        cards: arrayUnion(...newCards)
+      });
+      
+      // Remove pack from inventory
+      await removePackFromInventory(user.uid, inventoryPack);
+      
+      // Update local state
+      setCards((prevCards) => [...prevCards, ...newCards]);
+      setPackResults(newCards);
+      setShowPackResults(true);
+      
+      // Refresh inventory
+      const updatedInventory = await getInventoryPacks(user.uid);
+      setInventoryPacks(updatedInventory);
+    } catch (error) {
+      console.error('Error opening inventory pack:', error);
     } finally {
       setOpening(false);
     }

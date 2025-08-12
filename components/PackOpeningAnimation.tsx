@@ -26,6 +26,11 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
   // Modal state for enlarged card view
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   
+  // Pack-by-pack state
+  const [currentPackIndex, setCurrentPackIndex] = useState(0);
+  const totalPacks = Math.ceil(cards.length / 5);
+  const currentPackCards = cards.slice(currentPackIndex * 5, (currentPackIndex + 1) * 5);
+  
   useEffect(() => {
     // Start animation sequence
     backgroundOpacity.value = withTiming(1, { duration: 800 });
@@ -84,14 +89,21 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
         onPress={() => {}} // Prevent touch propagation to background
       >
         <Animated.View style={[styles.titleContainer, titleStyle]}>
-          <Text style={styles.title}>Pack Opened!</Text>
-          <Text style={styles.subtitle}>You received {cards.length} new cards</Text>
+          <Text style={styles.title}>
+            {totalPacks === 1 ? 'Pack Opened!' : `Pack ${currentPackIndex + 1} of ${totalPacks}`}
+          </Text>
+          <Text style={styles.subtitle}>
+            {totalPacks === 1 
+              ? `You received ${cards.length} new cards`
+              : `You received ${currentPackCards.length} new cards`
+            }
+          </Text>
         </Animated.View>
         
         <View style={styles.cardsContainer}>
           {/* First row - 3 cards */}
           <View style={styles.cardRow}>
-            {cards.slice(0, 3).map((card, index) => (
+            {currentPackCards.slice(0, 3).map((card, index) => (
               <CardComponent
                 key={card.id}
                 card={card}
@@ -106,7 +118,7 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
           
           {/* Second row - 2 cards */}
           <View style={styles.cardRow}>
-            {cards.slice(3, 5).map((card, index) => (
+            {currentPackCards.slice(3, 5).map((card, index) => (
               <CardComponent
                 key={card.id}
                 card={card}
@@ -120,21 +132,44 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
           </View>
         </View>
         
-        {/* Continue Button */}
-        <TouchableOpacity 
-          style={styles.continueButton} 
-          onPress={onComplete}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={[Colors.accent[700], Colors.accent[500]]}
-            style={styles.continueButtonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+        {/* Action buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={styles.continueButton} 
+            onPress={() => {
+              if (currentPackIndex < totalPacks - 1) {
+                // Go to next pack
+                setCurrentPackIndex(currentPackIndex + 1);
+              } else {
+                // Last pack, complete the animation
+                onComplete();
+              }
+            }}
+            activeOpacity={0.8}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+            <LinearGradient
+              colors={[Colors.accent[700], Colors.accent[500]]}
+              style={styles.continueButtonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={styles.continueButtonText}>
+                {totalPacks === 1 ? 'Continue' : (currentPackIndex < totalPacks - 1 ? 'Continue' : 'Complete')}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          
+          {/* Skip All button - only show if there are more packs */}
+          {totalPacks > 1 && currentPackIndex < totalPacks - 1 && (
+            <TouchableOpacity 
+              style={styles.skipButton} 
+              onPress={onComplete}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.skipButtonText}>Skip All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </TouchableOpacity>
       
       {/* Card Detail Modal */}
@@ -220,10 +255,18 @@ const styles = StyleSheet.create({
     gap: 10,
     flexWrap: 'wrap',
   },
-  continueButton: {
+  buttonContainer: {
     marginTop: 20,
+    alignItems: 'center',
+    gap: 12,
+  },
+  continueButton: {
     borderRadius: 20,
     overflow: 'hidden',
+  },
+  skipButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
   },
   continueButtonGradient: {
     paddingHorizontal: 30, // Smaller button
@@ -235,6 +278,12 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     fontSize: 16, // Smaller text
     fontWeight: 'bold',
+  },
+  skipButtonText: {
+    color: Colors.text.secondary,
+    fontSize: 14,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
   // Modal styles
   modalOverlay: {

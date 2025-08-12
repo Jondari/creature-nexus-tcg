@@ -13,6 +13,7 @@ import {
   signInWithCredential
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
+import { DEFAULT_STARTING_COINS } from '@/utils/currencyUtils';
 import { auth, db } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
@@ -96,7 +97,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             uid: user.uid,
             createdAt: serverTimestamp(),
             lastPackOpened: null,
-            cards: []
+            cards: [],
+            nexusCoins: DEFAULT_STARTING_COINS
           });
         }
       } else {
@@ -240,6 +242,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           createdAt: serverTimestamp(),
           lastPackOpened: null,
           cards: [],
+          nexusCoins: DEFAULT_STARTING_COINS,
           isAnonymous: false
         });
       }
@@ -270,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: serverTimestamp(),
         lastPackOpened: null,
         cards: [],
+        nexusCoins: DEFAULT_STARTING_COINS,
         isAnonymous: false
       });
     } catch (error) {
