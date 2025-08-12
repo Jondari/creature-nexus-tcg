@@ -16,6 +16,17 @@
     "ios": {
       "supportsTablet": true
     },
+    "android": {
+      "softwareKeyboardLayoutMode": "pan",
+      "navigationBar": {
+        "visible": false,
+        "behavior": "overlay-swipe"
+      },
+      "statusBar": {
+        "hidden": true,
+        "translucent": true
+      }
+    },
     "web": {
       "bundler": "metro",
       "output": "static",
