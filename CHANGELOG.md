@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.0...v0.3.1) (2025-08-12)
+
+
+### Features
+
+* hide status and navigation bars on Android devices for immersive gaming experience ([6b3d0ba](https://github.com/Jondari/creature-nexus-tcg/commit/6b3d0ba9a6f656060d9551be4b58f8f55cd76606))
+
+
+### Bug Fixes
+
+* enable statusBarTranslucent for Android modals to prevent edge-to-edge display gaps ([b553174](https://github.com/Jondari/creature-nexus-tcg/commit/b553174f6ddd074f265f88a534302123b2a675cd))
+
 ## [0.3.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.2.11...v0.3.0) (2025-08-12)
 
 
