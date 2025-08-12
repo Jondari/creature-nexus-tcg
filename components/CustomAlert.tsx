@@ -110,6 +110,7 @@ export default function CustomAlert({
         transparent={true}
         animationType="fade"
         onRequestClose={onClose}
+        statusBarTranslucent={Platform.OS === 'android'}
       >
         <View style={styles.overlay}>
           <View style={[styles.container, { opacity: contentVisible ? 1 : 0 }]}>
