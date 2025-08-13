@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.1...v0.3.2) (2025-08-13)
+
+
+### Bug Fixes
+
+* enable Google OAuth authentication by disabling PKCE and uncommenting login buttons ([c97dec9](https://github.com/Jondari/creature-nexus-tcg/commit/c97dec9e3b7fd350da362dee98fa7cdbd038077c))
+
 ### [0.3.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.0...v0.3.1) (2025-08-12)
 
 
