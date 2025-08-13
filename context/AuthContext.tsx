@@ -57,7 +57,6 @@ WebBrowser.maybeCompleteAuthSession();
 if (Platform.OS === 'android') {
   GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID!,
-    androidClientId: '825183736507-ietqkk2bgg71pvp4lc692r57a35666uf.apps.googleusercontent.com',
   });
 }
 
