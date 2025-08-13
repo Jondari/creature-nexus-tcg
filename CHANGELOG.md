@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.3...v0.3.4) (2025-08-13)
+
+
+### Features
+
+* optimize collection performance for mobile devices ([008bac4](https://github.com/Jondari/creature-nexus-tcg/commit/008bac48815a310d96dfa079421faab8411fc47a))
+
 ### [0.3.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.2...v0.3.3) (2025-08-13)
 
 
