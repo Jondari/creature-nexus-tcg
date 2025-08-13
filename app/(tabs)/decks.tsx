@@ -18,6 +18,7 @@ export default function DecksScreen() {
   const [loading, setLoading] = useState(true);
   const [showDeckBuilder, setShowDeckBuilder] = useState(false);
   const [editingDeck, setEditingDeck] = useState<any>(null);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -28,10 +29,12 @@ export default function DecksScreen() {
   // Refresh data when the tab comes into focus (e.g., after purchasing from store)
   useFocusEffect(
     React.useCallback(() => {
-      if (user) {
+      const now = Date.now();
+      // Only refetch if more than 5 seconds have passed since last fetch
+      if (user && (now - lastFetchTime > 5000)) {
         fetchUserCards();
       }
-    }, [user])
+    }, [user, lastFetchTime])
   );
 
   const fetchUserCards = async () => {
@@ -46,6 +49,7 @@ export default function DecksScreen() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setUserCards(userData.cards || []);
+        setLastFetchTime(Date.now());
       }
     } catch (error) {
       console.error('Error fetching user cards:', error);

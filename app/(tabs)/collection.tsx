@@ -16,6 +16,7 @@ export default function CollectionScreen() {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
+  const [lastFetchTime, setLastFetchTime] = useState(0);
   
   useEffect(() => {
     if (user) {
@@ -23,13 +24,15 @@ export default function CollectionScreen() {
     }
   }, [user]);
 
-  // Refetch cards when screen comes into focus
+  // Refetch cards when screen comes into focus (but not too frequently)
   useFocusEffect(
     React.useCallback(() => {
-      if (user) {
+      const now = Date.now();
+      // Only refetch if more than 5 seconds have passed since last fetch
+      if (user && (now - lastFetchTime > 5000)) {
         fetchUserCards();
       }
-    }, [user])
+    }, [user, lastFetchTime])
   );
   
   const fetchUserCards = async () => {
@@ -44,6 +47,7 @@ export default function CollectionScreen() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setCards(userData.cards || []);
+        setLastFetchTime(Date.now());
       }
     } catch (error) {
       console.error('Error fetching user cards:', error);

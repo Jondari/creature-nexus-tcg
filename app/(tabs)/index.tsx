@@ -25,6 +25,7 @@ export default function OpenPackScreen() {
   const [showPackResults, setShowPackResults] = useState(false);
   const [packResults, setPackResults] = useState<Card[]>([]);
   const [inventoryPacks, setInventoryPacks] = useState<InventoryPack[]>([]);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
   
   useEffect(() => {
     if (user) {
@@ -35,10 +36,12 @@ export default function OpenPackScreen() {
   // Refresh data when the tab comes into focus (e.g., after purchasing from store)
   useFocusEffect(
     React.useCallback(() => {
-      if (user) {
+      const now = Date.now();
+      // Only refetch if more than 5 seconds have passed since last fetch
+      if (user && (now - lastFetchTime > 5000)) {
         fetchUserData();
       }
-    }, [user])
+    }, [user, lastFetchTime])
   );
   
   const fetchUserData = async () => {
@@ -67,6 +70,7 @@ export default function OpenPackScreen() {
       // Load inventory packs
       const userInventoryPacks = await getInventoryPacks(user.uid);
       setInventoryPacks(userInventoryPacks);
+      setLastFetchTime(Date.now());
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {

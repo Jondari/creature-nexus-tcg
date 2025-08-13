@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatList } from 'react-native';
 import { Card, CardRarity } from '../models/Card';
 import { CardComponent } from './CardComponent';
 import { Sidebar } from './Sidebar';
@@ -31,15 +31,55 @@ export function DeckBuilder({
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
-  // Group available cards by name
-  const groupedAvailable = groupCardsByName(availableCards);
-  const groupedDeck = groupCardsByName(currentDeck);
+  // Group available cards by name (memoized)
+  const groupedAvailable = useMemo(() => groupCardsByName(availableCards), [availableCards]);
+  const groupedDeck = useMemo(() => groupCardsByName(currentDeck), [currentDeck]);
 
-  // Filter available cards
-  const filteredGroups = Object.entries(groupedAvailable).filter(([_, cardGroup]) => {
-    if (filter === 'all') return true;
-    return cardGroup[0].rarity === filter;
-  });
+  // Filter available cards (memoized)
+  const filteredGroups = useMemo(() => {
+    return Object.entries(groupedAvailable).filter(([_, cardGroup]) => {
+      if (filter === 'all') return true;
+      return cardGroup[0].rarity === filter;
+    });
+  }, [groupedAvailable, filter]);
+
+
+  // Render item for FlatList
+  const renderCard = ({ item }: { item: [string, Card[]] }) => {
+    const [name, cardGroup] = item;
+    const inDeck = getCardCountInDeck(name);
+    const available = getAvailableCount(name);
+    const canAdd = canAddCard(name);
+    
+    // 🔑 Dynamic key that updates when deck state changes
+    const itemKey = `${name}-${inDeck}-${available}-${currentDeck.length}`;
+    
+    return (
+      <View key={itemKey} style={styles.cardContainer}>
+        <View style={styles.cardWithIndicator}>
+          <CardComponent
+            card={cardGroup[0]}
+            onPress={() => canAdd && addCardToDeck(cardGroup[0])}
+            disabled={!canAdd}
+            size="small"
+          />
+          {inDeck > 0 && (
+            <View style={styles.deckIndicator}>
+              <Text style={styles.deckIndicatorText}>{inDeck}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardStats}>
+            In Deck: {inDeck}/{MAX_COPIES_PER_CARD}
+          </Text>
+          <Text style={styles.cardStats}>
+            Available: {available}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   const addCardToDeck = (card: Card) => {
     const cardsOfSameName = currentDeck.filter(c => c.name === card.name);
@@ -165,39 +205,18 @@ export function DeckBuilder({
 
         {/* Cards Grid - Using collection-style layout */}
         <View style={styles.cardsSection}>
-          <ScrollView contentContainerStyle={styles.gridContainer}>
-            {filteredGroups.map(([name, cardGroup]) => {
-              const inDeck = getCardCountInDeck(name);
-              const available = getAvailableCount(name);
-              const canAdd = canAddCard(name);
-
-              return (
-                <View key={name} style={styles.cardContainer}>
-                  <View style={styles.cardWithIndicator}>
-                    <CardComponent
-                      card={cardGroup[0]}
-                      onPress={() => canAdd && addCardToDeck(cardGroup[0])}
-                      disabled={!canAdd}
-                      size="small"
-                    />
-                    {inDeck > 0 && (
-                      <View style={styles.deckIndicator}>
-                        <Text style={styles.deckIndicatorText}>{inDeck}</Text>
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.cardInfo}>
-                    <Text style={styles.cardStats}>
-                      In Deck: {inDeck}/{MAX_COPIES_PER_CARD}
-                    </Text>
-                    <Text style={styles.cardStats}>
-                      Available: {available}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </ScrollView>
+          <FlatList
+            key={`deckbuilder-flatlist-${filter}`}
+            data={filteredGroups}
+            renderItem={renderCard}
+            keyExtractor={([name]) => name}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={20}
+            windowSize={20}
+            initialNumToRender={10}
+          />
         </View>
       </View>
 

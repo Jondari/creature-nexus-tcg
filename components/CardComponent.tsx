@@ -39,7 +39,7 @@ interface CardComponentProps {
   isFirstPlayer?: boolean;
 }
 
-export function CardComponent({ 
+const CardComponent = React.memo(({ 
   card, 
   onPress, 
   onAttack, 
@@ -56,7 +56,7 @@ export function CardComponent({
   playerEnergy = 0,
   currentTurn = 1,
   isFirstPlayer = false
-}: CardComponentProps) {
+}: CardComponentProps) => {
   const isPremium = card.rarity === 'legendary' || card.rarity === 'mythic';
   const isElementSymbolCard = true; // Always show element symbols
   const elementColor = getElementColor(card.element);
@@ -516,7 +516,54 @@ export function CardComponent({
     </DamageEffect>
     </Animated.View>
   );
-}
+}, (prevProps, nextProps) => {
+  // Safe comparison - only skip re-render if ALL relevant props are identical
+  // This ensures battle system functionality is never broken
+  
+  // Card data comparison
+  if (prevProps.card.id !== nextProps.card.id) return false;
+  if (prevProps.card.hp !== nextProps.card.hp) return false;
+  if (prevProps.card.name !== nextProps.card.name) return false;
+  if (prevProps.card.element !== nextProps.card.element) return false;
+  if (prevProps.card.rarity !== nextProps.card.rarity) return false;
+  
+  // UI state comparison
+  if (prevProps.disabled !== nextProps.disabled) return false;
+  if (prevProps.selected !== nextProps.selected) return false;
+  if (prevProps.aiHighlight !== nextProps.aiHighlight) return false;
+  if (prevProps.viewMode !== nextProps.viewMode) return false;
+  if (prevProps.count !== nextProps.count) return false;
+  if (prevProps.size !== nextProps.size) return false;
+  
+  // Battle system comparison
+  if (prevProps.showActions !== nextProps.showActions) return false;
+  if (prevProps.playerEnergy !== nextProps.playerEnergy) return false;
+  if (prevProps.currentTurn !== nextProps.currentTurn) return false;
+  if (prevProps.isFirstPlayer !== nextProps.isFirstPlayer) return false;
+  
+  // Animation comparison
+  if (prevProps.showAnimation !== nextProps.showAnimation) return false;
+  if (prevProps.index !== nextProps.index) return false;
+  
+  // Damage animation comparison - be very careful here
+  const prevDamage = prevProps.damageAnimation;
+  const nextDamage = nextProps.damageAnimation;
+  if (!prevDamage && !nextDamage) {
+    // Both undefined/null - no change
+  } else if (!prevDamage || !nextDamage) {
+    // One is defined, other isn't - definitely changed
+    return false;
+  } else {
+    // Both defined - compare properties
+    if (prevDamage.isActive !== nextDamage.isActive) return false;
+    if (prevDamage.duration !== nextDamage.duration) return false;
+  }
+  
+  // If we get here, all props are identical - safe to skip re-render
+  return true;
+});
+
+export { CardComponent };
 
 function getCardImage(card: Card) {
   // Static image mappings for React Native require

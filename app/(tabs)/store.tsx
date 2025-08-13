@@ -26,6 +26,7 @@ export default function StoreScreen() {
   const [showPackResults, setShowPackResults] = useState(false);
   const [packResults, setPackResults] = useState<any[]>([]);
   const [currentPackName, setCurrentPackName] = useState<string>('');
+  const [lastFetchTime, setLastFetchTime] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -36,10 +37,12 @@ export default function StoreScreen() {
   // Refresh currency when the tab comes into focus (e.g., after using dev tools to add coins)
   useFocusEffect(
     React.useCallback(() => {
-      if (user) {
+      const now = Date.now();
+      // Only refetch if more than 5 seconds have passed since last fetch
+      if (user && (now - lastFetchTime > 5000)) {
         fetchUserCurrency();
       }
-    }, [user])
+    }, [user, lastFetchTime])
   );
 
   const fetchUserCurrency = async () => {
@@ -49,6 +52,7 @@ export default function StoreScreen() {
       
       const currency = await getUserCurrency(user.uid);
       setUserCurrency(currency);
+      setLastFetchTime(Date.now());
     } catch (error) {
       console.error('Error fetching user currency:', error);
       showErrorAlert('Error', 'Failed to load your currency. Please try again.');

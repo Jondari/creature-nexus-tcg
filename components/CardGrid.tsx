@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, ScrollView, Text, TouchableOpacity } from 'react-native';
+import React, { useMemo } from 'react';
+import { StyleSheet, View, ScrollView, Text, TouchableOpacity, FlatList } from 'react-native';
 import { CardComponent } from './CardComponent';
 import { Card, CardRarity, RARITY_COLORS } from '../models/Card';
 import { groupCardsByName } from '../utils/cardUtils';
@@ -14,16 +14,33 @@ interface CardGridProps {
 }
 
 export default function CardGrid({ cards, filter, onFilterChange, cardSize = 'small' }: CardGridProps) {
-  // Group cards by name to count duplicates
-  const groupedCards = groupCardsByName(cards);
+  // Group cards by name to count duplicates (memoized)
+  const groupedCards = useMemo(() => groupCardsByName(cards), [cards]);
   
-  // Filter cards if needed
-  const filteredGroups = Object.entries(groupedCards).filter(([_, cardGroup]) => {
-    if (filter === 'all') return true;
-    return cardGroup[0].rarity === filter;
-  });
+  // Filter cards if needed (memoized)
+  const filteredGroups = useMemo(() => {
+    return Object.entries(groupedCards).filter(([_, cardGroup]) => {
+      if (filter === 'all') return true;
+      return cardGroup[0].rarity === filter;
+    });
+  }, [groupedCards, filter]);
   
   const filterOptions: Array<CardRarity | 'all'> = ['all', 'common', 'rare', 'epic', 'legendary', 'mythic'];
+  
+
+  // Render item for FlatList
+  const renderCard = ({ item }: { item: [string, Card[]] }) => {
+    const [name, cardGroup] = item;
+    return (
+      <CardComponent 
+        key={name} 
+        card={cardGroup[0]} 
+        viewMode="collection"
+        count={cardGroup.length}
+        size={cardSize}
+      />
+    );
+  };
   
   const renderFilterButtons = () => {
     return (
@@ -69,17 +86,18 @@ export default function CardGrid({ cards, filter, onFilterChange, cardSize = 'sm
             <Text style={styles.emptySubtext}>Open some packs to add cards to your collection</Text>
           </View>
         ) : (
-          <ScrollView contentContainerStyle={styles.gridContainer}>
-            {filteredGroups.map(([name, cardGroup]) => (
-              <CardComponent 
-                key={name} 
-                card={cardGroup[0]} 
-                viewMode="collection"
-                count={cardGroup.length}
-                size={cardSize}
-              />
-            ))}
-          </ScrollView>
+          <FlatList
+            key={`collection-flatlist-${filter}`}
+            data={filteredGroups}
+            renderItem={renderCard}
+            keyExtractor={([name]) => name}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={20}
+            windowSize={20}
+            initialNumToRender={10}
+          />
         )}
       </View>
     </View>
