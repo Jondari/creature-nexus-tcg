@@ -18,6 +18,7 @@ import { auth, db } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
+import { Google } from 'expo-auth-session/providers/google';
 
 interface AuthContextType {
   user: User | null;
@@ -164,21 +165,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const performGoogleAuth = async () => {
     try {
-      // Configure Google Auth Session using modern API
-      const redirectUri = AuthSession.makeRedirectUri({});
-
+      // Configure Google OAuth request without PKCE parameters
       const request = new AuthSession.AuthRequest({
         clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID!,
         scopes: ['openid', 'profile', 'email'],
         responseType: AuthSession.ResponseType.IdToken,
-        redirectUri,
+        redirectUri: AuthSession.makeRedirectUri({}),
+        usePKCE: false, // Explicitly disable PKCE for Google OAuth
         extraParams: {
-          nonce: 'nonce'
+          nonce: 'nonce' // Add nonce for security
         },
-      } as any);
+      });
+
 
       const result = await request.promptAsync({
         authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+        useProxy: true,
+        showInRecents: true,
       });
 
       if (result.type === 'success' && result.params.id_token) {

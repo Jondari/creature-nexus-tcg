@@ -181,14 +181,14 @@ export default function ProfileScreen() {
               <Save size={20} color={Colors.text.primary} />
               <Text style={styles.saveProgressText}>Create Account with Email</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               style={[styles.saveProgressButton, styles.googleSaveButton]}
               onPress={handleLinkWithGoogle}
               activeOpacity={0.8}
             >
               <Text style={styles.googleIcon}>G</Text>
               <Text style={styles.googleSaveText}>Save with Google</Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
           </View>
         )}
         

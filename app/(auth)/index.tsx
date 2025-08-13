@@ -174,14 +174,14 @@ export default function AuthScreen() {
           <Text style={styles.loginButtonText}>Sign In with Email</Text>
         </TouchableOpacity>
 
-        {/* <TouchableOpacity 
+        <TouchableOpacity 
           style={[styles.loginButton, styles.googleButton]} 
           onPress={handleGoogleSignIn}
           activeOpacity={0.8}
         >
           <Text style={styles.googleIcon}>G</Text>
           <Text style={styles.googleButtonText}>Continue with Google</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         
         <Text style={styles.termsText}>
           By continuing, you agree to our Terms of Service and Privacy Policy
