@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.2...v0.3.3) (2025-08-13)
+
+
+### Features
+
+* configure EAS Build for Android with package name com.jondari.creaturenexustcg ([e0d1a9c](https://github.com/Jondari/creature-nexus-tcg/commit/e0d1a9c1f66434af397c02c69eabcc04d6162eb4))
+* implement native Google Sign-In for Android Play Store with platform-specific authentication logic ([1227479](https://github.com/Jondari/creature-nexus-tcg/commit/1227479d8f43a8239c9ec71aed3c729f7f2ba896))
+
+
+### Bug Fixes
+
+* remove invalid androidClientId parameter from Google Sign-In configuration ([77c90dd](https://github.com/Jondari/creature-nexus-tcg/commit/77c90dd1d1bb331314a23309c890cdf32d08cce7))
+
 ### [0.3.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.1...v0.3.2) (2025-08-13)
 
 
