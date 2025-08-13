@@ -19,6 +19,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { Google } from 'expo-auth-session/providers/google';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { Platform } from 'react-native';
 
 interface AuthContextType {
   user: User | null;
@@ -50,6 +52,14 @@ const AuthContext = createContext<AuthContextType>({
 
 // Configure WebBrowser for auth session
 WebBrowser.maybeCompleteAuthSession();
+
+// Configure Google Sign-In for Android
+if (Platform.OS === 'android') {
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID!,
+    androidClientId: '825183736507-ietqkk2bgg71pvp4lc692r57a35666uf.apps.googleusercontent.com',
+  });
+}
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -127,7 +137,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Clear stored anonymous user ID
       await AsyncStorage.removeItem(ANONYMOUS_USER_KEY);
-      // Sign out from Firebase
+      
+      // Sign out from native Google Sign-In on Android
+      if (Platform.OS === 'android') {
+        try {
+          await GoogleSignin.signOut();
+        } catch (error) {
+          // Ignore if user wasn't signed in with Google Sign-In
+          console.log('No Google Sign-In session to clear');
+        }
+      }
+      
+      // Sign out from Firebase (works for all auth methods)
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
@@ -163,9 +184,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const performGoogleAuth = async () => {
+  const performWebGoogleAuth = async () => {
     try {
-      // Configure Google OAuth request without PKCE parameters
+      // Web-based Google OAuth using expo-auth-session
       const request = new AuthSession.AuthRequest({
         clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID!,
         scopes: ['openid', 'profile', 'email'],
@@ -176,7 +197,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           nonce: 'nonce' // Add nonce for security
         },
       });
-
 
       const result = await request.promptAsync({
         authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -191,8 +211,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Google sign-in was cancelled or failed');
       }
     } catch (error) {
-      console.error('Error with Google auth:', error);
+      console.error('Error with web Google auth:', error);
       throw error;
+    }
+  };
+
+  const performNativeGoogleAuth = async () => {
+    try {
+      // Native Android Google Sign-In
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      
+      if (userInfo.data?.idToken) {
+        const credential = GoogleAuthProvider.credential(userInfo.data.idToken);
+        return credential;
+      } else {
+        throw new Error('No ID token received from Google Sign-In');
+      }
+    } catch (error) {
+      console.error('Error with native Google auth:', error);
+      throw error;
+    }
+  };
+
+  const performGoogleAuth = async () => {
+    // Use platform-specific authentication
+    if (Platform.OS === 'web') {
+      return await performWebGoogleAuth();
+    } else if (Platform.OS === 'android') {
+      return await performNativeGoogleAuth();
+    } else {
+      throw new Error('Google authentication not supported on this platform');
     }
   };
 
