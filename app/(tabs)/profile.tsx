@@ -9,6 +9,8 @@ import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import { addNexusCoins } from '@/utils/currencyUtils';
 import Colors from '@/constants/Colors';
 
+const packageJson = require('../../package.json');
+
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
   const { cardSize, setCardSize, showBattleLog, setShowBattleLog } = useSettings();
@@ -359,7 +361,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
         
-        <Text style={styles.versionText}>Creature Nexus TCG v1.0.0</Text>
+        <Text style={styles.versionText}>Creature Nexus TCG v{packageJson.version}</Text>
       </ScrollView>
 
       <Modal
