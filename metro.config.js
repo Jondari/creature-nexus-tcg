@@ -12,7 +12,9 @@ defaultConfig.resolver.unstable_enablePackageExports = false;
 defaultConfig.transformer.minifierConfig = {
   keep_fnames: false,
   mangle: true,
-  drop_console: true, // Remove console.log, console.warn, etc. in production
+  compress: {
+    drop_console: true, // Remove console.log, console.warn, etc. in production
+  },
 };
 
 module.exports = defaultConfig;
