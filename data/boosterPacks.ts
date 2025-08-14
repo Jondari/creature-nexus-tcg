@@ -1,6 +1,21 @@
 import { BoosterPack, StandardPack, ElementalPack, PremiumPack } from '../models/BoosterPack';
 import { CardRarity } from '../models/Card';
 
+// Pack pricing configuration with fallback defaults
+const PACK_PRICES = {
+  STANDARD_NEXUS: parseInt(process.env.EXPO_PUBLIC_STANDARD_PACK_NEXUS_PRICE!) || 100,
+  STANDARD_USD: parseInt(process.env.EXPO_PUBLIC_STANDARD_PACK_USD_PRICE!) || 99,
+  
+  ELEMENTAL_NEXUS: parseInt(process.env.EXPO_PUBLIC_ELEMENTAL_PACK_NEXUS_PRICE!) || 150,
+  ELEMENTAL_USD: parseInt(process.env.EXPO_PUBLIC_ELEMENTAL_PACK_USD_PRICE!) || 149,
+  
+  MYTHIC_NEXUS: parseInt(process.env.EXPO_PUBLIC_MYTHIC_PACK_NEXUS_PRICE!) || 500,
+  MYTHIC_USD: parseInt(process.env.EXPO_PUBLIC_MYTHIC_PACK_USD_PRICE!) || 499,
+  
+  LEGENDARY_NEXUS: parseInt(process.env.EXPO_PUBLIC_LEGENDARY_PACK_NEXUS_PRICE!) || 300,
+  LEGENDARY_USD: parseInt(process.env.EXPO_PUBLIC_LEGENDARY_PACK_USD_PRICE!) || 299,
+};
+
 // Standard Packs
 export const STANDARD_PACK: StandardPack = {
   id: 'standard_pack',
@@ -8,8 +23,8 @@ export const STANDARD_PACK: StandardPack = {
   description: 'Contains 5 random cards from all available creatures. Perfect for building your collection!',
   cardCount: 5,
   type: 'standard',
-  nexusCoinPrice: 100,
-  realMoneyPrice: 99, // $0.99 in cents
+  nexusCoinPrice: PACK_PRICES.STANDARD_NEXUS,
+  realMoneyPrice: PACK_PRICES.STANDARD_USD,
   isAvailable: true,
   isPremium: false,
   imageUrl: require('@/assets/images/packs/standard_pack.png'),
@@ -41,8 +56,8 @@ export const FIRE_PACK: ElementalPack = {
   cardCount: 5,
   type: 'elemental',
   element: 'fire',
-  nexusCoinPrice: 150,
-  realMoneyPrice: 149, // $1.49
+  nexusCoinPrice: PACK_PRICES.ELEMENTAL_NEXUS,
+  realMoneyPrice: PACK_PRICES.ELEMENTAL_USD,
   isAvailable: true,
   isPremium: false,
   imageUrl: require('@/assets/images/packs/fire_pack.png'),
@@ -60,8 +75,8 @@ export const WATER_PACK: ElementalPack = {
   cardCount: 5,
   type: 'elemental',
   element: 'water',
-  nexusCoinPrice: 150,
-  realMoneyPrice: 149,
+  nexusCoinPrice: PACK_PRICES.ELEMENTAL_NEXUS,
+  realMoneyPrice: PACK_PRICES.ELEMENTAL_USD,
   isAvailable: true,
   isPremium: false,
   imageUrl: require('@/assets/images/packs/water_pack.png'),
@@ -79,8 +94,8 @@ export const EARTH_PACK: ElementalPack = {
   cardCount: 5,
   type: 'elemental',
   element: 'earth',
-  nexusCoinPrice: 150,
-  realMoneyPrice: 149,
+  nexusCoinPrice: PACK_PRICES.ELEMENTAL_NEXUS,
+  realMoneyPrice: PACK_PRICES.ELEMENTAL_USD,
   isAvailable: true,
   isPremium: false,
   imageUrl: require('@/assets/images/packs/earth_pack.png'),
@@ -98,8 +113,8 @@ export const AIR_PACK: ElementalPack = {
   cardCount: 5,
   type: 'elemental',
   element: 'air',
-  nexusCoinPrice: 150,
-  realMoneyPrice: 149,
+  nexusCoinPrice: PACK_PRICES.ELEMENTAL_NEXUS,
+  realMoneyPrice: PACK_PRICES.ELEMENTAL_USD,
   isAvailable: true,
   isPremium: false,
   imageUrl: require('@/assets/images/packs/air_pack.png'),
@@ -120,8 +135,8 @@ export const MYTHIC_GUARANTEED_PACK: PremiumPack = {
   subtype: 'mythic_guaranteed',
   guaranteedRarity: 'mythic',
   guaranteedCount: 1,
-  nexusCoinPrice: 500,
-  realMoneyPrice: 499, // $4.99
+  nexusCoinPrice: PACK_PRICES.MYTHIC_NEXUS,
+  realMoneyPrice: PACK_PRICES.MYTHIC_USD,
   isAvailable: true,
   isPremium: true,
   imageUrl: require('@/assets/images/packs/mythic_pack.png'),
@@ -137,8 +152,8 @@ export const LEGENDARY_GUARANTEED_PACK: PremiumPack = {
   subtype: 'legendary_guaranteed',
   guaranteedRarity: 'legendary',
   guaranteedCount: 1,
-  nexusCoinPrice: 300,
-  realMoneyPrice: 299, // $2.99
+  nexusCoinPrice: PACK_PRICES.LEGENDARY_NEXUS,
+  realMoneyPrice: PACK_PRICES.LEGENDARY_USD,
   isAvailable: true,
   isPremium: true,
   imageUrl: require('@/assets/images/packs/legendary_pack.png'),
