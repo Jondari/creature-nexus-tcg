@@ -31,7 +31,9 @@ export const addPackToInventory = async (
       unopenedPacks: arrayUnion(inventoryPack)
     });
   } catch (error) {
-    console.error('Error adding pack to inventory:', error);
+    if (__DEV__) {
+      console.error('Error adding pack to inventory:', error);
+    }
     throw error;
   }
 };
@@ -48,7 +50,9 @@ export const getInventoryPacks = async (userId: string): Promise<InventoryPack[]
     
     return [];
   } catch (error) {
-    console.error('Error getting inventory packs:', error);
+    if (__DEV__) {
+      console.error('Error getting inventory packs:', error);
+    }
     return [];
   }
 };
@@ -70,7 +74,9 @@ export const removePackFromInventory = async (
       unopenedPacks: updatedPacks
     });
   } catch (error) {
-    console.error('Error removing pack from inventory:', error);
+    if (__DEV__) {
+      console.error('Error removing pack from inventory:', error);
+    }
     throw error;
   }
 };
@@ -87,13 +93,17 @@ export const awardBonusPack = async (
     const pack = getPackById(packId);
     
     if (!pack) {
-      console.error(`Pack ${packId} not found`);
+      if (__DEV__) {
+        console.error(`Pack ${packId} not found`);
+      }
       return;
     }
     
     await addPackToInventory(userId, pack, reason);
   } catch (error) {
-    console.error('Error awarding bonus pack:', error);
+    if (__DEV__) {
+      console.error('Error awarding bonus pack:', error);
+    }
     throw error;
   }
 };

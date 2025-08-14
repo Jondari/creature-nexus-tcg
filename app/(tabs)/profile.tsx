@@ -15,9 +15,10 @@ export default function ProfileScreen() {
   const router = useRouter();
   
   // Debug auth state
-  console.log('Profile Screen - User:', user);
-  console.log('Profile Screen - Is Anonymous:', isAnonymous);
-  console.log('Profile Screen - User exists:', !!user);
+  if (__DEV__) {
+    console.log('Profile Screen - User:', user);
+    console.log('Profile Screen - Is Anonymous:', isAnonymous);
+  }
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [email, setEmail] = useState('');
@@ -32,7 +33,9 @@ export default function ProfileScreen() {
       await signOut();
       router.replace('/(auth)');
     } catch (error) {
-      console.error('Error signing out:', error);
+      if (__DEV__) {
+        console.error('Error signing out:', error);
+      }
       showErrorAlert('Error', 'Failed to sign out. Please try again.');
     }
   };
@@ -74,7 +77,9 @@ export default function ProfileScreen() {
       setPassword('');
       showSuccessAlert('Success', 'Your account has been saved! You can now sign in with this email on any device.');
     } catch (error: any) {
-      console.error('Error linking account:', error);
+      if (__DEV__) {
+        console.error('Error linking account:', error);
+      }
       showErrorAlert('Error', getErrorMessage(error));
     } finally {
       setLoading(false);
@@ -87,7 +92,9 @@ export default function ProfileScreen() {
       await linkWithGoogle();
       showSuccessAlert('Success', 'Your account has been saved with Google! You can now sign in with Google on any device.');
     } catch (error: any) {
-      console.error('Error linking with Google:', error);
+      if (__DEV__) {
+        console.error('Error linking with Google:', error);
+      }
       showErrorAlert('Error', 'Failed to link with Google. Please try again.');
     } finally {
       setLoading(false);
@@ -95,32 +102,19 @@ export default function ProfileScreen() {
   };
 
   const handleDeleteAccount = async () => {
-    console.log('Delete account button pressed');
-    console.log('User:', user);
-    console.log('Is anonymous:', isAnonymous);
-    
-    if (!user) {
-      console.log('No user found, showing modal anyway for debugging');
-    }
-    
-    if (isAnonymous) {
-      console.log('User is anonymous, showing modal anyway for debugging');
-    }
-    
     setShowDeleteModal(true);
   };
 
   const confirmDeleteAccount = async () => {
-    console.log('User confirmed deletion');
     try {
       setDeleteLoading(true);
-      console.log('Calling deleteAccount...');
       await deleteAccount();
-      console.log('Account deleted successfully');
       setShowDeleteModal(false);
       router.replace('/(auth)');
     } catch (error: any) {
-      console.error('Error deleting account:', error);
+      if (__DEV__) {
+        console.error('Error deleting account:', error);
+      }
       showErrorAlert('Error', 'Failed to delete account. Please try again.');
     } finally {
       setDeleteLoading(false);

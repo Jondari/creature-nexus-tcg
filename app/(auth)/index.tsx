@@ -89,7 +89,9 @@ export default function AuthScreen() {
       setEmail('');
       setPassword('');
     } catch (error: any) {
-      console.error('Error signing in:', error);
+      if (__DEV__) {
+        console.error('Error signing in:', error);
+      }
       showErrorAlert('Error', getSignInErrorMessage(error));
     } finally {
       setLoginLoading(false);
@@ -100,7 +102,9 @@ export default function AuthScreen() {
     try {
       await signInWithGoogle();
     } catch (error: any) {
-      console.error('Error signing in with Google:', error);
+      if (__DEV__) {
+        console.error('Error signing in with Google:', error);
+      }
       showErrorAlert('Error', 'Failed to sign in with Google. Please try again.');
     }
   };

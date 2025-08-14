@@ -57,7 +57,9 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (error) {
-      console.error('Error loading decks:', error);
+      if (__DEV__) {
+        console.error('Error loading decks:', error);
+      }
     }
   };
 
@@ -93,7 +95,9 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
         setActiveDeck(updatedDecks[0].id);
       }
     } catch (error) {
-      console.error('Error saving deck:', error);
+      if (__DEV__) {
+        console.error('Error saving deck:', error);
+      }
       throw error;
     }
   };
@@ -110,7 +114,9 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
         await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
       }
     } catch (error) {
-      console.error('Error deleting deck:', error);
+      if (__DEV__) {
+        console.error('Error deleting deck:', error);
+      }
       throw error;
     }
   };

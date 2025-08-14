@@ -84,10 +84,8 @@ export function GameBoard() {
     if (!gameState || !gameEngine || gameState.isGameOver || aiVisualState.isActive) return;
     
     const currentPlayer = gameEngine.getCurrentPlayer();
-    console.log(`Turn ${gameState.turnNumber}: Current player is ${currentPlayer.name} (AI: ${currentPlayer.isAI}), Phase: ${gameState.phase}`);
     
     if (currentPlayer.isAI && gameState.phase === 'main') {
-      console.log('Triggering AI turn...');
       const timeoutId = setTimeout(() => {
         processAITurn();
       }, 1500);
@@ -244,7 +242,7 @@ export function GameBoard() {
   };
 
   const handleEndTurn = () => {
-    console.log('Player ending turn manually');
+    // Player ending turn manually
     endTurn();
     setSelectedCard(null);
     setAttackMode(null);

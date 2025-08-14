@@ -42,7 +42,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setSettings({ ...defaultSettings, ...parsed });
       }
     } catch (error) {
-      console.error('Error loading settings:', error);
+      if (__DEV__) {
+        console.error('Error loading settings:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -53,7 +55,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings));
       setSettings(newSettings);
     } catch (error) {
-      console.error('Error saving settings:', error);
+      if (__DEV__) {
+        console.error('Error saving settings:', error);
+      }
     }
   };
 

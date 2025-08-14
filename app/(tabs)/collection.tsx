@@ -50,7 +50,9 @@ export default function CollectionScreen() {
         setLastFetchTime(Date.now());
       }
     } catch (error) {
-      console.error('Error fetching user cards:', error);
+      if (__DEV__) {
+        console.error('Error fetching user cards:', error);
+      }
     } finally {
       setLoading(false);
     }

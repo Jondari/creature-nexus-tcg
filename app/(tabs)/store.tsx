@@ -54,7 +54,9 @@ export default function StoreScreen() {
       setUserCurrency(currency);
       setLastFetchTime(Date.now());
     } catch (error) {
-      console.error('Error fetching user currency:', error);
+      if (__DEV__) {
+        console.error('Error fetching user currency:', error);
+      }
       showErrorAlert('Error', 'Failed to load your currency. Please try again.');
     } finally {
       setLoading(false);
@@ -77,7 +79,6 @@ export default function StoreScreen() {
           if (pack.bundleDiscount && quantity === pack.bundleDiscount.quantity) {
             // This is a bundle purchase, add the bonus packs
             totalPacksToGenerate = quantity + pack.bundleDiscount.bonus;
-            console.log(`Bundle purchase: ${quantity} packs + ${pack.bundleDiscount.bonus} bonus = ${totalPacksToGenerate} total packs`);
           }
           
           for (let i = 0; i < totalPacksToGenerate; i++) {
@@ -100,13 +101,17 @@ export default function StoreScreen() {
           await fetchUserCurrency();
         } catch (packError) {
           // Something failed after payment - refund the coins
-          console.error('Error after payment, refunding coins:', packError);
+          if (__DEV__) {
+            console.error('Error after payment, refunding coins:', packError);
+          }
           try {
             await addNexusCoins(user.uid, totalCost);
             await fetchUserCurrency(); // Refresh to show refund
             showErrorAlert('Purchase Failed', 'Pack opening failed. Your Nexus Coins have been refunded.');
           } catch (refundError) {
-            console.error('Error refunding coins:', refundError);
+            if (__DEV__) {
+              console.error('Error refunding coins:', refundError);
+            }
             showErrorAlert('Purchase Failed', 'Pack opening failed and refund failed. Please contact support.');
           }
         }
@@ -114,7 +119,9 @@ export default function StoreScreen() {
         showErrorAlert('Purchase Failed', 'Transaction failed. Please try again.');
       }
     } catch (error) {
-      console.error('Error executing purchase:', error);
+      if (__DEV__) {
+        console.error('Error executing purchase:', error);
+      }
       showErrorAlert('Purchase Failed', 'Failed to purchase pack. Please try again.');
     }
   };
@@ -141,7 +148,9 @@ export default function StoreScreen() {
       );
 
     } catch (error) {
-      console.error('Error purchasing pack:', error);
+      if (__DEV__) {
+        console.error('Error purchasing pack:', error);
+      }
       showErrorAlert('Purchase Failed', 'Failed to purchase pack. Please try again.');
     }
   };
@@ -186,7 +195,7 @@ export default function StoreScreen() {
                   source={pack.imageUrl}
                   style={styles.packImage}
                   resizeMode="contain"
-                  onError={(error) => console.log('Pack image failed to load:', pack.imageUrl, error)}
+                  onError={(error) => { if (__DEV__) {console.log('Pack image failed to load:', pack.imageUrl, error)}}}
               />
           )}
 

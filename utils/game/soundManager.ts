@@ -10,7 +10,9 @@ class SoundManager {
       const player = createAudioPlayer(source);
       this.sounds.set(name, player);
     } catch (error) {
-      console.warn(`Failed to load sound ${name}:`, error);
+      if (__DEV__) {
+        console.warn(`Failed to load sound ${name}:`, error);
+      }
     }
   }
 
@@ -24,10 +26,14 @@ class SoundManager {
         player.seekTo(0);
         player.play();
       } else {
-        console.warn(`Sound ${name} not found`);
+        if (__DEV__) {
+          console.warn(`Sound ${name} not found`);
+        }
       }
     } catch (error) {
-      console.warn(`Failed to play sound ${name}:`, error);
+      if (__DEV__) {
+        console.warn(`Failed to play sound ${name}:`, error);
+      }
     }
   }
 
@@ -44,7 +50,9 @@ class SoundManager {
       try {
         player.release();
       } catch (error) {
-        console.warn(`Failed to unload sound ${name}:`, error);
+        if (__DEV__) {
+          console.warn(`Failed to unload sound ${name}:`, error);
+        }
       }
     }
     this.sounds.clear();
@@ -60,7 +68,9 @@ export const initializeSounds = (): void => {
     // Load impact sound
     soundManager.loadSound('impact', require('../../assets/impact.wav'));
   } catch (error) {
-    console.warn('Failed to initialize sounds:', error);
+    if (__DEV__) {
+      console.warn('Failed to initialize sounds:', error);
+    }
   }
 };
 

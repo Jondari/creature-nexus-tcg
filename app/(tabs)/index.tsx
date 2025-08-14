@@ -72,7 +72,9 @@ export default function OpenPackScreen() {
       setInventoryPacks(userInventoryPacks);
       setLastFetchTime(Date.now());
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      if (__DEV__) {
+        console.error('Error fetching user data:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -102,7 +104,9 @@ export default function OpenPackScreen() {
       // Set the cooldown timer
       setTimeRemaining(12 * 60 * 60 * 1000); // 12 hours in milliseconds
     } catch (error) {
-      console.error('Error opening pack:', error);
+      if (__DEV__) {
+        console.error('Error opening pack:', error);
+      }
     } finally {
       setOpening(false);
     }
@@ -117,7 +121,9 @@ export default function OpenPackScreen() {
       // Get pack definition
       const packDef = getPackById(inventoryPack.packId);
       if (!packDef) {
-        console.error(`Pack ${inventoryPack.packId} not found`);
+        if (__DEV__) {
+          console.error(`Pack ${inventoryPack.packId} not found`);
+        }
         return;
       }
       
@@ -142,7 +148,9 @@ export default function OpenPackScreen() {
       const updatedInventory = await getInventoryPacks(user.uid);
       setInventoryPacks(updatedInventory);
     } catch (error) {
-      console.error('Error opening inventory pack:', error);
+      if (__DEV__) {
+        console.error('Error opening inventory pack:', error);
+      }
     } finally {
       setOpening(false);
     }

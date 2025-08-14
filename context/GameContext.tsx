@@ -250,16 +250,12 @@ export function GameProvider({ children }: GameProviderProps) {
   };
 
   const executeAITurn = async () => {
-    console.log('=== executeAITurn called ===');
     if (!state.gameEngine || !state.gameState) {
-      console.log('No game engine or game state');
       return;
     }
     
     const currentPlayer = state.gameEngine.getCurrentPlayer();
-    console.log(`Current player: ${currentPlayer.name} (AI: ${currentPlayer.isAI})`);
     if (!currentPlayer.isAI) {
-      console.log('Current player is not AI, exiting');
       return;
     }
     
@@ -271,10 +267,7 @@ export function GameProvider({ children }: GameProviderProps) {
       let actionsPerformed = 0;
       const maxActions = 10;
       
-      console.log(`Starting AI turn loop, max actions: ${maxActions}`);
-      
       while (actionsPerformed < maxActions) {
-        console.log(`--- AI Action ${actionsPerformed + 1} ---`);
         const currentState = state.gameEngine.getGameState();
         const currentPlayerInLoop = state.gameEngine.getCurrentPlayer();
         
@@ -287,7 +280,6 @@ export function GameProvider({ children }: GameProviderProps) {
         await delay(1300); // 800 + 500
         
         const aiDecision = AIEngine.makeDecision(currentState);
-        console.log(`AI Decision: ${aiDecision.action.type} - ${aiDecision.reasoning}`);
         
         // Show what AI is doing based on action type
         await showAIActionVisuals(aiDecision.action, dispatch);
@@ -342,20 +334,20 @@ export function GameProvider({ children }: GameProviderProps) {
           // Small pause between actions
           await delay(1000); // 500 + 500
         } else {
-          console.log(`AI action failed: ${aiDecision.action.type}, forcing end turn`);
           const endTurnSuccess = state.gameEngine.executeAction({
             type: 'END_TURN',
             playerId: currentPlayerInLoop.id,
           });
           if (!endTurnSuccess) {
-            console.error('Failed to end AI turn - breaking loop');
+            if (__DEV__) {
+              console.error('Failed to end AI turn - breaking loop');
+            }
           }
           break;
         }
       }
       
       if (actionsPerformed >= maxActions) {
-        console.warn('AI hit max actions limit, forcing end turn');
         const currentPlayerAfterLoop = state.gameEngine.getCurrentPlayer();
         if (currentPlayerAfterLoop.isAI) {
           state.gameEngine.executeAction({

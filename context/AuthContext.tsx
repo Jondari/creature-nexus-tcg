@@ -77,11 +77,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // If we have a stored ID but no current user, auto sign in
         if (storedUserId && !auth.currentUser) {
-          console.log('Restoring anonymous session...');
+          if (__DEV__) {
+            console.log('Restoring anonymous session...');
+          }
           await signInAnonymously(auth);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        if (__DEV__) {
+          console.error('Error initializing auth:', error);
+        }
       }
     };
 
@@ -126,7 +130,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       await signInAnonymously(auth);
     } catch (error) {
-      console.error('Error signing in anonymously:', error);
+      if (__DEV__) {
+        console.error('Error signing in anonymously:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -143,14 +149,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await GoogleSignin.signOut();
         } catch (error) {
           // Ignore if user wasn't signed in with Google Sign-In
-          console.log('No Google Sign-In session to clear');
+          if (__DEV__) {
+            console.log('No Google Sign-In session to clear');
+          }
         }
       }
       
       // Sign out from Firebase (works for all auth methods)
       await signOut(auth);
     } catch (error) {
-      console.error('Error signing out:', error);
+      if (__DEV__) {
+        console.error('Error signing out:', error);
+      }
     }
   };
 
@@ -178,7 +188,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(result.user);
       setIsAnonymous(false);
     } catch (error) {
-      console.error('Error linking with email:', error);
+      if (__DEV__) {
+        console.error('Error linking with email:', error);
+      }
       throw error;
     }
   };
@@ -210,7 +222,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Google sign-in was cancelled or failed');
       }
     } catch (error) {
-      console.error('Error with web Google auth:', error);
+      if (__DEV__) {
+        console.error('Error with web Google auth:', error);
+      }
       throw error;
     }
   };
@@ -228,7 +242,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('No ID token received from Google Sign-In');
       }
     } catch (error) {
-      console.error('Error with native Google auth:', error);
+      if (__DEV__) {
+        console.error('Error with native Google auth:', error);
+      }
       throw error;
     }
   };
@@ -270,7 +286,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(result.user);
       setIsAnonymous(false);
     } catch (error) {
-      console.error('Error linking with Google:', error);
+      if (__DEV__) {
+        console.error('Error linking with Google:', error);
+      }
       throw error;
     }
   };
@@ -298,7 +316,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
     } catch (error) {
-      console.error('Error signing in with Google:', error);
+      if (__DEV__) {
+        console.error('Error signing in with Google:', error);
+      }
       throw error;
     }
   };
@@ -307,7 +327,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      console.error('Error signing in with email:', error);
+      if (__DEV__) {
+        console.error('Error signing in with email:', error);
+      }
       throw error;
     }
   };
@@ -328,44 +350,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAnonymous: false
       });
     } catch (error) {
-      console.error('Error creating account with email:', error);
+      if (__DEV__) {
+        console.error('Error creating account with email:', error);
+      }
       throw error;
     }
   };
 
   const deleteAccount = async () => {
-    console.log('deleteAccount called');
-    console.log('Current user:', user);
-    
     if (!user) {
-      console.log('No user found');
       throw new Error('No user to delete');
     }
 
     if (user.isAnonymous) {
-      console.log('User is anonymous, cannot delete');
       throw new Error('Cannot delete anonymous accounts');
     }
 
     try {
-      console.log('Deleting user document from Firestore...');
       const userDocRef = doc(db, 'users', user.uid);
       
       // Delete user document from Firestore
       await deleteDoc(userDocRef);
-      console.log('User document deleted');
-      
-      console.log('Deleting user from Firebase Auth...');
+
       // Delete user from Firebase Auth
       await deleteUser(user);
-      console.log('User deleted from Auth');
-      
-      console.log('Clearing stored data...');
+
       // Clear any stored data
       await AsyncStorage.removeItem(ANONYMOUS_USER_KEY);
-      console.log('Account deletion completed');
     } catch (error) {
-      console.error('Error deleting account:', error);
+      if (__DEV__) {
+        console.error('Error deleting account:', error);
+      }
       throw error;
     }
   };

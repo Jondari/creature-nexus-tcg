@@ -26,7 +26,9 @@ export const showAlert = (title: string, message: string, buttons?: AlertButton[
     globalAlertManager.showAlert({ title, message, buttons, type });
   } else {
     // Fallback warning if manager not set
-    console.warn('GlobalAlertManager not initialized. Alert not shown:', title, message);
+    if (__DEV__) {
+      console.warn('GlobalAlertManager not initialized. Alert not shown:', title, message);
+    }
   }
 };
 

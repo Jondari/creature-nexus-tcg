@@ -17,7 +17,6 @@ export const getUserCurrency = async (userId: string): Promise<UserCurrency> => 
       
       // Initialize nexusCoins if it doesn't exist
       if (nexusCoins === undefined) {
-        console.log('Initializing nexusCoins for existing user');
         nexusCoins = DEFAULT_STARTING_COINS;
         await updateDoc(userDocRef, {
           nexusCoins: DEFAULT_STARTING_COINS
@@ -39,7 +38,9 @@ export const getUserCurrency = async (userId: string): Promise<UserCurrency> => 
       nexusCoins: DEFAULT_STARTING_COINS
     };
   } catch (error) {
-    console.error('Error fetching user currency:', error);
+    if (__DEV__) {
+      console.error('Error fetching user currency:', error);
+    }
     throw error;
   }
 };
@@ -52,7 +53,9 @@ export const addNexusCoins = async (userId: string, amount: number): Promise<voi
       nexusCoins: increment(amount)
     });
   } catch (error) {
-    console.error('Error adding nexus coins:', error);
+    if (__DEV__) {
+      console.error('Error adding nexus coins:', error);
+    }
     throw error;
   }
 };
@@ -64,23 +67,21 @@ export const spendNexusCoins = async (userId: string, amount: number): Promise<b
     const userDoc = await getDoc(userDocRef);
     
     if (!userDoc.exists()) {
-      console.error('User document does not exist:', userId);
+      if (__DEV__) {
+        console.error('User document does not exist:', userId);
+      }
       return false;
     }
     
     const userData = userDoc.data();
     const currentCoins = userData.nexusCoins || 0;
     
-    console.log(`User ${userId} attempting to spend ${amount} coins. Current balance: ${currentCoins}`);
-    
     if (currentCoins < amount) {
-      console.log('Insufficient funds');
       return false; // Insufficient funds
     }
     
     // Initialize nexusCoins field if it doesn't exist
     if (userData.nexusCoins === undefined) {
-      console.log('Initializing nexusCoins field');
       await updateDoc(userDocRef, {
         nexusCoins: DEFAULT_STARTING_COINS - amount
       });
@@ -89,11 +90,15 @@ export const spendNexusCoins = async (userId: string, amount: number): Promise<b
         nexusCoins: increment(-amount)
       });
     }
-    
-    console.log('Transaction successful');
+
+    if (__DEV__) {
+      console.log('Transaction successful');
+    }
     return true; // Success
   } catch (error) {
-    console.error('Error spending nexus coins:', error);
+    if (__DEV__) {
+      console.error('Error spending nexus coins:', error);
+    }
     return false; // Return false instead of throwing
   }
 };
@@ -110,7 +115,9 @@ export const getCoinBalance = async (userId: string): Promise<number> => {
     
     return 0;
   } catch (error) {
-    console.error('Error getting coin balance:', error);
+    if (__DEV__) {
+      console.error('Error getting coin balance:', error);
+    }
     return 0;
   }
 };
@@ -146,9 +153,13 @@ export const awardCoins = async (
     await addNexusCoins(userId, amount);
     
     // TODO: Log the reward transaction for analytics
-    console.log(`Awarded ${amount} Nexus Coins to user ${userId} for ${rewardType}`);
+    if (__DEV__) {
+      console.log(`Awarded ${amount} Nexus Coins to user ${userId} for ${rewardType}`);
+    }
   } catch (error) {
-    console.error('Error awarding coins:', error);
+    if (__DEV__) {
+      console.error('Error awarding coins:', error);
+    }
     throw error;
   }
 };
@@ -159,7 +170,9 @@ export const canAfford = async (userId: string, cost: number): Promise<boolean> 
     const balance = await getCoinBalance(userId);
     return balance >= cost;
   } catch (error) {
-    console.error('Error checking affordability:', error);
+    if (__DEV__) {
+      console.error('Error checking affordability:', error);
+    }
     return false;
   }
 };
@@ -172,7 +185,9 @@ export const initializeUserCurrency = async (userId: string): Promise<void> => {
       nexusCoins: DEFAULT_STARTING_COINS
     });
   } catch (error) {
-    console.error('Error initializing user currency:', error);
+    if (__DEV__) {
+      console.error('Error initializing user currency:', error);
+    }
     throw error;
   }
 };
