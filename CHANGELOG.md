@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.4...v0.3.5) (2025-08-14)
+
+
+### Bug Fixes
+
+* improve ActionLog sidebar height constraints for better mobile display ([c3badde](https://github.com/Jondari/creature-nexus-tcg/commit/c3badde65ba3e8cb03a5ac67907d718217861040))
+* use PNG element symbols on Android for better compatibility, SVG on other platforms and remove unused SVG variants. ([1c299f9](https://github.com/Jondari/creature-nexus-tcg/commit/1c299f9f32a95956031d90216e2c26f723beb36a))
+
 ### [0.3.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.3...v0.3.4) (2025-08-13)
 
 
