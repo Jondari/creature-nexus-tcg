@@ -129,9 +129,9 @@ export function DamageEffect({
             styles.damageOverlay,
             {
               opacity: overlayOpacity,
+              pointerEvents: 'none',
             },
           ]}
-          pointerEvents="none"
         />
       )}
     </Animated.View>
