@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.5...v0.3.6) (2025-08-14)
+
+
+### Bug Fixes
+
+* move drop_console to compress object in Terser config for production builds ([47dfebb](https://github.com/Jondari/creature-nexus-tcg/commit/47dfebb11c7d75244dbdf477a2e7d6d17e2a0642))
+
 ### [0.3.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.4...v0.3.5) (2025-08-14)
 
 
