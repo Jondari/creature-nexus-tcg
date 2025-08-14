@@ -717,29 +717,28 @@ function getRarityColors(rarity: string) {
   }
 }
 
+// Pre-calculate element images based on platform to avoid repeated Platform.OS checks
+const ELEMENT_IMAGES = Platform.OS === 'android' ? {
+  // PNG versions for Android
+  fire_symbol: require('../assets/images/element/fire_symbol.png'),
+  water_symbol: require('../assets/images/element/water_symbol.png'),
+  earth_symbol: require('../assets/images/element/earth_symbol.png'),
+  air_symbol: require('../assets/images/element/air_symbol.png'),
+  all: require('../assets/images/element/all.png'),
+} : {
+  // SVG versions for other platforms
+  fire_symbol: require('../assets/images/element/fire_symbol.svg'),
+  water_symbol: require('../assets/images/element/water_symbol.svg'),
+  earth_symbol: require('../assets/images/element/earth_symbol.svg'),
+  air_symbol: require('../assets/images/element/air_symbol.svg'),
+  all: require('../assets/images/element/all.png'),
+};
+
 function getElementSymbol(element: string) {
   if (!element) return null;
   
   const symbolKey = element === 'all' ? 'all' : `${element}_symbol`;
-  
-  // Use PNG files on Android for better compatibility, SVG on other platforms
-  const cardImages = Platform.OS === 'android' ? {
-    // PNG versions for Android
-    fire_symbol: require('../assets/images/element/fire_symbol.png'),
-    water_symbol: require('../assets/images/element/water_symbol.png'),
-    earth_symbol: require('../assets/images/element/earth_symbol.png'),
-    air_symbol: require('../assets/images/element/air_symbol.png'),
-    all: require('../assets/images/element/all.png'),
-  } : {
-    // SVG versions for other platforms
-    fire_symbol: require('../assets/images/element/fire_symbol.svg'),
-    water_symbol: require('../assets/images/element/water_symbol.svg'),
-    earth_symbol: require('../assets/images/element/earth_symbol.svg'),
-    air_symbol: require('../assets/images/element/air_symbol.svg'),
-    all: require('../assets/images/element/all.png'),
-  };
-
-  return cardImages[symbolKey as keyof typeof cardImages] || null;
+  return ELEMENT_IMAGES[symbolKey as keyof typeof ELEMENT_IMAGES] || null;
 }
 
 const styles = StyleSheet.create({
