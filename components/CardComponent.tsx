@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Card, DamageAnimation, Attack } from '../types/game';
 import { DamageEffect } from './DamageEffect';
@@ -722,8 +722,16 @@ function getElementSymbol(element: string) {
   
   const symbolKey = element === 'all' ? 'all' : `${element}_symbol`;
   
-  const cardImages = {
-    // Element symbols
+  // Use PNG files on Android for better compatibility, SVG on other platforms
+  const cardImages = Platform.OS === 'android' ? {
+    // PNG versions for Android
+    fire_symbol: require('../assets/images/element/fire_symbol.png'),
+    water_symbol: require('../assets/images/element/water_symbol.png'),
+    earth_symbol: require('../assets/images/element/earth_symbol.png'),
+    air_symbol: require('../assets/images/element/air_symbol.png'),
+    all: require('../assets/images/element/all.png'),
+  } : {
+    // SVG versions for other platforms
     fire_symbol: require('../assets/images/element/fire_symbol.svg'),
     water_symbol: require('../assets/images/element/water_symbol.svg'),
     earth_symbol: require('../assets/images/element/earth_symbol.svg'),
