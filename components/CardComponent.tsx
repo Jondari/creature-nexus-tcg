@@ -16,6 +16,14 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 
+// Helper function to convert hex color to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 interface CardComponentProps {
   card: Card;
   onPress?: () => void;
@@ -214,7 +222,7 @@ const CardComponent = React.memo(({
             >
               {/* Header */}
               <View style={styles.cardHeader}>
-                <Text style={[creatureNameStyle, { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' }]}>
+                <Text style={[creatureNameStyle, { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }]}>
                   {card.name}
                 </Text>
                 <View style={styles.hpSection}>
@@ -222,7 +230,7 @@ const CardComponent = React.memo(({
                     hpTextStyle, 
                     { 
                       color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text, 
-                      textShadowColor: 'rgba(0,0,0,0.8)' 
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)' 
                     }
                   ]}>
                     HP {card.hp}
@@ -296,14 +304,14 @@ const CardComponent = React.memo(({
                     <View style={styles.attackInfoPremium}>
                       <Text style={[
                         attackNameStyle, 
-                        { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' },
+                        { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' },
                         attackAvailable && showActions && (size === 'small' ? styles.availableAttackTextSmall : styles.availableAttackText)
                       ]}>
                         {attack.name || 'Basic Attack'}
                       </Text>
                       <Text style={[
                         attackDamageStyle, 
-                        { color: colors.text, textShadowColor: 'rgba(0,0,0,0.8)' },
+                        { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' },
                         attackAvailable && showActions && (size === 'small' ? styles.availableDamageTextSmall : styles.availableDamageText)
                       ]}>
                         {attack.damage || '??'}
@@ -769,27 +777,23 @@ const styles = StyleSheet.create({
     fontSize: 12, // Half of original 18
     fontWeight: 'bold',
     flex: 1,
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
+    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
   },
   hpTextSmall: {
     fontSize: 10, // Half of original 16
     fontWeight: 'bold',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
+    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
   },
   attackNameSmall: {
     fontSize: 8, // Half of original 14
     fontWeight: 'bold',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
+    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
     marginBottom: 1,
   },
   attackDamageSmall: {
     fontSize: 14, // Half of original 24
     fontWeight: 'bold',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
+    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
   },
   // Small card layout styles
   contentAreaWithHeaderSmall: {
@@ -861,8 +865,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     flex: 1,
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
   },
   hpSection: {
     flexDirection: 'row',
@@ -872,8 +875,7 @@ const styles = StyleSheet.create({
   hpText: {
     fontSize: 16,
     fontWeight: 'bold',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
   },
   elementIcon: {
     width: 20,
@@ -940,15 +942,13 @@ const styles = StyleSheet.create({
   attackName: {
     fontSize: 14,
     fontWeight: 'bold',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
     marginBottom: 2,
   },
   attackDamage: {
     fontSize: 24,
     fontWeight: 'bold',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
   },
   placeholderContainer: {
     position: 'relative',
@@ -972,9 +972,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
     marginBottom: 5,
   },
   placeholderSubtext: {
@@ -982,9 +980,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
     opacity: 0.8,
   },
   contentAreaWithHeader: {
@@ -1054,18 +1050,12 @@ const styles = StyleSheet.create({
   // Selection styles for standard cards (applied to inner card, not container)
   selectedCard: {
     borderWidth: 4, // Slightly thicker for better visibility
-    shadowColor: Colors.accent[400],
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
+    boxShadow: `0px 0px 6px 0px ${hexToRgba(Colors.accent[400], 0.4)}`,
     elevation: 4,
   },
   selectedCardSmall: {
     borderWidth: 3,
-    shadowColor: Colors.accent[400],
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 3,
+    boxShadow: `0px 0px 3px 0px ${hexToRgba(Colors.accent[400], 0.4)}`,
     elevation: 2,
   },
   disabled: {
@@ -1092,34 +1082,22 @@ const styles = StyleSheet.create({
   // AI highlight styles for standard cards (applied to inner card)
   aiHighlightCardSelected: {
     borderWidth: 4,
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
+    boxShadow: `0px 0px 8px 0px ${hexToRgba('#4CAF50', 0.7)}`,
     elevation: 8,
   },
   aiHighlightCardTarget: {
     borderWidth: 4,
-    shadowColor: '#FF5722',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
+    boxShadow: `0px 0px 8px 0px ${hexToRgba('#FF5722', 0.7)}`,
     elevation: 8,
   },
   aiHighlightCardSelectedSmall: {
     borderWidth: 3,
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 4,
+    boxShadow: `0px 0px 4px 0px ${hexToRgba('#4CAF50', 0.7)}`,
     elevation: 4,
   },
   aiHighlightCardTargetSmall: {
     borderWidth: 3,
-    shadowColor: '#FF5722',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 4,
+    boxShadow: `0px 0px 4px 0px ${hexToRgba('#FF5722', 0.7)}`,
     elevation: 4,
   },
   // Original selection/highlight styles (container-based) - restored for premium cards
@@ -1137,40 +1115,28 @@ const styles = StyleSheet.create({
     borderColor: '#4CAF50',
     borderWidth: 4,
     borderRadius: 15,
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
+    boxShadow: `0px 0px 8px 0px ${hexToRgba('#4CAF50', 0.7)}`,
     elevation: 8,
   },
   aiHighlightTarget: {
     borderColor: '#FF5722',
     borderWidth: 4,
     borderRadius: 15,
-    shadowColor: '#FF5722',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
+    boxShadow: `0px 0px 8px 0px ${hexToRgba('#FF5722', 0.7)}`,
     elevation: 8,
   },
   aiHighlightSelectedSmall: {
     borderColor: '#4CAF50',
     borderWidth: 2,
     borderRadius: 8,
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 4,
+    boxShadow: `0px 0px 4px 0px ${hexToRgba('#4CAF50', 0.7)}`,
     elevation: 4,
   },
   aiHighlightTargetSmall: {
     borderColor: '#FF5722',
     borderWidth: 2,
     borderRadius: 8,
-    shadowColor: '#FF5722',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 4,
+    boxShadow: `0px 0px 4px 0px ${hexToRgba('#FF5722', 0.7)}`,
     elevation: 4,
   },
   // Attack availability styles - normal size
@@ -1182,10 +1148,7 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     borderWidth: 2,
     borderColor: '#4CAF50',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    boxShadow: `0px 0px 4px 0px ${hexToRgba('#4CAF50', 0.3)}`,
     elevation: 2,
   },
   unavailableAttack: {
@@ -1199,17 +1162,13 @@ const styles = StyleSheet.create({
   availableAttackText: {
     color: '#4CAF50',
     fontWeight: '700',
-    textShadowColor: 'rgba(76, 175, 80, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '1px 1px 2px rgba(76, 175, 80, 0.3)',
   },
   availableDamageText: {
     color: '#4CAF50',
     fontWeight: 'bold',
     fontSize: 26,
-    textShadowColor: 'rgba(76, 175, 80, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+    textShadow: '1px 1px 3px rgba(76, 175, 80, 0.3)',
   },
   // Attack availability styles - small size
   availableAttackSmall: {
@@ -1221,10 +1180,7 @@ const styles = StyleSheet.create({
     marginVertical: 1,
     borderWidth: 1,
     borderColor: '#4CAF50',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
+    boxShadow: `0px 0px 2px 0px ${hexToRgba('#4CAF50', 0.3)}`,
     elevation: 1,
   },
   unavailableAttackSmall: {
@@ -1239,16 +1195,12 @@ const styles = StyleSheet.create({
   availableAttackTextSmall: {
     color: '#4CAF50',
     fontWeight: '700',
-    textShadowColor: 'rgba(76, 175, 80, 0.3)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
+    textShadow: '0.5px 0.5px 1px rgba(76, 175, 80, 0.3)',
   },
   availableDamageTextSmall: {
     color: '#4CAF50',
     fontWeight: 'bold',
     fontSize: 14,
-    textShadowColor: 'rgba(76, 175, 80, 0.3)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1.5,
+    textShadow: '0.5px 0.5px 1.5px rgba(76, 175, 80, 0.3)',
   },
 });

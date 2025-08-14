@@ -68,10 +68,7 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     backgroundColor: Colors.background.card,
-    shadowColor: '#000',
-    shadowOffset: { width: -4, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    boxShadow: '-4px 0px 12px 0px rgba(0, 0, 0, 0.3)',
     elevation: 16,
     zIndex: 1000,
   },
