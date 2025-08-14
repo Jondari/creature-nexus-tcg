@@ -198,8 +198,9 @@ const styles = StyleSheet.create({
   },
   sidebarLogContainer: {
     flex: 1,
-    maxHeight: '100%',
+    maxHeight: '95%',
     padding: 16,
+    minHeight: 500,
   },
   sidebarLogEntry: {
     backgroundColor: 'rgba(245, 245, 245, 0.8)',
