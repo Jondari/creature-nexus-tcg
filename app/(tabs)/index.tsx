@@ -15,6 +15,7 @@ import CountdownTimer from '@/components/CountdownTimer';
 import PackOpeningAnimation from '@/components/PackOpeningAnimation';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useFocusEffect } from '@react-navigation/native';
+import { NotificationService } from '@/services/notificationService';
 
 export default function OpenPackScreen() {
   const { user } = useAuth();
@@ -32,6 +33,12 @@ export default function OpenPackScreen() {
       fetchUserData();
     }
   }, [user]);
+
+  // Initialize notifications when component mounts
+  useEffect(() => {
+    // Setup notification handlers (for mobile)
+    NotificationService.setupNotificationHandlers();
+  }, []);
 
   // Refresh data when the tab comes into focus (e.g., after purchasing from store)
   useFocusEffect(
@@ -64,6 +71,9 @@ export default function OpenPackScreen() {
             const remaining = getTimeUntilNextPack(lastPackOpenedTimestamp);
             setTimeRemaining(remaining);
           }
+        } else {
+          // First time user - request permission gracefully
+          requestNotificationPermissionGracefully();
         }
       }
       
@@ -103,6 +113,10 @@ export default function OpenPackScreen() {
       
       // Set the cooldown timer
       setTimeRemaining(12 * 60 * 60 * 1000); // 12 hours in milliseconds
+
+      // Schedule notification for next pack
+      const currentTimestamp = Date.now();
+      await NotificationService.scheduleNextPackNotification(currentTimestamp);
     } catch (error) {
       if (__DEV__) {
         console.error('Error opening pack:', error);
@@ -159,6 +173,49 @@ export default function OpenPackScreen() {
   const handlePackOpeningComplete = () => {
     setShowPackResults(false);
   };
+
+  // Helper function to handle notification permission and scheduling
+  const handleNotificationSetup = async (lastPackOpenedTimestamp: number) => {
+    try {
+      // Check if we should request permission
+      if (NotificationService.shouldRequestPermission()) {
+        const permission = await NotificationService.requestPermission();
+        
+        if (__DEV__) {
+          console.log('Notification permission:', permission.status);
+        }
+      }
+
+      // Schedule notification for next pack if permission granted
+      await NotificationService.scheduleNextPackNotification(lastPackOpenedTimestamp);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error setting up notifications:', error);
+      }
+    }
+  };
+
+  // Helper function to gracefully request notification permission for new users
+  const requestNotificationPermissionGracefully = async () => {
+    try {
+      // Only request permission if we haven't asked before
+      if (NotificationService.shouldRequestPermission()) {
+        // Small delay to not interrupt the initial loading experience
+        setTimeout(async () => {
+          const permission = await NotificationService.requestPermission();
+          
+          if (__DEV__) {
+            console.log('Initial notification permission request:', permission.status);
+          }
+        }, 2000); // 2 second delay
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error requesting notification permission:', error);
+      }
+    }
+  };
+
   
   const handleRefresh = () => {
     fetchUserData();
