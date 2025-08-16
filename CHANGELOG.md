@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.8](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.7...v0.3.8) (2025-08-16)
+
+
+### Features
+
+* implement notification system for available pack opening ([7c2258c](https://github.com/Jondari/creature-nexus-tcg/commit/7c2258c665dbc829768577b992e93a27cd8d26c2))
+
 ### [0.3.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.6...v0.3.7) (2025-08-16)
 
 
