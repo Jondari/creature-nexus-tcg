@@ -4,9 +4,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube } from 'lucide-react-native';
+import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube, Gift } from 'lucide-react-native';
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import { addNexusCoins } from '@/utils/currencyUtils';
+import { RedeemCodeModal } from '@/components/RedeemCodeModal';
 import Colors from '@/constants/Colors';
 
 const packageJson = require('../../package.json');
@@ -23,6 +24,7 @@ export default function ProfileScreen() {
   }
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -269,6 +271,29 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Redeem Code</Text>
+          
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Enter Code</Text>
+              <Text style={styles.settingDescription}>
+                Redeem codes to unlock rewards like Nexus Coins and booster packs
+              </Text>
+            </View>
+            <View style={styles.settingButtons}>
+              <TouchableOpacity 
+                style={styles.redeemButton}
+                onPress={() => setShowRedeemModal(true)}
+                activeOpacity={0.8}
+              >
+                <Gift size={16} color={Colors.text.primary} />
+                <Text style={styles.redeemButtonText}>Redeem</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
         {/* A supprimer */}
         {__DEV__ && (
         <View style={styles.card}>
@@ -452,6 +477,14 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      <RedeemCodeModal
+        visible={showRedeemModal}
+        onClose={() => setShowRedeemModal(false)}
+        onSuccess={() => {
+          // Optionally refresh currency or show additional success feedback
+        }}
+      />
     </View>
   );
 }
@@ -584,6 +617,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: Colors.text.primary,
     marginLeft: 12,
+  },
+  redeemButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.accent?.[500] || Colors.primary || '#007AFF',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+  },
+  redeemButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+    marginLeft: 8,
   },
   signOutButton: {
     flexDirection: 'row',

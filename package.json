@@ -14,7 +14,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "release": "standard-version"
+    "release": "standard-version",
+    "redeem-code": "node scripts/redeem-code.js"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.3",
@@ -64,6 +65,7 @@
     "standard-version": "^9.5.0",
     "typescript": "~5.8.3",
     "eslint": "^9.0.0",
-    "eslint-config-expo": "~9.2.0"
+    "eslint-config-expo": "~9.2.0",
+    "dotenv": "^16.3.1"
   }
 }
