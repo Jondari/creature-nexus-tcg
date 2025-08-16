@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.6...v0.3.7) (2025-08-16)
+
+
+### Features
+
+* add dynamic version display from package.json in profile screen ([0b72d5d](https://github.com/Jondari/creature-nexus-tcg/commit/0b72d5d6ee6bc20692bc74e296c9b11e9f92d33c))
+* externalize prices to config file ([d7ea4bc](https://github.com/Jondari/creature-nexus-tcg/commit/d7ea4bc2cf9559720566f12a24408bf66c700474))
+* implement redeem code system and console crud ([c018d28](https://github.com/Jondari/creature-nexus-tcg/commit/c018d28837d96a597068f108231a385d092a49c4))
+
 ### [0.3.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.5...v0.3.6) (2025-08-14)
 
 
