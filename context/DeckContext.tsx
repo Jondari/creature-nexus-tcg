@@ -19,7 +19,7 @@ interface DeckContextType {
   activeDeck: SavedDeck | null;
   saveDeck: (cards: Card[], name: string, deckId?: string) => Promise<void>;
   deleteDeck: (deckId: string) => Promise<void>;
-  setActiveDeck: (deckId: string) => void;
+  setActiveDeck: (deckId: string) => Promise<void>;
   loadDecks: () => Promise<void>;
   syncDecks: () => Promise<void>;
 }
@@ -71,12 +71,23 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
         // 2) Offline local cache
         await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(parsed));
 
-        // 3) Local active deck (no cloud write here)
+        // 3) Active deck reconciliation
         const act = parsed.find((d: any) => d.isActive);
         if (act) {
+          // Active deck present in the cloud → mirror locally
           setActiveDeckState(act); // ⬅ avoid calling setActiveDeck (it will re-sync Firebase)
           await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, act.id);
-        } else if (parsed.length === 0) {
+        } else if (parsed.length > 0) {
+          // No active deck in cloud → promote the newest deck (always persist)
+          const fallback = [...parsed].sort((a: any, b: any) =>
+              (b.updatedAt?.getTime?.() ?? 0) - (a.updatedAt?.getTime?.() ?? 0) ||
+              (b.createdAt?.getTime?.() ?? 0) - (a.createdAt?.getTime?.() ?? 0)
+          )[0];
+
+          // /!\ deliberate cloud write to enforce the invariant "there’s always an active deck if any decks remain"
+          await setActiveDeck(fallback.id);
+        } else {
+          // Zero deck
           setActiveDeckState(null);
           await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
         }
@@ -154,13 +165,18 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
           
       setSavedDecks(parsedDecks);
 
-      if (parsedDecks.length) {
-        // Find and set active deck
-        const activeDeck = parsedDecks.find((deck: SavedDeck) => deck.isActive);
-        if (activeDeck) {
-          setActiveDeckState(activeDeck);
-          await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, activeDeck.id);
-        }
+      const active = parsedDecks.find((d: SavedDeck) => d.isActive);
+      if (active) {
+        setActiveDeckState(active);
+        await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, active.id);
+      } else if (parsedDecks.length > 0) {
+        // No active deck but decks exist → auto-select the most recent one + sync
+        const fallback = [...parsedDecks].sort(
+            (a: any, b: any) =>
+                (b.updatedAt?.getTime?.() ?? 0) - (a.updatedAt?.getTime?.() ?? 0) ||
+                (b.createdAt?.getTime?.() ?? 0) - (a.createdAt?.getTime?.() ?? 0)
+        )[0];
+        await setActiveDeck(fallback.id);
       } else {
         setActiveDeckState(null);
         await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
@@ -264,19 +280,37 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
     const originalActiveDeck = activeDeck;
 
     try {
-      const updatedDecks = savedDecks.filter(deck => deck.id !== deckId);
-      setSavedDecks(updatedDecks);
-      await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(updatedDecks));
+      const remaining = savedDecks.filter(d => d.id !== deckId);
 
-      // If deleted deck was active, clear active deck
-      if (activeDeck?.id === deckId) {
-        setActiveDeckState(null);
-        await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
-      }
+      if (activeDeck?.id === deckId && remaining.length > 0) {
+        // select the newest
+        const fallback = [...remaining].sort((a, b) =>
+            (b.updatedAt?.getTime?.() ?? 0) - (a.updatedAt?.getTime?.() ?? 0) ||
+            (b.createdAt?.getTime?.() ?? 0) - (a.createdAt?.getTime?.() ?? 0)
+        )[0];
 
-      // Sync deletion to Firebase
-      if (user) {
-        await syncDecksToFirebase(updatedDecks);
+        const activated = remaining.map(d => ({ ...d, isActive: d.id === fallback.id }));
+
+        // local state and cache
+        setSavedDecks(activated);
+        setActiveDeckState(fallback);
+        await Promise.all([
+          AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(activated)),
+          AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, fallback.id),
+        ]);
+
+        // Cloud
+        if (user) await syncDecksToFirebase(activated);
+      } else {
+        // general case (active deck unchanged OR no decks left)
+        setSavedDecks(remaining);
+        await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(remaining));
+
+        if (activeDeck?.id === deckId) {
+          setActiveDeckState(null);
+          await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
+        }
+        if (user) await syncDecksToFirebase(remaining);
       }
     } catch (error) {
       if (__DEV__) {
@@ -289,6 +323,8 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
       
       if (originalActiveDeck) {
         await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, originalActiveDeck.id);
+      } else {
+        await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
       }
       await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(originalDecks));
       
