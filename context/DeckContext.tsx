@@ -199,16 +199,30 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
         updatedDecks = [...savedDecks, newDeck];
       }
 
-      // Update local state immediately (fast UI response)
-      setSavedDecks(updatedDecks);
-      await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(updatedDecks));
-
       // If this is the first deck and no active deck, make it active FIRST
       if (updatedDecks.length === 1 && !activeDeck) {
-        await setActiveDeck(updatedDecks[0].id); // <- do a sync already
-      } else if (user) {
-        // Push the ACTUAL updated state (avoid stale closure)
-        await syncDecksToFirebase(updatedDecks);
+        const firstId = updatedDecks[0].id;
+        const activatedDecks = updatedDecks.map(d => ({ ...d, isActive: d.id === firstId }));
+
+        // 1) Local state
+        setSavedDecks(activatedDecks);
+        setActiveDeckState(activatedDecks[0]);
+
+        // 2) Offline local cache
+        await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(activatedDecks));
+        await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, firstId);
+
+        // 3) Cloud
+        if (user) {
+          await syncDecksToFirebase(activatedDecks);
+        }
+      } else {
+        // Normal case (not the first deck)
+        setSavedDecks(updatedDecks);
+        await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(updatedDecks));
+        if (user) {
+          await syncDecksToFirebase(updatedDecks);
+        }
       }
     } catch (error) {
       if (__DEV__) {
