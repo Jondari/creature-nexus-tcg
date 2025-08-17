@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.9](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.8...v0.3.9) (2025-08-17)
+
+
+### Features
+
+* sync deck data to firebase ([c336403](https://github.com/Jondari/creature-nexus-tcg/commit/c33640357264042124a95acc9546afd683dfa9de))
+
+
+### Bug Fixes
+
+* always promote most recent deck when none is active and remove stale snapshot check to prevent ghost active across devices ([6829f21](https://github.com/Jondari/creature-nexus-tcg/commit/6829f21c24fe3ecf4899a8ceca02c721026fd760))
+* auto-activate & sync first deck on creation to avoid unsynced state ([2d792f5](https://github.com/Jondari/creature-nexus-tcg/commit/2d792f5b343cb39220d9c8096b5e554e30510918))
+* ignore pending writes, handle zero decks, and use functional updates to prevent stale state & double sync ([4c27386](https://github.com/Jondari/creature-nexus-tcg/commit/4c27386de5b851239d0ef9515f3880aa711dc0bc))
+
 ### [0.3.8](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.7...v0.3.8) (2025-08-16)
 
 
