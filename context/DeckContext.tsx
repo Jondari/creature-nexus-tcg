@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { Card } from '../models/Card';
@@ -40,6 +40,55 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
     loadDecks();
   }, [user]);
 
+  // Firebase real-time sync
+  useEffect(() => {
+    if (!user) return;
+
+    const ref = doc(db, 'users', user.uid);
+    const unsub = onSnapshot(ref, { includeMetadataChanges: true }, async (snap) => {
+      try {
+        if (snap.metadata.hasPendingWrites) return; // ← ignore pending local writes
+        const data = snap.data();
+
+        // If the 'decks' field is missing, assume an empty deck list
+        if (!data || !Array.isArray(data.decks)) {
+          setSavedDecks([]);
+          setActiveDeckState(null);
+          await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify([]));
+          await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
+          return;
+        }
+
+        const parsed = data.decks.map((d: any) => ({
+          ...d,
+          createdAt: d.createdAt?.toDate ? d.createdAt.toDate() : new Date(d.createdAt),
+          updatedAt: d.updatedAt?.toDate ? d.updatedAt.toDate() : new Date(d.updatedAt),
+        }));
+
+        // 1) Local state
+        setSavedDecks(parsed);
+
+        // 2) Offline local cache
+        await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(parsed));
+
+        // 3) Local active deck (no cloud write here)
+        const act = parsed.find((d: any) => d.isActive);
+        if (act) {
+          setActiveDeckState(act); // ⬅ avoid calling setActiveDeck (it will re-sync Firebase)
+          await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, act.id);
+        } else if (parsed.length === 0) {
+          setActiveDeckState(null);
+          await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
+        }
+      } catch (error) {
+        if (__DEV__) {
+          console.error('Error during snapshot :', error);
+        }
+      }
+    });
+
+    return () => unsub();
+  }, [user?.uid]); // re-subscribe on user change
 
   const loadDecks = async () => {
     try {
@@ -93,34 +142,32 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
     try {
       const userDocRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
-      
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const firebaseDecks = userData.decks || [];
-        
-        if (firebaseDecks.length > 0) {
-          // Convert Firestore timestamps back to Date objects
-          const parsedDecks = firebaseDecks.map((deck: any) => ({
-            ...deck,
-            createdAt: deck.createdAt?.toDate ? deck.createdAt.toDate() : new Date(deck.createdAt),
-            updatedAt: deck.updatedAt?.toDate ? deck.updatedAt.toDate() : new Date(deck.updatedAt),
-          }));
+
+      const firebaseDecks = userDoc.exists() ? (userDoc.data().decks || []) : [];
+
+      // Convert Firestore timestamps back to Date objects
+      const parsedDecks = firebaseDecks.map((deck: any) => ({
+        ...deck,
+        createdAt: deck.createdAt?.toDate ? deck.createdAt.toDate() : new Date(deck.createdAt),
+        updatedAt: deck.updatedAt?.toDate ? deck.updatedAt.toDate() : new Date(deck.updatedAt),
+      }));
           
-          setSavedDecks(parsedDecks);
-          
-          // Find and set active deck
-          const activeDeck = parsedDecks.find((deck: SavedDeck) => deck.isActive);
-          if (activeDeck) {
-            setActiveDeckState(activeDeck);
-            await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, activeDeck.id);
-          }
-          
-          // Cache in AsyncStorage for offline access
-          await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(parsedDecks));
-          
-          setHasLoadedFromFirebase(true);
+      setSavedDecks(parsedDecks);
+
+      if (parsedDecks.length) {
+        // Find and set active deck
+        const activeDeck = parsedDecks.find((deck: SavedDeck) => deck.isActive);
+        if (activeDeck) {
+          setActiveDeckState(activeDeck);
+          await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, activeDeck.id);
         }
+      } else {
+        setActiveDeckState(null);
+        await AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY);
       }
+      // Cache in AsyncStorage for offline access
+      await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(parsedDecks));
+      setHasLoadedFromFirebase(true);
     } catch (error) {
       if (__DEV__) {
         console.error('Error loading decks from Firebase:', error);
@@ -158,15 +205,10 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
 
       // If this is the first deck and no active deck, make it active FIRST
       if (updatedDecks.length === 1 && !activeDeck) {
-        await setActiveDeck(updatedDecks[0].id);
-      }
-
-      // THEN sync to Firebase (always, after potential activation)
-      if (user) {
-        // Use a small delay to ensure state is updated after setActiveDeck
-        setTimeout(() => {
-          syncDecksToFirebase(savedDecks);
-        }, 100);
+        await setActiveDeck(updatedDecks[0].id); // <- do a sync already
+      } else if (user) {
+        // Push the ACTUAL updated state (avoid stale closure)
+        await syncDecksToFirebase(updatedDecks);
       }
     } catch (error) {
       if (__DEV__) {
@@ -189,9 +231,8 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
         updatedAt: deck.updatedAt,
       }));
 
-      await updateDoc(userDocRef, {
-        decks: firebaseDecks
-      });
+      // setDoc with merge: true creates-or-updates (updateDoc fails if doc doesn't exist)
+      await setDoc(userDocRef, { decks: firebaseDecks }, { merge: true });
 
       if (__DEV__) {
         console.log('Decks synced to Firebase successfully');
@@ -242,29 +283,42 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setActiveDeck = async (deckId: string) => {
-    // Store original state for rollback
+    // Original state for rollback
     const originalDecks = savedDecks;
     const originalActiveDeck = activeDeck;
 
+    // Copies computed from the most up-to-date state
+    let updatedDecksLocal: SavedDeck[] = [];
+    let newActiveLocal: SavedDeck | null = null;
+
     try {
-      // Update isActive for all decks (only one can be active)
-      const updatedDecks = savedDecks.map(deck => ({
-        ...deck,
-        isActive: deck.id === deckId
-      }));
+      // 1) Update savedDecks using the most up-to-date "prev"
+      setSavedDecks((prev) => {
+        updatedDecksLocal = prev.map(d => ({ ...d, isActive: d.id === deckId }));
+        newActiveLocal = updatedDecksLocal.find(d => d.id === deckId) ?? null;
+        return updatedDecksLocal;
+      });
 
-      const newActiveDeck = updatedDecks.find(d => d.id === deckId);
-      if (newActiveDeck) {
-        // Update local state first
-        setSavedDecks(updatedDecks);
-        setActiveDeckState(newActiveDeck);
-        await AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, deckId);
-        await AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(updatedDecks));
+      // If the ID doesn't exist (deck deleted / invalid ID), clear the active deck and exit cleanly
+      if (!newActiveLocal) {
+        setActiveDeckState(null);
+        await Promise.all([
+          AsyncStorage.removeItem(ACTIVE_DECK_STORAGE_KEY),
+          AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(updatedDecksLocal)),
+        ]);
+        return;
+      }
 
-        // Sync to Firebase with updated isActive status
-        if (user) {
-          await syncDecksToFirebase(updatedDecks);
-        }
+      // 2) Update the local active deck and cache
+      setActiveDeckState(newActiveLocal);
+      await Promise.all([
+        AsyncStorage.setItem(ACTIVE_DECK_STORAGE_KEY, deckId),
+        AsyncStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(updatedDecksLocal)),
+      ]);
+
+      // 3) Sync Firebase
+      if (user) {
+        await syncDecksToFirebase(updatedDecksLocal);
       }
     } catch (error) {
       if (__DEV__) {
