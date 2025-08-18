@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { DeckProvider } from '@/context/DeckContext';
 import { SettingsProvider } from '@/context/SettingsContext';
 import GlobalAlertProvider from '@/components/GlobalAlertProvider';
+import { StoryModeProvider } from '@/context/StoryModeContext';
 import { useFonts } from 'expo-font';
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
 import { Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
@@ -53,15 +54,17 @@ export default function RootLayout() {
       <SettingsProvider>
         <AuthProvider>
           <DeckProvider>
-            <Stack screenOptions={{ 
-              headerShown: false,
-              contentStyle: { backgroundColor: Colors.background.primary }
-            }}>
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
-            </Stack>
-            <StatusBar style="light" hidden={Platform.OS === 'android'} />
+            <StoryModeProvider>
+              <Stack screenOptions={{ 
+                headerShown: false,
+                contentStyle: { backgroundColor: Colors.background.primary }
+              }}>
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
+              </Stack>
+              <StatusBar style="light" hidden={Platform.OS === 'android'} />
+            </StoryModeProvider>
           </DeckProvider>
         </AuthProvider>
       </SettingsProvider>

@@ -1,10 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
 import { CardComponent } from '../components/CardComponent';
 import { CARDS_DATABASE } from '../models/Card';
 import Colors from '../constants/Colors';
 
 export default function CardTestScreen() {
+  const router = useRouter();
+  
   // Group cards by rarity for organized display
   const cardsByRarity = {
     common: CARDS_DATABASE.filter(card => card.rarity === 'common'),
@@ -36,10 +40,21 @@ export default function CardTestScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Monster Cards Illustration Test</Text>
-      <Text style={styles.subtitle}>
-        Total: {CARDS_DATABASE.length} cards
-      </Text>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.push('/(tabs)/profile')}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft size={24} color={Colors.text.primary} />
+        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <Text style={styles.header}>Monster Cards Illustration Test</Text>
+          <Text style={styles.subtitle}>
+            Total: {CARDS_DATABASE.length} cards
+          </Text>
+        </View>
+      </View>
       
       <ScrollView 
         style={styles.scrollView}
@@ -65,6 +80,22 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.primary,
     paddingTop: 50,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.background.card,
+    marginRight: 16,
+  },
+  headerContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -76,7 +107,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text.secondary,
     textAlign: 'center',
-    marginBottom: 20,
   },
   scrollView: {
     flex: 1,

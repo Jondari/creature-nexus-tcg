@@ -76,6 +76,30 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="quick-battle"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="story-mode"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="chapter-map"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="story-battle"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Modal, Linking } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
+import { useStoryMode } from '@/context/StoryModeContext';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube, Gift } from 'lucide-react-native';
@@ -15,6 +16,7 @@ const packageJson = require('../../package.json');
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
   const { cardSize, setCardSize, showBattleLog, setShowBattleLog } = useSettings();
+  const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
   
   // Debug auth state
@@ -313,6 +315,14 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.linkButton}
+              onPress={() => router.push('/dev-storymap' as any)}
+            >
+              <TestTube size={20} color={'#9333ea'} />
+              <Text style={[styles.linkText, { color: '#9333ea' }]}>StoryMap Visualizer</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.linkButton}
               onPress={async () => {
                 if (user) {
                   try {
@@ -326,6 +336,36 @@ export default function ProfileScreen() {
             >
               <TestTube size={20} color={'#ffd700'} />
               <Text style={[styles.linkText, { color: '#ffd700' }]}>Add 10,000 Nexus Coins</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={async () => {
+                try {
+                  await resetProgress();
+                  showSuccessAlert('Dev Tools', 'Story mode progress has been reset!');
+                } catch (error) {
+                  showErrorAlert('Dev Tools', 'Failed to reset progress. Please try again.');
+                }
+              }}
+            >
+              <TestTube size={20} color={'#ff6b6b'} />
+              <Text style={[styles.linkText, { color: '#ff6b6b' }]}>Reset Story</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={async () => {
+                try {
+                  await unlockAllChapters();
+                  showSuccessAlert('Dev Tools', 'All chapters have been unlocked!');
+                } catch (error) {
+                  showErrorAlert('Dev Tools', 'Failed to unlock chapters. Please try again.');
+                }
+              }}
+            >
+              <TestTube size={20} color={'#4ecdc4'} />
+              <Text style={[styles.linkText, { color: '#4ecdc4' }]}>Unlock All Chapters</Text>
             </TouchableOpacity>
           </View>
         </View>
