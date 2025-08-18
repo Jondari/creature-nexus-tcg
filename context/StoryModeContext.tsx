@@ -3,18 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { useAuth } from '@/context/AuthContext';
-import { STORY_CHAPTERS, StoryChapter, updateBattleProgress, unlockNextChapter } from '@/data/storyMode';
+import { STORY_CHAPTERS, StoryChapter } from '@/data/storyMode';
 import StoryDeckGenerator from "@/utils/storyDeckGenerator";
-import {Card} from "@/types/game";
 
-const STORY_PROGRESS_KEY = 'creature_nexus_story_progress';
 const SCHEMA_VERSION = 1;
-
-interface StoryProgress {
-  chapters: StoryChapter[];
-  currentChapter: number;
-  lastUpdated: Date;
-}
 
 interface StoryProgressLight {
   schemaVersion: number;
@@ -80,43 +72,48 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
   const [chapters, setChapters] = useState<StoryChapter[]>([...STORY_CHAPTERS]);
   const [currentChapter, setCurrentChapter] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const lastAppliedRef = React.useRef<number>(0);
 
   useEffect(() => {
     loadProgress();
   }, [user]);
 
+  // Reset anti-stale guard whenever the signed-in user changes
+  useEffect(() => {
+    lastAppliedRef.current = 0;
+  }, [user?.uid]);
+
   // Firebase real-time sync for story progress
   useEffect(() => {
     if (!user) return;
-
     const ref = doc(db, 'users', user.uid);
     const unsub = onSnapshot(ref, { includeMetadataChanges: true }, async (snap) => {
-      try {
-        if (snap.metadata.hasPendingWrites) return;
+      if (snap.metadata.hasPendingWrites) return;
+      if (!snap.exists()) return;
+      const data = snap.data();
+      if (!data?.storyProgressLight) return;
 
-        if (snap.exists()) {
-          const userData = snap.data();
-          if (userData.storyProgress) {
-            const progress: StoryProgress = {
-              ...userData.storyProgress,
-              lastUpdated: userData.storyProgress.lastUpdated?.toDate() || new Date(),
-            };
-            
-            // Update local state with Firebase data
-            setChapters(progress.chapters);
-            setCurrentChapter(progress.currentChapter);
-            
-            // Also save to local storage
-            await AsyncStorage.setItem(STORY_PROGRESS_KEY, JSON.stringify(progress));
-          }
-        }
-      } catch (error) {
-        if (__DEV__) {
-          console.error('Error syncing story progress from Firebase:', error);
-        }
+      // Extract and normalize lastUpdated as number
+      const ts = data.storyProgressLight.lastUpdated?.toDate?.()?.getTime?.() ?? 0;
+      if (ts && ts < lastAppliedRef.current) {
+        // Ignore stale snapshot
+        return;
       }
-    });
 
+      const firebaseLight = data.storyProgressLight;
+      const light = {
+        ...firebaseLight,
+        lastUpdated: firebaseLight.lastUpdated?.toDate?.() || new Date(),
+      };
+      const chaptersBuilt = buildChaptersFromLight(light, STORY_CHAPTERS);
+      const reconciled = reconcileChapters(chaptersBuilt);
+      setChapters(reconciled);
+      setCurrentChapter(light.currentChapter);
+      await AsyncStorage.setItem('creature_nexus_story_progress_light', JSON.stringify(light));
+
+      // Remember last applied server timestamp
+      lastAppliedRef.current = light.lastUpdated.getTime?.() ?? Date.now();
+    });
     return unsub;
   }, [user]);
 
@@ -129,29 +126,32 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
 
   const saveProgress = async () => {
     try {
-      const progress: StoryProgress = {
-        chapters,
+      // Rebuild the light progress from the current state
+      const unlockedChapters = chapters.filter(ch => ch.isUnlocked).map(ch => ch.id);
+      const completedBattles: Record<number, string[]> = {};
+      chapters.forEach(ch => {
+        const completed = ch.battles.filter(b => b.isCompleted).map(b => b.id);
+        if (completed.length) completedBattles[ch.id] = completed;
+      });
+
+      // Use a monotonic local timestamp for optimistic anti-stale guard
+      const now = Date.now();
+
+      const light: StoryProgressLight = {
+        schemaVersion: SCHEMA_VERSION,
         currentChapter,
-        lastUpdated: new Date(),
+        unlockedChapters,
+        completedBattles,
+        lastUpdated: new Date(now),
       };
 
-      // Save to local storage
-      await AsyncStorage.setItem(STORY_PROGRESS_KEY, JSON.stringify(progress));
+      // Optimistically bump the guard so older snapshots will be ignored by the listener
+      lastAppliedRef.current = now;
 
-      // Save to Firebase if user is authenticated
-      if (user) {
-        const userDocRef = doc(db, 'users', user.uid);
-        await setDoc(userDocRef, {
-          storyProgress: {
-            ...progress,
-            lastUpdated: new Date(),
-          }
-        }, { merge: true });
-      }
-    } catch (error) {
-      if (__DEV__) {
-        console.error('Error saving story progress:', error);
-      }
+      // Single save: local + Firestore (light)
+      await saveProgressLight(user?.uid, light);
+    } catch (e) {
+      if (__DEV__) console.error('saveProgress (light) failed', e);
     }
   };
 
@@ -181,6 +181,8 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
         if (storedLight) {
           light = JSON.parse(storedLight);
           light.lastUpdated = new Date(light.lastUpdated);
+          // Keep anti-stale guard in sync with the applied server state
+          lastAppliedRef.current = (light.lastUpdated as Date)?.getTime?.() ?? Date.now();
         }
       }
 
@@ -190,69 +192,12 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
         const reconciledChapters = reconcileChapters(chapters);
         setChapters(reconciledChapters);
         setCurrentChapter(light.currentChapter);
-        setIsLoading(false);
+        // Keep anti-stale guard in sync with the applied server state
+        lastAppliedRef.current = (light.lastUpdated as Date)?.getTime?.() ?? Date.now();
         return;
       }
 
-      // 3. Try to load legacy storyProgress and convert it
-      let legacyProgress: StoryProgress | null = null;
-
-      if (user) {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists() && userDoc.data().storyProgress) {
-          const firebaseProgress = userDoc.data().storyProgress;
-          legacyProgress = {
-            ...firebaseProgress,
-            lastUpdated: firebaseProgress.lastUpdated?.toDate() || new Date(),
-          };
-        }
-      }
-
-      if (!legacyProgress) {
-        const storedProgress = await AsyncStorage.getItem(STORY_PROGRESS_KEY);
-        if (storedProgress) {
-          legacyProgress = JSON.parse(storedProgress);
-          legacyProgress.lastUpdated = new Date(legacyProgress.lastUpdated);
-        }
-      }
-
-      if (legacyProgress) {
-        // Convert legacy progress to light format
-        const unlockedChapters = legacyProgress.chapters
-          .filter(ch => ch.isUnlocked)
-          .map(ch => ch.id);
-        
-        const completedBattles: Record<number, string[]> = {};
-        legacyProgress.chapters.forEach(ch => {
-          const completed = ch.battles.filter(b => b.isCompleted).map(b => b.id);
-          if (completed.length > 0) {
-            completedBattles[ch.id] = completed;
-          }
-        });
-
-        const convertedLight: StoryProgressLight = {
-          schemaVersion: SCHEMA_VERSION,
-          currentChapter: legacyProgress.currentChapter,
-          unlockedChapters,
-          completedBattles,
-          lastUpdated: new Date(),
-        };
-
-        // Save the converted light progress
-        await saveProgressLight(user?.uid, convertedLight);
-
-        // Load from the converted light progress
-        const chapters = buildChaptersFromLight(convertedLight, STORY_CHAPTERS);
-        const reconciledChapters = reconcileChapters(chapters);
-        setChapters(reconciledChapters);
-        setCurrentChapter(convertedLight.currentChapter);
-        setIsLoading(false);
-        return;
-      }
-
-      // 4. Bootstrap with defaults
+      // 3. Bootstrap with defaults
       const defaultLight: StoryProgressLight = {
         schemaVersion: SCHEMA_VERSION,
         currentChapter: 1,
@@ -267,7 +212,8 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
       const reconciledChapters = reconcileChapters(chapters);
       setChapters(reconciledChapters);
       setCurrentChapter(1);
-      
+      // Baseline the anti-stale guard for a fresh default state
+      lastAppliedRef.current = Date.now();
     } catch (error) {
       if (__DEV__) {
         console.error('Error loading story progress:', error);
@@ -284,99 +230,98 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
 
   const completeBattle = async (chapterId: number, battleId: string) => {
     try {
-      const updatedChapters = [...chapters];
-      const chapterIndex = updatedChapters.findIndex(c => c.id === chapterId);
-      
-      if (chapterIndex === -1) return;
+      // Create a shallow-cloned graph to avoid mutating React state directly
+      const updatedChapters = chapters.map(ch => ({
+        ...ch,
+        battles: ch.battles.map(b => ({ ...b })),
+      }));
 
+      // Locate chapter and battle
+      const chapterIndex = updatedChapters.findIndex(c => c.id === chapterId);
+      if (chapterIndex === -1) return;
       const chapter = updatedChapters[chapterIndex];
       const battle = chapter.battles.find(b => b.id === battleId);
-      
       if (!battle || battle.isCompleted) return;
 
-      // Mark battle as completed
+      // Mark the battle as completed
       battle.isCompleted = true;
 
-      // Update accessibility of connected battles
-      battle.connections.forEach(connectionId => {
-        const connectedBattle = chapter.battles.find(b => b.id === connectionId);
-        if (connectedBattle) {
-          connectedBattle.isAccessible = true;
-        }
-      });
+      // Unlock connected nodes within the same chapter (graph-based access)
+      for (const connId of battle.connections) {
+        const neighbor = chapter.battles.find(b => b.id === connId);
+        if (neighbor) neighbor.isAccessible = true;
+      }
 
-      // Check if this is a boss battle - if so, unlock next chapter immediately
-      if (battle.isBoss) {
+      // Compute nextCurrent locally to avoid using stale state (setState is async)
+      let nextCurrent = currentChapter;
+
+      // If the boss is defeated OR the chapter is 100% completed, unlock the next chapter
+      const chapterFullyCompleted = chapter.battles.every(b => b.isCompleted);
+      const bossDefeated = battle.isBoss || chapter.battles.some(b => b.isBoss && b.isCompleted);
+
+      if (bossDefeated || chapterFullyCompleted) {
         chapter.isCompleted = true;
-        
-        // Unlock next chapter when boss is defeated
-        const nextChapterIndex = chapterIndex + 1;
-        if (nextChapterIndex < updatedChapters.length) {
-          updatedChapters[nextChapterIndex].isUnlocked = true;
-          setCurrentChapter(updatedChapters[nextChapterIndex].id);
-        }
-      } else {
-        // Check if chapter is completed (all battles done)
-        const allBattlesCompleted = chapter.battles.every(b => b.isCompleted);
-        if (allBattlesCompleted) {
-          chapter.isCompleted = true;
-          
-          // Unlock next chapter
-          const nextChapterIndex = chapterIndex + 1;
-          if (nextChapterIndex < updatedChapters.length) {
-            updatedChapters[nextChapterIndex].isUnlocked = true;
-            setCurrentChapter(updatedChapters[nextChapterIndex].id);
-          }
+        const nextIdx = chapterIndex + 1;
+        if (nextIdx < updatedChapters.length) {
+          updatedChapters[nextIdx].isUnlocked = true;
+          nextCurrent = updatedChapters[nextIdx].id; // ensure we persist the new current chapter
         }
       }
 
-      // Reconcile chapters to ensure proper state
-      const reconciledChapters = reconcileChapters(updatedChapters);
-      setChapters(reconciledChapters);
+      // Reconcile all derived flags (unlocked/completed) before persisting
+      const reconciled = reconcileChapters(updatedChapters);
 
-      // Build light progress from reconciled state
-      const unlockedChapters = reconciledChapters
-        .filter(ch => ch.isUnlocked)
-        .map(ch => ch.id);
-      
-      const completedBattles: Record<number, string[]> = {};
-      reconciledChapters.forEach(ch => {
-        const completed = ch.battles.filter(b => b.isCompleted).map(b => b.id);
-        if (completed.length > 0) {
-          completedBattles[ch.id] = completed;
-        }
-      });
+      // Apply state updates
+      setChapters(reconciled);
+      setCurrentChapter(nextCurrent);
 
+      // Build the light progress view from the reconciled state
+      const unlockedChapters = reconciled.filter(c => c.isUnlocked).map(c => c.id);
+      const completedBattles: Record<number, string[]> = Object.fromEntries(
+          reconciled.map(c => [c.id, c.battles.filter(b => b.isCompleted).map(b => b.id)])
+      );
+
+      // Persist light-only progress (local + Firestore)
       const lightProgress: StoryProgressLight = {
         schemaVersion: SCHEMA_VERSION,
-        currentChapter,
+        currentChapter: nextCurrent, // persist the computed chapter id, not the old state
         unlockedChapters,
         completedBattles,
         lastUpdated: new Date(),
       };
-
       await saveProgressLight(user?.uid, lightProgress);
     } catch (error) {
-      if (__DEV__) {
-        console.error('Error completing battle:', error);
-      }
+      if (__DEV__) console.error('completeBattle failed:', error);
     }
   };
 
   const unlockChapter = async (chapterId: number) => {
     try {
-      const updatedChapters = [...chapters];
+      // Clone to avoid mutating state directly
+      const updatedChapters = chapters.map(ch => ({
+        ...ch,
+        battles: ch.battles.map(b => ({ ...b })),
+      }));
+
       const chapter = updatedChapters.find(c => c.id === chapterId);
-      
       if (chapter && !chapter.isUnlocked) {
+        // Mark chapter as unlocked
         chapter.isUnlocked = true;
+
+        // Make the first node tappable right away (better UX)
+        const first = chapter.battles[0];
+        if (first && !first.isCompleted) {
+          first.isAccessible = true; // ensure immediate access to the entry node
+        }
+
+        // Push to UI
         setChapters(updatedChapters);
+
+        // Persist light-only progress
         await saveProgress();
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error('Error unlocking chapter:', error);
-      }
+      if (__DEV__) console.error('Error unlocking chapter:', error);
     }
   };
 
@@ -392,7 +337,6 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
       }
 
       // Clear local storage
-      await AsyncStorage.removeItem(STORY_PROGRESS_KEY);
       await AsyncStorage.removeItem('creature_nexus_story_progress_light');
 
       // Bootstrap default light progress
@@ -420,26 +364,29 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
 
   const unlockAllChapters = async () => {
     try {
+      // Decide a clear current chapter for DEV (1 is predictable and safe)
+      const targetCurrent = 1;
+
+      // Unlock every chapter; do not auto-complete battles by default
       const allChapterIds = STORY_CHAPTERS.map(ch => ch.id);
-      
+
+      // Persist a clean light structure
       const lightProgress: StoryProgressLight = {
         schemaVersion: SCHEMA_VERSION,
-        currentChapter,
+        currentChapter: targetCurrent,
         unlockedChapters: allChapterIds,
-        completedBattles: {},
+        completedBattles: {}, // keep empty for "unlocked but not completed"; fill to simulate 100%
         lastUpdated: new Date(),
       };
-
       await saveProgressLight(user?.uid, lightProgress);
 
-      // Load from the new light progress
-      const chapters = buildChaptersFromLight(lightProgress, STORY_CHAPTERS);
-      const reconciledChapters = reconcileChapters(chapters);
-      setChapters(reconciledChapters);
+      // Rebuild UI state from the just-persisted light structure
+      const built = buildChaptersFromLight(lightProgress, STORY_CHAPTERS);
+      const reconciled = reconcileChapters(built);
+      setChapters(reconciled);
+      setCurrentChapter(targetCurrent);
     } catch (error) {
-      if (__DEV__) {
-        console.error('Error unlocking all chapters:', error);
-      }
+      if (__DEV__) console.error('unlockAllChapters failed:', error);
     }
   };
 
