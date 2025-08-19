@@ -96,15 +96,15 @@ export function GameBoard() {
 
   // Auto-clear damage animations after duration
   useEffect(() => {
-    damageAnimations.forEach(animation => {
-      if (animation.isActive && animation.duration > 0) {
-        const timeoutId = setTimeout(() => {
-          clearDamageAnimation(animation.cardId);
-        }, animation.duration);
-        
-        return () => clearTimeout(timeoutId);
-      }
-    });
+    const timeoutIds = damageAnimations
+        .filter(anim => anim.isActive && anim.duration > 0)
+        .map(anim => setTimeout(() => {
+          clearDamageAnimation(anim.cardId);
+        }, anim.duration));
+
+    return () => {
+      timeoutIds.forEach(clearTimeout);
+    };
   }, [damageAnimations, clearDamageAnimation]);
 
   if (isLoading) {
