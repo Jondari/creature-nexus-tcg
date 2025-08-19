@@ -419,6 +419,19 @@ export function GameBoard() {
                 })()
                 : null;
 
+            // Choose badge styles responsively based on card size ("small" vs "normal")
+            const isSmall = cardSize === 'small';
+            const previewBadgeStyle = [
+              styles.previewBadgeBase,
+              isSmall ? styles.previewBadgeSmall : styles.previewBadgeNormal,
+            ];
+            const previewTextStyle = [
+              styles.previewTextBase,
+              isSmall ? styles.previewTextSmall : styles.previewTextNormal,
+              preview?.affinity > 0 && { color: '#4ECDC4' },   // positive bonus
+              preview?.affinity < 0 && { color: '#FF6B6B' },   // negative bonus
+            ];
+
             return (
                 <View key={card.id} style={{ marginRight: 12, position: 'relative' }}>
                   <CardComponent
@@ -432,14 +445,8 @@ export function GameBoard() {
 
                   {/* Damage + affinity preview badge */}
                   {attackMode && isPlayerTurn && preview && (
-                      <View style={styles.previewBadge}>
-                        <Text
-                            style={[
-                              styles.previewText,
-                              preview.affinity > 0 && { color: '#4ECDC4' },   // green/blue for positive bonus
-                              preview.affinity < 0 && { color: '#FF6B6B' },   // red for negative bonus
-                            ]}
-                        >
+                      <View style={previewBadgeStyle}>
+                        <Text style={previewTextStyle}>
                           {preview.total}
                           {preview.affinity ? ` (${preview.affinity > 0 ? '+' : ''}${preview.affinity})` : ''}
                         </Text>
@@ -878,20 +885,43 @@ const styles = StyleSheet.create({
     marginTop: 24,
     fontStyle: 'italic',
   },
-  previewBadge: {
+  // Base styles shared by all sizes
+  previewBadgeBase: {
     position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 2 },
+    // Android elevation
+    elevation: 3,
+  },
+  previewBadgeSmall: {
     top: 6,
     right: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: 'rgba(0,0,0,0.65)',
     borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
   },
-  previewText: {
+  previewBadgeNormal: {
+    top: 10,
+    right: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  previewTextBase: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  previewTextSmall: {
     fontSize: 12,
+  },
+  previewTextNormal: {
+    fontSize: 16,
   },
 });
