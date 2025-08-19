@@ -56,6 +56,11 @@ export function GameBoard() {
     earth: 'water',
   };
 
+  // Clear any stale attack preview when switching the selected attacker
+  useEffect(() => {
+    // If the player picks another card, drop the previous preview immediately
+    setAttackMode(null);
+  }, [selectedCard]);
 
   /**
    * Returns the affinity bonus: +20, -20, or 0.
@@ -496,7 +501,11 @@ export function GameBoard() {
               key={card.id}
               card={card}
               selected={selectedCard === card.id}
-              onPress={() => setSelectedCard(card.id === selectedCard ? null : card.id!)}
+              onPress={() => {
+                // Toggle selection and drop any previous attack preview to avoid stale damage badges
+                setSelectedCard(card.id === selectedCard ? null : card.id!);
+                setAttackMode(null);
+              }}
               onAttack={(attackName) => handleAttack(card.id!, attackName)}
               showActions={currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard === card.id}
               disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn || resolvingAttack}
