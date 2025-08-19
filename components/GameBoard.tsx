@@ -41,6 +41,9 @@ export function GameBoard() {
   const isWeb = Platform.OS === 'web';
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const translateX = React.useRef(new Animated.Value(isMobile ? screenWidth : 0)).current;
+  // Blocks interactions while we delay lethal attacks for the hit animation
+  const [resolvingAttack, setResolvingAttack] = useState(false);
+
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
   const closeSidebar = () => setSidebarVisible(false);
@@ -219,17 +222,40 @@ export function GameBoard() {
   const isPlayerTurn = !currentPlayer.isAI;
 
   const handleCardPress = (card: Card) => {
-    if (!isPlayerTurn) return;
-    
+    // Prevent interactions during a delayed lethal resolution
+    if (!isPlayerTurn || resolvingAttack) return;
+
     if (attackMode) {
-      // Attack target selected - trigger damage animation
+      // Predict lethal to decide if we should delay the engine update
+      const attacker = playerAtBottom.field.find(c => c.id === attackMode.cardId);
+      const preview = attacker ? getPreviewDamage(attacker, attackMode.attackName, card) : null;
+      const isPredictedLethal = !!(preview && card.hp != null && preview.total >= card.hp);
+
+      // Play the hit animation on the target card first
+      const KILL_ANIM_MS = 600;   // keep this short and snappy
+      const NON_KILL_ANIM_MS = 1000;
+      const animMs = isPredictedLethal ? KILL_ANIM_MS : NON_KILL_ANIM_MS;
+
       if (card.id) {
-        triggerDamageAnimation(card.id, 1000);
+        // Triggers the existing per-card DamageEffect animation
+        triggerDamageAnimation(card.id, animMs);
       }
-      
-      attack(attackMode.cardId, attackMode.attackName, card.id);
+
+      // Clear UI selection immediately
       setAttackMode(null);
       setSelectedCard(null);
+
+      if (isPredictedLethal) {
+        // Delay the engine attack so the card is not removed before the animation
+        setResolvingAttack(true);
+        setTimeout(() => {
+          attack(attackMode.cardId, attackMode.attackName, card.id!);
+          setResolvingAttack(false);
+        }, KILL_ANIM_MS);
+      } else {
+        // Non-lethal: resolve immediately (current behavior)
+        attack(attackMode.cardId, attackMode.attackName, card.id!);
+      }
     } else {
       setSelectedCard(card.id === selectedCard ? null : card.id!);
     }
@@ -393,7 +419,7 @@ export function GameBoard() {
                   <CardComponent
                       card={card}
                       onPress={() => handleCardPress(card)}
-                      disabled={!isPlayerTurn || !attackMode}
+                      disabled={!isPlayerTurn || !attackMode || resolvingAttack}
                       aiHighlight={getCardHighlightType(card.id!)}
                       damageAnimation={getDamageAnimationForCard(card.id!)}
                       size={cardSize}
@@ -473,7 +499,7 @@ export function GameBoard() {
               onPress={() => setSelectedCard(card.id === selectedCard ? null : card.id!)}
               onAttack={(attackName) => handleAttack(card.id!, attackName)}
               showActions={currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard === card.id}
-              disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
+              disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn || resolvingAttack}
               aiHighlight={getCardHighlightType(card.id!)}
               damageAnimation={getDamageAnimationForCard(card.id!)}
               size={cardSize}

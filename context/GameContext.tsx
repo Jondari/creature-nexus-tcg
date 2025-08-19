@@ -247,7 +247,24 @@ export function GameProvider({ children }: GameProviderProps) {
         payload: error instanceof Error ? error.message : 'Failed to execute action' 
       });
     }
+  }
+
+  // --- Affinity helpers for AI lethal timing (keep consistent with UI) ---
+  const ELEMENT_CYCLE: Record<string, string> = {
+    water: 'fire',
+    fire: 'air',
+    air: 'earth',
+    earth: 'water',
   };
+
+  function getAffinityBonus(attackerElement?: string, defenderElement?: string): number {
+    if (!attackerElement || !defenderElement) return 0;
+    if (defenderElement === 'all') return 0;
+    if (ELEMENT_CYCLE[attackerElement] === defenderElement) return 20;
+    if (ELEMENT_CYCLE[defenderElement] === attackerElement) return -20;
+    return 0;
+  }
+
 
   const executeAITurn = async () => {
     if (!state.gameEngine || !state.gameState) {
@@ -290,19 +307,41 @@ export function GameProvider({ children }: GameProviderProps) {
         
         // Execute the action
         dispatch({ type: 'SET_AI_STATUS', payload: { status: 'executing_action', message: 'Executing action...' } });
-        
-        // Trigger damage animation for AI attacks
+
+        // Trigger damage animation for AI attacks (delay engine if lethal so animation can play)
         if (aiDecision.action.type === 'ATTACK' && aiDecision.action.targetCardId) {
-          dispatch({ 
-            type: 'ADD_DAMAGE_ANIMATION', 
-            payload: { 
-              cardId: aiDecision.action.targetCardId, 
-              isActive: true, 
-              duration: 1000 
-            } 
+          // Get attacker and target from the current state
+          const attacker = currentState.players
+              .find(p => p.id === currentPlayerInLoop.id)?.field
+              .find(c => c.id === aiDecision.action.cardId);
+
+          const target = currentState.players
+              .find(p => p.id !== currentPlayerInLoop.id)?.field
+              .find(c => c.id === aiDecision.action.targetCardId);
+
+          // Predict lethality (base + affinity)
+          const base = Number(attacker?.attacks?.find(a => a.name === aiDecision.action.attackName)?.damage ?? 0) || 0;
+          const affinity = getAffinityBonus(attacker?.element as string, target?.element as string);
+          const total = Math.max(0, base + affinity);
+          const isPredictedLethal = !!(target && target.hp != null && total >= target.hp);
+
+          const KILL_ANIM_MS = 600;
+          const NON_KILL_ANIM_MS = 1000;
+          const animMs = isPredictedLethal ? KILL_ANIM_MS : NON_KILL_ANIM_MS;
+
+          // Show the hit animation on the target
+          dispatch({
+            type: 'ADD_DAMAGE_ANIMATION',
+            payload: { cardId: aiDecision.action.targetCardId, isActive: true, duration: animMs },
           });
+
+          // If lethal, wait so the card isn't removed before the animation is seen
+          if (isPredictedLethal) {
+            await delay(animMs);
+          }
         }
-        
+
+        // Execute the AI action after the (optional) delay
         const success = state.gameEngine.executeAction(aiDecision.action);
         
         // Log the AI action
