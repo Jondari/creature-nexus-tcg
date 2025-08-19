@@ -45,6 +45,41 @@ export function GameBoard() {
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
   const closeSidebar = () => setSidebarVisible(false);
 
+  // Element cycle used for affinity: water > fire, fire > air, air > earth, earth > water
+  const ELEMENT_CYCLE: Record<string, string> = {
+    water: 'fire',
+    fire: 'air',
+    air: 'earth',
+    earth: 'water',
+  };
+
+
+  /**
+   * Returns the affinity bonus: +20, -20, or 0.
+   * If defender is "all" (multi-element in defense), affinity is neutral (0).
+   */
+  function getAffinityBonus(attackerElement?: string, defenderElement?: string): number {
+    if (!attackerElement || !defenderElement) return 0;
+    if (defenderElement === 'all') return 0; // multi-element defense → neutral
+    if (ELEMENT_CYCLE[attackerElement] === defenderElement) return 20;
+    if (ELEMENT_CYCLE[defenderElement] === attackerElement) return -20;
+    return 0;
+  }
+
+
+  /**
+   * Computes damage preview for the selected attack against a target.
+   * total = base + affinity (clamped to >= 0)
+   */
+  function getPreviewDamage(attacker: Card, attackName: string, target: Card) {
+    const atk = attacker.attacks.find((a: any) => a.name === attackName);
+    if (!atk) return null;
+    const base = Number(atk.damage ?? 0) || 0;
+    const affinity = getAffinityBonus(attacker.element as any, target.element as any);
+    const total = Math.max(0, base + affinity);
+    return { base, affinity, total };
+  }
+
   // Show deck selection if no game is active
   useEffect(() => {
     if (!gameState && !isLoading && !showDeckSelection) {
@@ -344,17 +379,44 @@ export function GameBoard() {
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>{playerAtTop.name} {t('player.field')}</Text>
         <ScrollView horizontal style={styles.cardRow}>
-          {playerAtTop.field.map((card) => (
-            <CardComponent
-              key={card.id}
-              card={card}
-              onPress={() => handleCardPress(card)}
-              disabled={!isPlayerTurn || !attackMode}
-              aiHighlight={getCardHighlightType(card.id!)}
-              damageAnimation={getDamageAnimationForCard(card.id!)}
-              size={cardSize}
-            />
-          ))}
+          {playerAtTop.field.map((card) => {
+            // Only compute preview when it's the player's turn and an attack is selected
+            const preview = (isPlayerTurn && attackMode)
+                ? (() => {
+                  const attacker = playerAtBottom.field.find(c => c.id === attackMode.cardId);
+                  return attacker ? getPreviewDamage(attacker, attackMode.attackName, card) : null;
+                })()
+                : null;
+
+            return (
+                <View key={card.id} style={{ marginRight: 12, position: 'relative' }}>
+                  <CardComponent
+                      card={card}
+                      onPress={() => handleCardPress(card)}
+                      disabled={!isPlayerTurn || !attackMode}
+                      aiHighlight={getCardHighlightType(card.id!)}
+                      damageAnimation={getDamageAnimationForCard(card.id!)}
+                      size={cardSize}
+                  />
+
+                  {/* Damage + affinity preview badge */}
+                  {attackMode && isPlayerTurn && preview && (
+                      <View style={styles.previewBadge}>
+                        <Text
+                            style={[
+                              styles.previewText,
+                              preview.affinity > 0 && { color: '#4ECDC4' },   // green/blue for positive bonus
+                              preview.affinity < 0 && { color: '#FF6B6B' },   // red for negative bonus
+                            ]}
+                        >
+                          {preview.total}
+                          {preview.affinity ? ` (${preview.affinity > 0 ? '+' : ''}${preview.affinity})` : ''}
+                        </Text>
+                      </View>
+                  )}
+                </View>
+            );
+          })}
           {playerAtTop.field.length === 0 && (
             <Text style={styles.emptyField}>No creatures on field</Text>
           )}
@@ -780,5 +842,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 24,
     fontStyle: 'italic',
+  },
+  previewBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  previewText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 12,
   },
 });
