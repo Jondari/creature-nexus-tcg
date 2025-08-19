@@ -64,7 +64,8 @@ export default function ChapterMapScreen() {
               pathname: '/(tabs)/story-battle',
               params: { 
                 chapterId: chapter.id.toString(),
-                battleId: battle.id 
+                battleId: battle.id,
+                session: Date.now().toString(), // cache-buster for provider remount
               }
             });
           }

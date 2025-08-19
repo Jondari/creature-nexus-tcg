@@ -21,17 +21,78 @@ function deepCloneChapters(src: StoryChapter[]): StoryChapter[] {
   return src.map(c => ({ ...c, battles: c.battles.map(b => ({ ...b })) }));
 }
 
+// Rebuild chapters UI state from the light progress model.
+// Accessibility policy:
+//  - Reset all nodes' accessibility.
+//  - If chapter is unlocked:
+//     * First node is accessible (keeps replay simple) — you may gate this by "!first.isCompleted" if preferred.
+//     * Completed nodes are always accessible (explicit replay support).
+//     * For each COMPLETED node, mark all DIRECT neighbors accessible if they are NOT completed.
+//       Use BFS to propagate across chains of completed nodes until the next unfinished frontier.
 function buildChaptersFromLight(light: StoryProgressLight, canon: StoryChapter[]): StoryChapter[] {
   const chapters = deepCloneChapters(canon);
   const unlocked = new Set(light.unlockedChapters);
+
   for (const ch of chapters) {
+    // Chapter 1 is always unlocked; others depend on the light model
     ch.isUnlocked = unlocked.has(ch.id) || ch.id === 1;
-    const doneIds = new Set(light.completedBattles[ch.id] || []);
+
+    // Build fast lookup (robust if ids become numbers later)
+    const byId = new Map<string, StoryBattle>();
     for (const b of ch.battles) {
-      b.isCompleted = doneIds.has(b.id);
-      if (ch.isUnlocked && ch.battles[0].id === b.id) b.isAccessible = true;
+      byId.set(String(b.id), b);
+    }
+
+    // Completed set for this chapter (light format uses string ids)
+    const doneIds = new Set<string>((light.completedBattles[ch.id] || []).map(id => String(id)));
+
+    // 1) Apply completion + reset accessibility
+    for (const b of ch.battles) {
+      b.isCompleted = doneIds.has(String(b.id));
+      b.isAccessible = false; // recomputed below
+    }
+
+    // 2) Recompute accessibility if the chapter is unlocked
+    if (ch.isUnlocked) {
+      // Entry point: keep first node tappable (even if completed, to allow quick replay)
+      const first = ch.battles[0];
+      if (first) {
+        first.isAccessible = true; // change to (!first.isCompleted) if you want stricter entry
+      }
+
+      // Completed nodes should be directly tappable (explicit replay support)
+      for (const b of ch.battles) {
+        if (b.isCompleted) {
+          b.isAccessible = true; // allow replay on completed nodes
+        }
+      }
+
+      // BFS from completed nodes to unlock the next unfinished frontier
+      const queue: StoryBattle[] = ch.battles.filter(b => b.isCompleted);
+      const visited = new Set<string>();
+
+      while (queue.length) {
+        const cur = queue.shift()!;
+        const curKey = String(cur.id);
+        if (visited.has(curKey)) continue;
+        visited.add(curKey);
+
+        for (const connId of cur.connections) {
+          const nb = byId.get(String(connId));
+          if (!nb) continue;
+
+          if (!nb.isCompleted) {
+            // Neighbor not completed → becomes available to progress
+            nb.isAccessible = true;
+          } else {
+            // Neighbor also completed → keep traversing to reach the next unfinished node
+            queue.push(nb);
+          }
+        }
+      }
     }
   }
+
   return chapters;
 }
 

@@ -13,6 +13,7 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 interface StoryBattleParams {
   chapterId: string;
   battleId: string;
+  session?: string; // cache-buster to remount provider on Android
 }
 
 function StoryBattleContent() {
@@ -149,6 +150,8 @@ function StoryBattleContent() {
           foundBattle.isBoss
       );
 
+      // Always clear any previous engine before starting a new battle (important on replay)
+      resetGame(); // ensure a clean engine/context
       // Initialize the game with player deck vs AI deck
       initializeGame('Player', activeDeck.cards, aiDeck);
       
@@ -241,8 +244,13 @@ function StoryBattleContent() {
 }
 
 export default function StoryBattleScreen() {
+  const { chapterId, battleId, session } = useLocalSearchParams<{
+    chapterId: string; battleId: string; session?: string;
+  }>();
+
+  // Ensure a fresh GameContext per battle
   return (
-    <GameProvider>
+    <GameProvider key={`${chapterId}:${battleId}:${session ?? ''}`}>
       <StoryBattleContent />
     </GameProvider>
   );
