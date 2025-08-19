@@ -40,7 +40,7 @@ export function GameBoard() {
   const isMobile = screenWidth <= 768;
   const isWeb = Platform.OS === 'web';
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const translateX = new Animated.Value(isMobile ? screenWidth : 0);
+  const translateX = React.useRef(new Animated.Value(isMobile ? screenWidth : 0)).current;
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
   const closeSidebar = () => setSidebarVisible(false);
