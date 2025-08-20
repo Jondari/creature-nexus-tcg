@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.10](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.9...v0.3.10) (2025-08-20)
+
+
+### Features
+
+* add damage & affinity preview on enemy targets when an attack is selected ([07cca96](https://github.com/Jondari/creature-nexus-tcg/commit/07cca96337735ff7eb2061b415e9cfbca4843743))
+
+
+### Bug Fixes
+
+* ensure hit animation plays before removing lethal targets for both player and AI ([ef31652](https://github.com/Jondari/creature-nexus-tcg/commit/ef3165227b82812a149bbc74c822690e702d0f47))
+* make damage/affinity badge responsive (small vs normal card sizes) ([f977e11](https://github.com/Jondari/creature-nexus-tcg/commit/f977e112deb77dfd54ab4639dc6ac4171c61be5d))
+* prevent stale attack damage ([6444772](https://github.com/Jondari/creature-nexus-tcg/commit/64447724c02e9138017a8c2b95df018e52b0f14a))
+* properly cleanup damage animation timeouts to prevent memory leaks ([43ea178](https://github.com/Jondari/creature-nexus-tcg/commit/43ea178dc983241d2e114ad6a980a6a082da635b))
+
 ### [0.3.9](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.8...v0.3.9) (2025-08-17)
 
 
