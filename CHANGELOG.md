@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.10...v0.4.0) (2025-08-22)
+
+
+### Features
+
+* implement complete story mode with light persistence and dev tools ([1d3ba76](https://github.com/Jondari/creature-nexus-tcg/commit/1d3ba76e2d0bab4143787629411357e692461bba))
+
+
+### Bug Fixes
+
+* back button appearing in gameboard when battle starts from quick battle ([32706d2](https://github.com/Jondari/creature-nexus-tcg/commit/32706d24f596670c5ea8a2dd78599960b9b7010e))
+* fix infinite load on battle replay ([8ee3fb7](https://github.com/Jondari/creature-nexus-tcg/commit/8ee3fb7a6d51b39c8ec2dcecbeeed142bfb25bb6))
+
 ### [0.3.10](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.9...v0.3.10) (2025-08-20)
 
 
