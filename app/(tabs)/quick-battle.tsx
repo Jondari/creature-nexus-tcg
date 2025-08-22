@@ -2,21 +2,25 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
-import { GameProvider } from '@/context/GameContext';
+import { GameProvider, useGame } from '@/context/GameContext';
 import { GameBoard } from '@/components/GameBoard';
 import Colors from '@/constants/Colors';
 
-export default function QuickBattleScreen() {
+function QuickBattleContent() {
   const router = useRouter();
+  const { gameState } = useGame();
 
   const handleBackPress = () => {
     router.push('/(tabs)/battle');
   };
 
+  // Only show back button when no game is active (deck selection screen)
+  const showBackButton = !gameState || gameState.isGameOver;
+
   return (
-    <GameProvider>
-      <View style={styles.container}>
-        {/* Back Button */}
+    <View style={styles.container}>
+      {/* Back Button - only visible during deck selection */}
+      {showBackButton && (
         <TouchableOpacity
           style={styles.backButton}
           onPress={handleBackPress}
@@ -24,9 +28,17 @@ export default function QuickBattleScreen() {
         >
           <ArrowLeft size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        
-        <GameBoard onBackPress={handleBackPress} />
-      </View>
+      )}
+      
+      <GameBoard />
+    </View>
+  );
+}
+
+export default function QuickBattleScreen() {
+  return (
+    <GameProvider>
+      <QuickBattleContent />
     </GameProvider>
   );
 }
