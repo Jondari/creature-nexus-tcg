@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, Dimensions, TouchableOpacity, Modal } from 'react-native';
-import { Card } from '../models/Card';
-import { CardComponent } from './CardComponent';
+import { Card } from '../../models/Card';
+import { CardComponent } from '../CardComponent';
 import { LinearGradient } from 'expo-linear-gradient';
-import Colors from '../constants/Colors';
+import Colors from '../../constants/Colors';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 

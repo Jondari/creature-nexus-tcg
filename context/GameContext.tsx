@@ -11,6 +11,7 @@ interface GameContextState {
   actionLog: ActionLogEntry[];
   damageAnimations: DamageAnimation[];
   aiVisualState: AIVisualState;
+  energyWaveAnimation: { show: boolean; amount: number } | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -22,6 +23,8 @@ interface GameContextActions {
   resetGame: () => void;
   triggerDamageAnimation: (cardId: string, duration?: number) => void;
   clearDamageAnimation: (cardId: string) => void;
+  triggerEnergyWaveAnimation: (amount: number) => void;
+  clearEnergyWaveAnimation: () => void;
   setAIStatus: (status: AIStatus, message?: string) => void;
   setAIHighlight: (cardId?: string, targetCardId?: string) => void;
   clearAIVisuals: () => void;
@@ -37,6 +40,8 @@ type GameAction_Context =
   | { type: 'ADD_ACTION_LOG'; payload: ActionLogEntry }
   | { type: 'ADD_DAMAGE_ANIMATION'; payload: DamageAnimation }
   | { type: 'CLEAR_DAMAGE_ANIMATION'; payload: string }
+  | { type: 'TRIGGER_ENERGY_WAVE_ANIMATION'; payload: number }
+  | { type: 'CLEAR_ENERGY_WAVE_ANIMATION' }
   | { type: 'SET_AI_STATUS'; payload: { status: AIStatus; message?: string } }
   | { type: 'SET_AI_HIGHLIGHT'; payload: { cardId?: string; targetCardId?: string } }
   | { type: 'CLEAR_AI_VISUALS' }
@@ -53,6 +58,7 @@ const initialState: GameContextState = {
     status: 'idle',
     isActive: false,
   },
+  energyWaveAnimation: null,
   isLoading: false,
   error: null,
 };
@@ -86,6 +92,16 @@ function gameReducer(state: GameContextState, action: GameAction_Context): GameC
       return {
         ...state,
         damageAnimations: state.damageAnimations.filter(anim => anim.cardId !== action.payload),
+      };
+    case 'TRIGGER_ENERGY_WAVE_ANIMATION':
+      return {
+        ...state,
+        energyWaveAnimation: { show: true, amount: action.payload },
+      };
+    case 'CLEAR_ENERGY_WAVE_ANIMATION':
+      return {
+        ...state,
+        energyWaveAnimation: null,
       };
     case 'SET_AI_STATUS':
       return {
@@ -202,6 +218,16 @@ export function GameProvider({ children }: GameProviderProps) {
       const player2 = PlayerUtils.createPlayer('player2', 'AI Opponent', aiDeck, true);
       
       const gameEngine = new GameEngine(player1, player2, playerDeck, aiDeck);
+      
+      // Set up energy gain callback
+      gameEngine.setOnPlayerEnergyGain((playerId: string, amount: number) => {
+        const players = gameEngine.getPlayers();
+        const player = players.find(p => p.id === playerId);
+        if (player && !player.isAI) {
+          triggerEnergyWaveAnimation(amount);
+        }
+      });
+      
       const gameState = gameEngine.getGameState();
       
       dispatch({ 
@@ -223,6 +249,10 @@ export function GameProvider({ children }: GameProviderProps) {
       const players = state.gameEngine.getPlayers();
       const player = players.find(p => p.id === action.playerId);
       const description = getActionDescription(action, state.gameEngine);
+      
+      // Store previous game state to detect energy changes
+      const previousGameState = state.gameEngine.getGameState();
+      const previousCurrentPlayer = previousGameState.players[previousGameState.currentPlayerIndex];
       
       const success = state.gameEngine.executeAction(action);
       
@@ -430,6 +460,14 @@ export function GameProvider({ children }: GameProviderProps) {
     dispatch({ type: 'CLEAR_DAMAGE_ANIMATION', payload: cardId });
   };
 
+  const triggerEnergyWaveAnimation = (amount: number) => {
+    dispatch({ type: 'TRIGGER_ENERGY_WAVE_ANIMATION', payload: amount });
+  };
+
+  const clearEnergyWaveAnimation = () => {
+    dispatch({ type: 'CLEAR_ENERGY_WAVE_ANIMATION' });
+  };
+
   const setAIStatus = (status: AIStatus, message?: string) => {
     dispatch({ type: 'SET_AI_STATUS', payload: { status, message } });
   };
@@ -452,6 +490,8 @@ export function GameProvider({ children }: GameProviderProps) {
         resetGame,
         triggerDamageAnimation,
         clearDamageAnimation,
+        triggerEnergyWaveAnimation,
+        clearEnergyWaveAnimation,
         setAIStatus,
         setAIHighlight,
         clearAIVisuals,

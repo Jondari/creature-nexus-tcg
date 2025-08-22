@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Coins, ShoppingCart, Star, Zap } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
-import PackOpeningAnimation from '@/components/PackOpeningAnimation';
+import PackOpeningAnimation from '@/components/Animation/PackOpeningAnimation';
 import { PACK_CATEGORIES, getAvailablePacks, BoosterPack } from '@/data/boosterPacks';
 import { UserCurrency } from '@/models/BoosterPack';
 import { showErrorAlert, showSuccessAlert, showConfirmAlert } from '@/utils/alerts';

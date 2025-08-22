@@ -9,6 +9,7 @@ import { useSettings } from '../context/SettingsContext';
 import { CardComponent } from './CardComponent';
 import { ActionLog } from './ActionLog';
 import { Sidebar } from './Sidebar';
+import { EnergyWaveAnimation } from './Animation/EnergyWaveAnimation';
 import { Card } from '../types/game';
 import { t } from '../utils/i18n';
 import { CardLoader } from '../utils/game/cardLoader';
@@ -21,10 +22,12 @@ export function GameBoard() {
     actionLog, 
     damageAnimations,
     aiVisualState,
+    energyWaveAnimation,
     isLoading, 
     error,
     triggerDamageAnimation,
     clearDamageAnimation,
+    clearEnergyWaveAnimation,
     resetGame,
     initializeGame
   } = useGame();
@@ -606,6 +609,14 @@ export function GameBoard() {
         >
           <ActionLog logs={actionLog} sidebarMode={true} />
         </Sidebar>
+      )}
+
+      {/* Energy Wave Animation */}
+      {energyWaveAnimation && energyWaveAnimation.show && (
+        <EnergyWaveAnimation
+          energyAmount={energyWaveAnimation.amount}
+          onComplete={clearEnergyWaveAnimation}
+        />
       )}
     </View>
   );

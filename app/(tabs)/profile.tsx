@@ -367,6 +367,14 @@ export default function ProfileScreen() {
               <TestTube size={20} color={'#4ecdc4'} />
               <Text style={[styles.linkText, { color: '#4ecdc4' }]}>Unlock All Chapters</Text>
             </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={() => router.push('/energy-demo' as any)}
+            >
+              <TestTube size={20} color={'#00ff9f'} />
+              <Text style={[styles.linkText, { color: '#00ff9f' }]}>Energy Animation Demo</Text>
+            </TouchableOpacity>
           </View>
         </View>
         )}

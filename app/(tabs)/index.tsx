@@ -12,7 +12,7 @@ import { Card } from '@/models/Card';
 import { PackageOpen } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import CountdownTimer from '@/components/CountdownTimer';
-import PackOpeningAnimation from '@/components/PackOpeningAnimation';
+import PackOpeningAnimation from '@/components/Animation/PackOpeningAnimation';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useFocusEffect } from '@react-navigation/native';
 import { NotificationService } from '@/services/notificationService';

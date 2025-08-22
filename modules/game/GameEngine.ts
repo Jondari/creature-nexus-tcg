@@ -8,6 +8,7 @@ import { Deck } from '../card/Deck';
 export class GameEngine {
   private gameState: GameState;
   private playerDecks: [Deck, Deck];
+  private onPlayerEnergyGain?: (playerId: string, amount: number) => void;
 
   constructor(player1: Player, player2: Player, deck1: Card[], deck2: Card[]) {
     this.playerDecks = [new Deck(deck1), new Deck(deck2)];
@@ -38,7 +39,15 @@ export class GameEngine {
     this.gameState.players = [player1, player2];
     
     // Start the first turn for player 1
+    const previousEnergy = this.gameState.players[this.gameState.currentPlayerIndex].energy;
     this.gameState = TurnManager.startTurn(this.gameState, this.playerDecks);
+    
+    // Trigger energy gain callback for human player with actual amount gained
+    const currentPlayer = this.gameState.players[this.gameState.currentPlayerIndex];
+    if (!currentPlayer.isAI && this.onPlayerEnergyGain) {
+      const energyGained = currentPlayer.energy - previousEnergy;
+      this.onPlayerEnergyGain(currentPlayer.id, energyGained);
+    }
   }
 
   executeAction(action: GameAction): boolean {
@@ -156,7 +165,18 @@ export class GameEngine {
     this.gameState = TurnManager.endTurn(this.gameState);
     
     if (this.gameState.phase === 'draw') {
+      // Store energy before turn start
+      const previousEnergy = this.gameState.players[this.gameState.currentPlayerIndex].energy;
+      
       this.gameState = TurnManager.startTurn(this.gameState, this.playerDecks);
+      
+      // Trigger energy gain callback for human player with actual amount gained
+      const currentPlayer = this.gameState.players[this.gameState.currentPlayerIndex];
+      if (!currentPlayer.isAI && this.onPlayerEnergyGain) {
+        const energyGained = currentPlayer.energy - previousEnergy;
+        this.onPlayerEnergyGain(currentPlayer.id, energyGained);
+      }
+      
       // If game ended due to deck-out during startTurn, stop processing
       if (this.gameState.isGameOver) {
         return true;
@@ -184,7 +204,18 @@ export class GameEngine {
     this.gameState = TurnManager.endTurn(this.gameState);
     
     if (this.gameState.phase === 'draw') {
+      // Store energy before turn start
+      const previousEnergy = this.gameState.players[this.gameState.currentPlayerIndex].energy;
+      
       this.gameState = TurnManager.startTurn(this.gameState, this.playerDecks);
+      
+      // Trigger energy gain callback for human player with actual amount gained
+      const currentPlayer = this.gameState.players[this.gameState.currentPlayerIndex];
+      if (!currentPlayer.isAI && this.onPlayerEnergyGain) {
+        const energyGained = currentPlayer.energy - previousEnergy;
+        this.onPlayerEnergyGain(currentPlayer.id, energyGained);
+      }
+      
       // If game ended due to deck-out during startTurn, stop processing
       if (this.gameState.isGameOver) {
         return true;
@@ -200,12 +231,20 @@ export class GameEngine {
     return { ...this.gameState };
   }
 
+  setOnPlayerEnergyGain(callback: (playerId: string, amount: number) => void): void {
+    this.onPlayerEnergyGain = callback;
+  }
+
   getCurrentPlayer(): Player {
     return TurnManager.getCurrentPlayer(this.gameState);
   }
 
   getOpponent(): Player {
     return TurnManager.getOpponent(this.gameState);
+  }
+
+  getPlayers(): [Player, Player] {
+    return this.gameState.players;
   }
 
   isGameOver(): boolean {
