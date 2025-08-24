@@ -122,18 +122,6 @@ export default function AuthScreen() {
         end={{ x: 0.5, y: 1 }}
       />
       
-      {/* Bolt Hackathon Badge */}
-      <TouchableOpacity 
-        style={styles.boltBadge}
-        onPress={() => Linking.openURL('https://bolt.new/')}
-        activeOpacity={0.8}
-      >
-        <Image 
-          source={require('@/assets/images/white_circle_360x360.png')}
-          style={styles.boltBadgeImage}
-          resizeMode="contain"
-        />
-      </TouchableOpacity>
       
       <View style={styles.content}>
         <View style={styles.logoContainer}>
@@ -423,19 +411,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Medium',
     color: Colors.text.primary,
-  },
-  boltBadge: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 100,
-    width: 50,
-    height: 50,
-    boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.25)',
-    elevation: 5,
-  },
-  boltBadgeImage: {
-    width: 50,
-    height: 50,
   },
 });

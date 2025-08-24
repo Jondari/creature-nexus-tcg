@@ -234,18 +234,6 @@ export default function OpenPackScreen() {
         end={{ x: 0.5, y: 0.5 }}
       />
       
-      {/* Bolt Hackathon Badge */}
-      <TouchableOpacity 
-        style={styles.boltBadge}
-        onPress={() => Linking.openURL('https://bolt.new/')}
-        activeOpacity={0.8}
-      >
-        <Image 
-          source={require('@/assets/images/white_circle_360x360.png')}
-          style={styles.boltBadgeImage}
-          resizeMode="contain"
-        />
-      </TouchableOpacity>
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
@@ -451,19 +439,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: Colors.text.secondary,
-  },
-  boltBadge: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 100,
-    width: 50,
-    height: 50,
-    boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.25)',
-    elevation: 5,
-  },
-  boltBadgeImage: {
-    width: 50,
-    height: 50,
   },
 });
