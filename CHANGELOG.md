@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.0...v0.4.1) (2025-08-24)
+
+
+### Features
+
+* integrate energy wave animation system that triggers when players gain energy at turn start ([eb9f664](https://github.com/Jondari/creature-nexus-tcg/commit/eb9f664f7c8b0ec380a8872fdb4c3e9d3b2f4194))
+
 ## [0.4.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.3.10...v0.4.0) (2025-08-22)
 
 
