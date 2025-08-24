@@ -7,6 +7,7 @@ import { Mail, LogIn } from 'lucide-react-native';
 import { showErrorAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import MonsterShowcaseAnimation from '@/components/Animation/MonsterShowcaseAnimation';
 
 // Premium monster showcase images
 const PREMIUM_MONSTERS = {
@@ -233,6 +234,14 @@ export default function AuthScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Full Screen Monster Animation Overlay */}
+      <MonsterShowcaseAnimation
+        transitionDuration={1200}
+        fadeDuration={600}
+        autoStart={true}
+        fullScreen={true}
+      />
     </View>
   );
 }
