@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
@@ -14,6 +14,7 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import Colors from '@/constants/Colors';
 import { SplashScreen } from 'expo-router';
 import * as NavigationBar from 'expo-navigation-bar';
+import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -29,6 +30,8 @@ export default function RootLayout() {
     'Poppins-SemiBold': Poppins_600SemiBold,
     'Poppins-Bold': Poppins_700Bold,
   });
+
+  const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -64,6 +67,14 @@ export default function RootLayout() {
                 <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
               </Stack>
               <StatusBar style="light" hidden={Platform.OS === 'android'} />
+              
+              {/* Animated Splash Screen */}
+              {showAnimatedSplash && (
+                <AnimatedSplashScreen
+                  duration={2500} // 2.5 seconds
+                  onComplete={() => setShowAnimatedSplash(false)}
+                />
+              )}
             </StoryModeProvider>
           </DeckProvider>
         </AuthProvider>
