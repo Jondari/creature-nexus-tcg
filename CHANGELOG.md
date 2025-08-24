@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.2...v0.4.3) (2025-08-24)
+
+
+### Features
+
+* add animated splash screen with pulsing icon effect ([4bbce11](https://github.com/Jondari/creature-nexus-tcg/commit/4bbce117be8b318a82624935afa8cac45c48f458))
+* create a screen opening animation ([2427846](https://github.com/Jondari/creature-nexus-tcg/commit/24278467dca2d037c09562a2f90572ec34a1494e))
+
 ### [0.4.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.1...v0.4.2) (2025-08-24)
 
 
