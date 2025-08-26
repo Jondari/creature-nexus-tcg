@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.4...v0.4.5) (2025-08-26)
+
+
+### Features
+
+* enhance privacy policy with detailed account deletion procedures and data retention timelines ([22845e1](https://github.com/Jondari/creature-nexus-tcg/commit/22845e113e7101f83de6ef90faacf0fff49fdc26))
+
 ### [0.4.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.3...v0.4.4) (2025-08-26)
 
 
