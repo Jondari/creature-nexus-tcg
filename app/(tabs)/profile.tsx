@@ -5,7 +5,7 @@ import { useSettings } from '@/context/SettingsContext';
 import { useStoryMode } from '@/context/StoryModeContext';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube, Gift } from 'lucide-react-native';
+import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube, Gift, Shield } from 'lucide-react-native';
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import { addNexusCoins } from '@/utils/currencyUtils';
 import { RedeemCodeModal } from '@/components/RedeemCodeModal';
@@ -410,6 +410,14 @@ export default function ProfileScreen() {
             >
               <Globe size={20} color={Colors.text.primary} />
               <Text style={styles.linkText}>Official Website</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={() => router.push('/privacy-policy' as any)}
+            >
+              <Shield size={20} color={Colors.text.primary} />
+              <Text style={styles.linkText}>Privacy Policy</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -177,7 +177,13 @@ export default function AuthScreen() {
         </TouchableOpacity>
         
         <Text style={styles.termsText}>
-          By continuing, you agree to our Terms of Service and Privacy Policy
+          By continuing, you agree to our Terms of Service and{' '}
+          <Text 
+            style={styles.privacyLink}
+            onPress={() => router.push('/privacy-policy' as any)}
+          >
+            Privacy Policy
+          </Text>
         </Text>
       </View>
 
@@ -319,6 +325,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: Colors.text.secondary,
     textAlign: 'center',
+  },
+  privacyLink: {
+    color: Colors.accent[500],
+    textDecorationLine: 'underline',
   },
   loginButton: {
     flexDirection: 'row',
