@@ -144,11 +144,22 @@ export default function PrivacyPolicyScreen() {
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account deletion</Text>
+        <View id="delete-account" style={styles.section}>
+          <Text style={styles.sectionTitle}>Account & data deletion</Text>
           <Text style={styles.sectionText}>
-            You can delete your account in-app (Settings → Delete account) or by emailing{' '}
-            <Text style={styles.link}>contact.giovanni.i@gmail.com</Text>.
+            <Text style={styles.bold}>In-app:</Text> Settings → Delete account. This action is <Text style={styles.bold}>irreversible</Text>.
+          </Text>
+          <Text style={styles.sectionText}>
+            <Text style={styles.bold}>Without the app:</Text> email <Text style={styles.link}>contact.giovanni.i@gmail.com</Text> (subject “Deletion request – Creature Nexus TCG”) and include your account email or UID if possible.
+          </Text>
+          <Text style={styles.sectionText}>
+            <Text style={styles.bold}>Data deleted:</Text> Firebase account and Firestore profile (progress, decks, cards, nexusCoins, avatar, preferences).
+          </Text>
+          <Text style={styles.sectionText}>
+            <Text style={styles.bold}>Data retained:</Text> purchase records (Google Play / RevenueCat) kept for legal/accounting purposes; technical logs and backups for up to 30 days.
+          </Text>
+          <Text style={styles.sectionText}>
+            <Text style={styles.bold}>Timeline:</Text> deletion starts immediately; completed within 30 days (backups may take up to 30 days to fully purge).
           </Text>
         </View>
 
@@ -278,10 +289,21 @@ export default function PrivacyPolicyScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Suppression du compte</Text>
+            <Text style={styles.sectionTitle}>Suppression du compte et des données</Text>
             <Text style={styles.sectionText}>
-              Suppression possible dans l'application (Réglages → Supprimer le compte) ou par e-mail à{' '}
-              <Text style={styles.link}>contact.giovanni.i@gmail.com</Text>.
+              <Text style={styles.bold}>Dans l’application :</Text> Réglages → Supprimer le compte. Action <Text style={styles.bold}>irréversible</Text>.
+            </Text>
+            <Text style={styles.sectionText}>
+              <Text style={styles.bold}>Sans l’app :</Text> écrivez à <Text style={styles.link}>contact.giovanni.i@gmail.com</Text> (objet « Deletion request – Creature Nexus TCG ») avec votre e-mail de compte ou UID si possible.
+            </Text>
+            <Text style={styles.sectionText}>
+              <Text style={styles.bold}>Données supprimées :</Text> compte Firebase et profil Firestore (progression, decks, cartes, nexusCoins, avatar, préférences).
+            </Text>
+            <Text style={styles.sectionText}>
+              <Text style={styles.bold}>Données conservées :</Text> preuves d’achat (Google Play / RevenueCat) pour obligations comptables/légales ; journaux techniques et sauvegardes jusqu’à 30 jours.
+            </Text>
+            <Text style={styles.sectionText}>
+              <Text style={styles.bold}>Délai :</Text> démarrage immédiat ; finalisation sous 30 jours (les sauvegardes peuvent nécessiter jusqu’à 30 jours).
             </Text>
           </View>
 
