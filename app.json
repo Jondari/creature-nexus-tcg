@@ -18,15 +18,14 @@
     },
     "android": {
       "package": "com.jondari.creaturenexustcg",
-      "softwareKeyboardLayoutMode": "pan",
-      "navigationBar": {
-        "visible": false,
-        "behavior": "overlay-swipe"
-      },
-      "statusBar": {
-        "hidden": true,
-        "translucent": true
-      }
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "androidNavigationBar": {
+      "visible": "leanback"
+    },
+    "androidStatusBar": {
+      "hidden": true,
+      "translucent": true
     },
     "web": {
       "bundler": "metro",
@@ -46,12 +45,16 @@
           "defaultChannel": "default"
         }
       ],
-      ["expo-build-properties", {
-        "android": {
-          "enableProguardInReleaseBuilds": true,
-          "enableShrinkResourcesInReleaseBuilds": true
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
         }
-      }]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true
