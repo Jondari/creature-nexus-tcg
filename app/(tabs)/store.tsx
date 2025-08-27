@@ -14,6 +14,7 @@ import { getUserCurrency, spendNexusCoins, addNexusCoins } from '@/utils/currenc
 import { generatePackCards } from '@/utils/boosterUtils';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/config/firebase';
+import { BillingService } from '@/services/billingService';
 
 const { width } = Dimensions.get('window');
 const isWideScreen = width >= 768; // Tablet/desktop breakpoint
@@ -155,12 +156,103 @@ export default function StoreScreen() {
     }
   };
 
-  const handleRealMoneyPurchase = (pack: BoosterPack) => {
-    // TODO: Implement real money payment integration
-    showErrorAlert(
-      'Coming Soon',
-      'Real money purchases will be available in a future update!'
-    );
+  const handleRealMoneyPurchase = async (pack: BoosterPack) => {
+    if (!user) return;
+
+    // Check if billing is supported on this platform
+    if (Platform.OS === 'web') {
+      showErrorAlert(
+        'Not Available', 
+        'In-app purchases are only available on mobile devices. Please use the mobile app to make purchases.'
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Map pack names to product IDs
+      const getProductId = (packName: string): string => {
+        switch (packName.toLowerCase()) {
+          case 'standard pack':
+            return BillingService.PRODUCT_IDS.STANDARD_PACK;
+          case 'fire pack':
+          case 'water pack':
+          case 'earth pack':
+          case 'air pack':
+            return BillingService.PRODUCT_IDS.ELEMENTAL_PACK;
+          case 'legendary pack':
+            return BillingService.PRODUCT_IDS.LEGENDARY_PACK;
+          case 'mythic pack':
+            return BillingService.PRODUCT_IDS.MYTHIC_PACK;
+          default:
+            return BillingService.PRODUCT_IDS.STANDARD_PACK;
+        }
+      };
+
+      const productId = getProductId(pack.name);
+      
+      // Initialize billing service
+      await BillingService.initialize();
+      
+      // Get product details to show current price
+      const product = await BillingService.getProduct(productId);
+      if (!product) {
+        showErrorAlert('Error', 'This product is not available for purchase.');
+        return;
+      }
+
+      // Show confirmation with real price
+      showConfirmAlert(
+        'Confirm Purchase',
+        `Purchase ${pack.name} for ${product.price}?`,
+        async () => {
+          const result = await BillingService.purchaseProduct(productId);
+          
+          if (result.success) {
+            // Purchase successful - grant the pack to the user
+            const packCards = generatePackCards(pack);
+            
+            // Add cards to user's collection
+            const userRef = doc(db, 'users', user.uid);
+            await updateDoc(userRef, {
+              cards: arrayUnion(...packCards.map(card => card.id)),
+              lastPackOpened: new Date(),
+              packHistory: arrayUnion({
+                packName: pack.name,
+                openedAt: new Date(),
+                cost: product.price,
+                paymentMethod: 'real_money'
+              })
+            });
+
+            // Finish the transaction
+            if (result.purchaseToken) {
+              await BillingService.finishTransaction(result.purchaseToken);
+            }
+
+            // Show pack results
+            setPackResults(packCards);
+            setCurrentPackName(pack.name);
+            setShowPackResults(true);
+            
+            showSuccessAlert(
+              'Purchase Successful!',
+              `You purchased ${pack.name} for ${product.price}!`
+            );
+          } else {
+            showErrorAlert('Purchase Failed', result.error || 'Failed to complete purchase.');
+          }
+        }
+      );
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Real money purchase error:', error);
+      }
+      showErrorAlert('Error', 'Failed to process purchase. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderPackCard = (pack: BoosterPack) => {

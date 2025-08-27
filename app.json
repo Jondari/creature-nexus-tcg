@@ -54,7 +54,8 @@
           }
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      "expo-iap"
     ],
     "experiments": {
       "typedRoutes": true
