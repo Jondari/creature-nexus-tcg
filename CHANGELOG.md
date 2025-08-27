@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.8](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.7...v0.4.8) (2025-08-27)
+
+
+### Features
+
+* add expo in app purchases dependency ([275fac7](https://github.com/Jondari/creature-nexus-tcg/commit/275fac7f077da120a355fcaca2a593e385ede687))
+
+
+### Bug Fixes
+
+* resolve app.json schema validation and update Expo dependencies to 53.0.22 ([6959c3d](https://github.com/Jondari/creature-nexus-tcg/commit/6959c3db0b9ff927aa8f6ec88e6a9764c6244487))
+
 ### [0.4.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.6...v0.4.7) (2025-08-27)
 
 
