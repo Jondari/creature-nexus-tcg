@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.8...v0.5.0) (2025-08-27)
+
+
+### Features
+
+* migrate from expo-in-app-purchases to expo-iap with comprehensive billing integration ([b264328](https://github.com/Jondari/creature-nexus-tcg/commit/b264328be0e1fa2fd572c855811264b5a130522e))
+
 ### [0.4.8](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.7...v0.4.8) (2025-08-27)
 
 
