@@ -9,7 +9,12 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal"            // generate APK
+    },
+    "preview-store": {
+      "distribution": "store",              // important to target the store
+      "android": { "buildType": "app-bundle" }, // AAB (not APK)
+      "autoIncrement": true
     },
     "production": {
       "autoIncrement": true

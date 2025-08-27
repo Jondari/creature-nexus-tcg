@@ -45,7 +45,13 @@
           "color": "#ffffff",
           "defaultChannel": "default"
         }
-      ]
+      ],
+      ["expo-build-properties", {
+        "android": {
+          "enableProguardInReleaseBuilds": true,
+          "enableShrinkResourcesInReleaseBuilds": true
+        }
+      }]
     ],
     "experiments": {
       "typedRoutes": true
