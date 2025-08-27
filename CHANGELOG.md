@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.6...v0.4.7) (2025-08-27)
+
+
+### Features
+
+* add imagemin tools for optimizing JPEGs and PNGs to reduce app bundle size ([bb99153](https://github.com/Jondari/creature-nexus-tcg/commit/bb991537678d757946d9cdcf5ce5f4658428d040))
+
 ### [0.4.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.5...v0.4.6) (2025-08-27)
 
 ### [0.4.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.4...v0.4.5) (2025-08-26)
