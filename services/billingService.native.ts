@@ -1,14 +1,15 @@
 import {
   initConnection,
   endConnection,
-  getProducts,
-  requestPurchase,
+  requestProducts,        // ✅ replaces getProducts / getSubscriptions
+  requestPurchase,        // ✅ new signature
   purchaseUpdatedListener,
   purchaseErrorListener,
-  finishTransaction,
+  finishTransaction,      // ✅ new signature
   type Product,
   type Purchase,
 } from 'expo-iap';
+import { Platform } from 'react-native';
 
 export interface BillingProduct {
   id: string;
@@ -21,6 +22,13 @@ export interface BillingProduct {
 
 let purchaseUpdateSub: ReturnType<typeof purchaseUpdatedListener> | null = null;
 let purchaseErrorSub: ReturnType<typeof purchaseErrorListener> | null = null;
+
+// Helper function to parse localized price strings
+function parseLocalizedAmount(priceString: string): number {
+  // "€2,99" -> 2.99 ; "R$ 12,50" -> 12.50 ; "$3.49" -> 3.49
+  const numericMatch = priceString.replace(/[^\d.,]/g, '').replace(',', '.').match(/\d+(\.\d+)?/);
+  return numericMatch ? parseFloat(numericMatch[0]) : 0;
+}
 
 export class BillingService {
   private static isInitialized = false;
@@ -64,10 +72,10 @@ export class BillingService {
     purchaseUpdateSub = purchaseUpdatedListener(async (purchase: Purchase) => {
       try {
         if (__DEV__) {
-          console.log('Purchase successful:', purchase);
+          console.log('IAP purchase:', { id: purchase.id, productId: purchase.productId, token: purchase.purchaseToken });
         }
         
-        // Finish the transaction
+        // Finish the transaction - Android consumable
         await finishTransaction({ purchase, isConsumable: true });
         
         // Call success callback if set
@@ -106,19 +114,22 @@ export class BillingService {
     }
 
     try {
-      const productIds = Object.values(this.PRODUCT_IDS);
-      const products = await getProducts({ productIds });
+      const skus = Object.values(this.PRODUCT_IDS);
+      const products = await requestProducts({ skus, type: 'inapp' }) as Product[];
       
-      this.products = products.map((product: Product) => ({
-        id: product.productId,
-        title: product.title,
-        description: product.description || '',
-        price: product.localizedPrice,
-        priceAmount: product.price ? parseFloat(product.price) : 0,
-        currency: product.currency || 'USD'
+      this.products = products.map((p: Product) => ({
+        id: p.id,                                   // ✅ correct field name
+        title: p.title,
+        description: p.description ?? '',
+        price: p.displayPrice,                      // ✅ localized string ("€2,99")
+        priceAmount: typeof p.price === 'number'    // ✅ numeric value if available
+          ? p.price
+          : parseLocalizedAmount(p.displayPrice),
+        currency: p.currency,
       }));
 
       if (__DEV__) {
+        console.log('IAP products keys:', products.map(p => ({ id: p.id, displayPrice: p.displayPrice, currency: p.currency })));
         console.log('Retrieved products:', this.products);
       }
 
@@ -163,8 +174,11 @@ export class BillingService {
         }
       };
 
-      // Initiate the purchase
-      requestPurchase({ productId })
+      // Initiate the purchase - Android only
+      requestPurchase({
+        request: { android: { skus: [productId] } },
+        type: 'inapp'
+      })
         .catch((error) => {
           if (__DEV__) {
             console.error('Purchase request failed:', error);
