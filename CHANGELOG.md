@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.0...v0.5.1) (2025-08-28)
+
+
+### Bug Fixes
+
+* migrate billingService to expo-iap v2.8.3 API to resolve skus required error ([7590a46](https://github.com/Jondari/creature-nexus-tcg/commit/7590a46ea6de8cd78d99771c31ca679b55b58ac3))
+
 ## [0.5.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.4.8...v0.5.0) (2025-08-27)
 
 
