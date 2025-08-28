@@ -15,6 +15,7 @@ import Colors from '@/constants/Colors';
 import { SplashScreen } from 'expo-router';
 import * as NavigationBar from 'expo-navigation-bar';
 import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
+import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -45,6 +46,40 @@ export default function RootLayout() {
       NavigationBar.setVisibilityAsync('hidden');
       NavigationBar.setBackgroundColorAsync('transparent');
     }
+  }, []);
+
+  // Configure RevenueCat (Android only)
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    
+    const initializeRevenueCat = async () => {
+      try {
+        const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
+        
+        if (!apiKey) {
+          if (__DEV__) {
+            console.warn('RevenueCat Android API key not found in environment variables');
+          }
+          return;
+        }
+
+        if (__DEV__) {
+          Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+        }
+        
+        await Purchases.configure({ apiKey });
+        
+        if (__DEV__) {
+          console.log('RevenueCat configured successfully');
+        }
+      } catch (error) {
+        if (__DEV__) {
+          console.error('Failed to configure RevenueCat:', error);
+        }
+      }
+    };
+    
+    initializeRevenueCat();
   }, []);
 
   // Return null to keep splash screen visible while fonts load

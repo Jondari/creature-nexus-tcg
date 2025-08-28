@@ -1,14 +1,7 @@
-import {
-  initConnection,
-  endConnection,
-  requestProducts,        // ✅ replaces getProducts / getSubscriptions
-  requestPurchase,        // ✅ new signature
-  purchaseUpdatedListener,
-  purchaseErrorListener,
-  finishTransaction,      // ✅ new signature
-  type Product,
-  type Purchase,
-} from 'expo-iap';
+// BillingService - RevenueCat wrapper maintaining original interface
+// This service delegates to RevenueCat while keeping the same API your store expects
+
+import RevenueCatService, { RCProduct } from './RevenueCatService';
 import { Platform } from 'react-native';
 
 export interface BillingProduct {
@@ -20,25 +13,11 @@ export interface BillingProduct {
   currency: string;
 }
 
-let purchaseUpdateSub: ReturnType<typeof purchaseUpdatedListener> | null = null;
-let purchaseErrorSub: ReturnType<typeof purchaseErrorListener> | null = null;
-
-// Helper function to parse localized price strings
-function parseLocalizedAmount(priceString: string): number {
-  // "€2,99" -> 2.99 ; "R$ 12,50" -> 12.50 ; "$3.49" -> 3.49
-  const numericMatch = priceString.replace(/[^\d.,]/g, '').replace(',', '.').match(/\d+(\.\d+)?/);
-  return numericMatch ? parseFloat(numericMatch[0]) : 0;
-}
-
 export class BillingService {
   private static isInitialized = false;
   private static products: BillingProduct[] = [];
-  private static purchaseCallbacks: {
-    onSuccess?: (purchase: Purchase) => void;
-    onError?: (error: any) => void;
-  } = {};
 
-  // Define your product IDs - these must match what you create in Google Play Console
+  // Keep original product IDs for mapping/compatibility
   static readonly PRODUCT_IDS = {
     STANDARD_PACK: 'standard_pack',
     ELEMENTAL_PACK: 'elemental_pack', 
@@ -53,55 +32,18 @@ export class BillingService {
     if (this.isInitialized) return;
 
     try {
-      await initConnection();
-      this.setupPurchaseListeners();
+      await RevenueCatService.initialize();
       this.isInitialized = true;
       
       if (__DEV__) {
-        console.log('Billing service initialized successfully');
+        console.log('BillingService (RevenueCat) initialized successfully');
       }
     } catch (error) {
       if (__DEV__) {
-        console.error('Failed to initialize billing service:', error);
+        console.error('Failed to initialize BillingService (RevenueCat):', error);
       }
       throw error;
     }
-  }
-
-  private static setupPurchaseListeners(): void {
-    purchaseUpdateSub = purchaseUpdatedListener(async (purchase: Purchase) => {
-      try {
-        if (__DEV__) {
-          console.log('IAP purchase:', { id: purchase.id, productId: purchase.productId, token: purchase.purchaseToken });
-        }
-        
-        // Finish the transaction - Android consumable
-        await finishTransaction({ purchase, isConsumable: true });
-        
-        // Call success callback if set
-        if (this.purchaseCallbacks.onSuccess) {
-          this.purchaseCallbacks.onSuccess(purchase);
-        }
-      } catch (error) {
-        if (__DEV__) {
-          console.error('Error finishing transaction:', error);
-        }
-        
-        if (this.purchaseCallbacks.onError) {
-          this.purchaseCallbacks.onError(error);
-        }
-      }
-    });
-
-    purchaseErrorSub = purchaseErrorListener((error: any) => {
-      if (__DEV__) {
-        console.error('Purchase error:', error);
-      }
-      
-      if (this.purchaseCallbacks.onError) {
-        this.purchaseCallbacks.onError(error);
-      }
-    });
   }
 
   static async getProducts(): Promise<BillingProduct[]> {
@@ -114,29 +56,30 @@ export class BillingService {
     }
 
     try {
-      const skus = Object.values(this.PRODUCT_IDS);
-      const products = await requestProducts({ skus, type: 'inapp' }) as Product[];
+      const rcProducts = await RevenueCatService.getProducts();
       
-      this.products = products.map((p: Product) => ({
-        id: p.id,                                   // ✅ correct field name
+      // Map RevenueCat products to BillingProduct interface
+      this.products = rcProducts.map((p: RCProduct) => ({
+        id: p.id,
         title: p.title,
-        description: p.description ?? '',
-        price: p.displayPrice,                      // ✅ localized string ("€2,99")
-        priceAmount: typeof p.price === 'number'    // ✅ numeric value if available
-          ? p.price
-          : parseLocalizedAmount(p.displayPrice),
+        description: p.description || '',
+        price: p.price,           // Already localized string from RevenueCat
+        priceAmount: p.priceAmount,
         currency: p.currency,
       }));
 
       if (__DEV__) {
-        console.log('IAP products keys:', products.map(p => ({ id: p.id, displayPrice: p.displayPrice, currency: p.currency })));
-        console.log('Retrieved products:', this.products);
+        console.log('BillingService products:', this.products.map(p => ({ 
+          id: p.id, 
+          title: p.title, 
+          price: p.price 
+        })));
       }
 
       return this.products;
     } catch (error) {
       if (__DEV__) {
-        console.error('Failed to get products:', error);
+        console.error('Failed to get products via RevenueCat:', error);
       }
       return [];
     }
@@ -156,101 +99,80 @@ export class BillingService {
       await this.initialize();
     }
 
-    return new Promise((resolve) => {
-      // Set up callbacks for this purchase
-      this.purchaseCallbacks = {
-        onSuccess: (purchase: Purchase) => {
-          resolve({
+    try {
+      const result = await RevenueCatService.purchaseProduct(productId);
+      
+      if (result.success) {
+        if (__DEV__) {
+          console.log('BillingService purchase successful:', {
+            productId,
             success: true,
-            purchaseToken: purchase.purchaseToken
-          });
-        },
-        onError: (error: any) => {
-          const errorMessage = this.getErrorMessage(error);
-          resolve({
-            success: false,
-            error: errorMessage
+            purchaseToken: result.purchaseToken
           });
         }
+        
+        return {
+          success: true,
+          purchaseToken: result.purchaseToken
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error
+        };
+      }
+    } catch (error: any) {
+      if (__DEV__) {
+        console.error('BillingService purchase failed:', error);
+      }
+      
+      return {
+        success: false,
+        error: error?.message || 'Purchase failed. Please try again.'
       };
-
-      // Initiate the purchase - Android only
-      requestPurchase({
-        request: { android: { skus: [productId] } },
-        type: 'inapp'
-      })
-        .catch((error) => {
-          if (__DEV__) {
-            console.error('Purchase request failed:', error);
-          }
-          resolve({
-            success: false,
-            error: 'Failed to initiate purchase. Please try again.'
-          });
-        });
-    });
+    }
   }
 
-  private static getErrorMessage(error: any): string {
-    // Handle different types of errors from expo-iap
-    if (typeof error === 'string') {
-      if (error.includes('cancelled') || error.includes('canceled')) {
-        return 'Purchase cancelled';
-      }
-    }
+  static async finishTransaction(purchaseToken?: string): Promise<void> {
+    // RevenueCat handles transaction finishing automatically
+    await RevenueCatService.finishTransaction(purchaseToken);
     
-    if (error?.code) {
-      switch (error.code) {
-        case 'USER_CANCELED':
-          return 'Purchase cancelled';
-        case 'SERVICE_UNAVAILABLE':
-          return 'Billing service is currently unavailable';
-        case 'BILLING_UNAVAILABLE':
-          return 'Billing is not available on this device';
-        case 'ITEM_UNAVAILABLE':
-          return 'This item is not available for purchase';
-        case 'DEVELOPER_ERROR':
-          return 'There was a configuration error. Please contact support.';
-        default:
-          return error.message || 'An error occurred during purchase. Please try again.';
-      }
-    }
-
-    return error?.message || 'An error occurred during purchase. Please try again.';
-  }
-
-  static async finishTransaction(purchaseToken: string): Promise<void> {
-    // Note: expo-iap handles transaction finishing automatically in the listener
-    // This method is kept for compatibility but doesn't need to do anything
     if (__DEV__) {
-      console.log('Transaction finished (handled automatically by expo-iap)');
+      console.log('Transaction finished (handled by RevenueCat)');
     }
   }
 
   static async disconnect(): Promise<void> {
     try {
-      // Clean up listeners
-      if (purchaseUpdateSub) {
-        purchaseUpdateSub.remove();
-        purchaseUpdateSub = null;
-      }
-      if (purchaseErrorSub) {
-        purchaseErrorSub.remove();
-        purchaseErrorSub = null;
-      }
-
-      await endConnection();
+      await RevenueCatService.disconnect();
       this.isInitialized = false;
       this.products = [];
       
       if (__DEV__) {
-        console.log('Billing service disconnected');
+        console.log('BillingService (RevenueCat) disconnected');
       }
     } catch (error) {
       if (__DEV__) {
-        console.error('Failed to disconnect billing service:', error);
+        console.error('Failed to disconnect BillingService:', error);
       }
     }
+  }
+
+  // Additional RevenueCat-specific methods (bonus functionality)
+  static async restorePurchases() {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    
+    return await RevenueCatService.restorePurchases();
+  }
+
+  static async getCustomerInfo() {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    
+    return await RevenueCatService.getCustomerInfo();
   }
 }
 

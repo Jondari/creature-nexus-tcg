@@ -18,7 +18,8 @@
     },
     "android": {
       "package": "com.jondari.creaturenexustcg",
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "permissions": ["com.android.vending.BILLING"]
     },
     "androidNavigationBar": {
       "visible": "leanback"
@@ -54,8 +55,7 @@
           }
         }
       ],
-      "expo-audio",
-      "expo-iap"
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true
