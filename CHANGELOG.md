@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.4...v0.5.5) (2025-08-29)
+
+
+### Bug Fixes
+
+* resolve RevenueCat purchase integration and add price localization ([980015f](https://github.com/Jondari/creature-nexus-tcg/commit/980015f59986a2bf6b4a55466d11df7fe12f47fc))
+
 ### [0.5.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.3...v0.5.4) (2025-08-29)
 
 
