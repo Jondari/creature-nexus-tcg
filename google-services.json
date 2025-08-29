@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "825183736507-i9vvs2u2fgnsqq2oh4hsqt532jqrkfml.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jondari.creaturenexustcg",
+            "certificate_hash": "99cc6ff861b8c53da406c8b1c43e90a553aaee32"
+          }
+        },
+        {
           "client_id": "825183736507-ietqkk2bgg71pvp4lc692r57a35666uf.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
