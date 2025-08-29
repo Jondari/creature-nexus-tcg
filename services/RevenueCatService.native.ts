@@ -1,8 +1,5 @@
 import Purchases, { 
-  PurchasesPackage, 
-  CustomerInfo, 
-  PurchasesOfferings,
-  LOG_LEVEL 
+  CustomerInfo 
 } from 'react-native-purchases';
 
 export interface RCProduct {
@@ -15,9 +12,20 @@ export interface RCProduct {
   packageType?: string;
 }
 
+// Product IDs (SKUs) for Google Play managed products
+export const PRODUCT_IDS = {
+  STANDARD_PACK: 'standard_pack',
+  ELEMENTAL_PACK: 'elemental_pack',
+  LEGENDARY_PACK: 'legendary_pack',
+  MYTHIC_PACK: 'mythic_pack',
+  NEXUS_COINS_100: 'nexus_coins_100',
+  NEXUS_COINS_500: 'nexus_coins_500',
+  NEXUS_COINS_1000: 'nexus_coins_1000',
+} as const;
+
 export class RevenueCatService {
   private static isInitialized = false;
-  private static offerings: PurchasesOfferings | null = null;
+  static readonly PRODUCT_IDS = PRODUCT_IDS;
 
   static async initialize(): Promise<void> {
     // RevenueCat is already configured in app startup
@@ -35,42 +43,40 @@ export class RevenueCatService {
     }
 
     try {
-      // Fetch offerings from RevenueCat
-      this.offerings = await Purchases.getOfferings();
-      const currentOffering = this.offerings.current;
+      // Fetch products directly by identifiers (no Offerings)
+      const skus = [
+        PRODUCT_IDS.STANDARD_PACK,
+        PRODUCT_IDS.ELEMENTAL_PACK,
+        PRODUCT_IDS.LEGENDARY_PACK,
+        PRODUCT_IDS.MYTHIC_PACK,
+        PRODUCT_IDS.NEXUS_COINS_100,
+        PRODUCT_IDS.NEXUS_COINS_500,
+        PRODUCT_IDS.NEXUS_COINS_1000,
+      ];
       
-      if (!currentOffering || !currentOffering.availablePackages.length) {
-        if (__DEV__) {
-          console.warn('No current offering or packages found');
-          console.log('Available offerings:', Object.keys(this.offerings.all));
-        }
-        return [];
-      }
+      // Force 'inapp' type for Android compatibility
+      const storeProducts = await Purchases.getProducts(skus as string[], 'inapp');
 
-      // Map packages to our product interface
-      const products: RCProduct[] = currentOffering.availablePackages.map((pkg: PurchasesPackage) => ({
-        id: pkg.product.identifier,           // SKU from store
-        title: pkg.product.title,
-        description: pkg.product.description || '',
-        price: pkg.product.priceString,       // Localized price string
-        priceAmount: pkg.product.price,       // Numeric price
-        currency: pkg.product.currencyCode,
-        packageType: pkg.packageType,
+      const products: RCProduct[] = storeProducts.map((p: any) => ({
+        id: p.identifier,
+        title: p.title,
+        description: p.description || '',
+        price: p.priceString,
+        priceAmount: p.price,
+        currency: p.currencyCode,
       }));
 
       if (__DEV__) {
-        console.log('RevenueCat products:', products.map(p => ({ 
-          id: p.id, 
-          title: p.title, 
-          price: p.price, 
-          packageType: p.packageType 
-        })));
+        console.log(
+          'RevenueCat products (no offerings):',
+          products.map(p => ({ id: p.id, price: p.price }))
+        );
       }
 
       return products;
     } catch (error) {
       if (__DEV__) {
-        console.error('Failed to get RevenueCat products:', error);
+        console.error('Failed to get RevenueCat products (no offerings):', error);
       }
       return [];
     }
@@ -85,74 +91,36 @@ export class RevenueCatService {
     success: boolean;
     error?: string;
     purchaseToken?: string;
-    customerInfo?: CustomerInfo;
   }> {
-    if (!this.isInitialized) {
-      await this.initialize();
-    }
-
     try {
-      // Get the package for this product ID
-      const products = await this.getProducts();
-      const product = products.find(p => p.id === productId);
-      
-      if (!product) {
-        return {
-          success: false,
-          error: 'Product not found'
-        };
+      if (!this.isInitialized) {
+        await this.initialize();
       }
 
-      // Find the package in current offering
-      const currentOffering = this.offerings?.current;
-      const packageToPurchase = currentOffering?.availablePackages.find(
-        pkg => pkg.product.identifier === productId
-      );
+      // Achat direct par identifiant (SKU)
+      const { customerInfo, productIdentifier } = await Purchases.purchaseProduct(productId);
 
-      if (!packageToPurchase) {
-        return {
-          success: false,
-          error: 'Package not found'
-        };
-      }
-
-      // Make the purchase
-      const { customerInfo, productIdentifier } = await Purchases.purchasePackage(packageToPurchase);
-      
       if (__DEV__) {
-        console.log('RevenueCat purchase successful:', {
-          productIdentifier,
-          activeEntitlements: Object.keys(customerInfo.entitlements.active),
-          latestExpirationDate: customerInfo.latestExpirationDate
-        });
+        console.log('Purchase successful:', { productIdentifier });
       }
 
-      return {
-        success: true,
-        customerInfo,
-        purchaseToken: productIdentifier // RevenueCat handles tokens internally
-      };
-
+      // RevenueCat gère les transactions ; on renvoie l'ID pour compat 'finishTransaction'
+      return { success: true, purchaseToken: productIdentifier };
     } catch (error: any) {
       if (__DEV__) {
-        console.error('RevenueCat purchase failed:', error);
+        console.error('Purchase failed:', error);
       }
-
-      let errorMessage = 'Purchase failed. Please try again.';
       
-      if (error.code) {
+      let errorMessage = 'Purchase failed';
+      if (error?.userCancelled) {
+        errorMessage = 'User cancelled';
+      } else if (typeof error?.code === 'string') {
         switch (error.code) {
-          case 'PURCHASE_CANCELLED':
-            errorMessage = 'Purchase cancelled';
+          case 'PRODUCT_ALREADY_PURCHASED':
+            errorMessage = 'Product already purchased';
             break;
-          case 'STORE_PROBLEM':
-            errorMessage = 'Store is currently unavailable';
-            break;
-          case 'PURCHASE_NOT_ALLOWED':
-            errorMessage = 'Purchase not allowed on this device';
-            break;
-          case 'PURCHASE_INVALID':
-            errorMessage = 'Invalid purchase';
+          case 'PURCHASE_INVALID_ERROR':
+            errorMessage = 'Purchase invalid';
             break;
           case 'PRODUCT_NOT_AVAILABLE':
             errorMessage = 'Product not available';
@@ -161,11 +129,7 @@ export class RevenueCatService {
             errorMessage = error.message || errorMessage;
         }
       }
-
-      return {
-        success: false,
-        error: errorMessage
-      };
+      return { success: false, error: errorMessage };
     }
   }
 
@@ -219,7 +183,6 @@ export class RevenueCatService {
   static async disconnect(): Promise<void> {
     // RevenueCat doesn't need explicit disconnection like expo-iap
     this.isInitialized = false;
-    this.offerings = null;
     
     if (__DEV__) {
       console.log('RevenueCatService disconnected');
