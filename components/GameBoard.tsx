@@ -7,6 +7,7 @@ import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
 import { useSettings } from '../context/SettingsContext';
 import { CardComponent } from './CardComponent';
+import { CardActionButtons } from './CardActionButtons';
 import { ActionLog } from './ActionLog';
 import { Sidebar } from './Sidebar';
 import { EnergyWaveAnimation } from './Animation/EnergyWaveAnimation';
@@ -507,25 +508,34 @@ export function GameBoard() {
         <Text style={styles.fieldLabel}>{playerAtBottom.name} {t('player.field')}</Text>
         <ScrollView horizontal style={styles.cardRow}>
           {playerAtBottom.field.map((card) => (
-            <CardComponent
-              key={card.id}
-              card={card}
-              selected={selectedCard === card.id}
-              onPress={() => {
-                // Toggle selection and drop any previous attack preview to avoid stale damage badges
-                setSelectedCard(card.id === selectedCard ? null : card.id!);
-                setAttackMode(null);
-              }}
-              onAttack={(attackName) => handleAttack(card.id!, attackName)}
-              showActions={currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard === card.id}
-              disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn || resolvingAttack}
-              aiHighlight={getCardHighlightType(card.id!)}
-              damageAnimation={getDamageAnimationForCard(card.id!)}
-              size={cardSize}
-              playerEnergy={playerAtBottom.energy}
-              currentTurn={gameState.turnNumber}
-              isFirstPlayer={playerAtBottom.id === gameState.players[0].id}
-            />
+            <View key={card.id} style={{ marginRight: 12, position: 'relative' }}>
+              <CardComponent
+                card={card}
+                selected={selectedCard === card.id}
+                onPress={() => {
+                  // Toggle selection and drop any previous attack preview to avoid stale damage badges
+                  setSelectedCard(card.id === selectedCard ? null : card.id!);
+                  setAttackMode(null);
+                }}
+                onAttack={(attackName) => handleAttack(card.id!, attackName)}
+                showActions={currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard === card.id}
+                disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn || resolvingAttack}
+                aiHighlight={getCardHighlightType(card.id!)}
+                damageAnimation={getDamageAnimationForCard(card.id!)}
+                size={cardSize}
+                playerEnergy={playerAtBottom.energy}
+                currentTurn={gameState.turnNumber}
+                isFirstPlayer={playerAtBottom.id === gameState.players[0].id}
+              />
+              
+              {/* Card Action Buttons */}
+              <CardActionButtons
+                visible={selectedCard === card.id && currentPlayer.id === playerAtBottom.id && isPlayerTurn}
+                showRetire={true}
+                onRetire={() => handleRetire(card.id!)}
+                cardSize={cardSize}
+              />
+            </View>
           ))}
           {playerAtBottom.field.length === 0 && (
             <Text style={styles.emptyField}>No creatures on field</Text>
@@ -548,41 +558,29 @@ export function GameBoard() {
         <Text style={styles.fieldLabel}>{t('player.hand')}</Text>
         <ScrollView horizontal style={styles.cardRow}>
           {playerAtBottom.hand.map((card) => (
-            <CardComponent
-              key={card.id}
-              card={card}
-              selected={selectedCard === card.id}
-              onPress={() => setSelectedCard(card.id === selectedCard ? null : card.id!)}
-              disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
-              aiHighlight={getCardHighlightType(card.id!)}
-              size={cardSize}
-            />
+            <View key={card.id} style={{ marginRight: 12, position: 'relative' }}>
+              <CardComponent
+                card={card}
+                selected={selectedCard === card.id}
+                onPress={() => setSelectedCard(card.id === selectedCard ? null : card.id!)}
+                disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
+                aiHighlight={getCardHighlightType(card.id!)}
+                size={cardSize}
+              />
+              
+              {/* Card Action Buttons */}
+              <CardActionButtons
+                visible={selectedCard === card.id && currentPlayer.id === playerAtBottom.id && isPlayerTurn}
+                showPlay={true}
+                onPlay={() => handlePlayCard(card.id!)}
+                cardSize={cardSize}
+              />
+            </View>
           ))}
         </ScrollView>
       </View>
 
-      {/* Action Buttons */}
-      {currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard && (
-        <View style={styles.actions}>
-          {playerAtBottom.hand.some(card => card.id === selectedCard) && (
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handlePlayCard(selectedCard)}
-            >
-              <Text style={styles.actionText}>{t('actions.play')}</Text>
-            </TouchableOpacity>
-          )}
-          
-          {playerAtBottom.field.some(card => card.id === selectedCard) && (
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handleRetire(selectedCard)}
-            >
-              <Text style={styles.actionText}>{t('actions.retire')}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
+      {/* Action buttons removed - now handled by CardActionButtons overlay */}
 
       {/* End Turn Button */}
       {currentPlayer.id === playerAtBottom.id && isPlayerTurn && (
