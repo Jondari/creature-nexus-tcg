@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.1...v0.5.2) (2025-08-29)
+
+
+### Features
+
+* add iOS bundle identifier, audio permissions, Babel config, and update native build scripts to fix app crash ([fec0dc2](https://github.com/Jondari/creature-nexus-tcg/commit/fec0dc20168f1d32cd8d550f0377a4549e74cc0a))
+* migrate from expo-iap to RevenueCat for in-app purchases ([aa49421](https://github.com/Jondari/creature-nexus-tcg/commit/aa49421119fb696337bd9a796ff693e14ce15878))
+
 ### [0.5.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.0...v0.5.1) (2025-08-28)
 
 
