@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.2...v0.5.3) (2025-08-29)
+
+
+### Bug Fixes
+
+* add google play signatures to fix firebase issue on android ([b948c51](https://github.com/Jondari/creature-nexus-tcg/commit/b948c51e0f26cd42a194911715b230d5a10ba820))
+
 ### [0.5.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.1...v0.5.2) (2025-08-29)
 
 
