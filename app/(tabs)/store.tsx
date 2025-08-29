@@ -28,10 +28,12 @@ export default function StoreScreen() {
   const [packResults, setPackResults] = useState<any[]>([]);
   const [currentPackName, setCurrentPackName] = useState<string>('');
   const [lastFetchTime, setLastFetchTime] = useState(0);
+  const [realPrices, setRealPrices] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (user) {
       fetchUserCurrency();
+      fetchRealPrices(); // Load real prices from RevenueCat
     }
   }, [user]);
 
@@ -45,6 +47,25 @@ export default function StoreScreen() {
       }
     }, [user, lastFetchTime])
   );
+
+  const fetchRealPrices = async () => {
+    try {
+      await BillingService.initialize();
+      const products = await BillingService.getProducts();
+      
+      const priceMap: Record<string, string> = {};
+      products.forEach(product => {
+        priceMap[product.id] = product.price;
+      });
+      
+      setRealPrices(priceMap);
+    } catch (error) {
+      if (__DEV__) {
+        console.log('Failed to fetch real prices, using fallback:', error);
+        // Keep realPrices empty to use fallback
+      }
+    }
+  };
 
   const fetchUserCurrency = async () => {
     try {
@@ -156,6 +177,91 @@ export default function StoreScreen() {
     }
   };
 
+  // Map pack IDs to product IDs
+  const getProductId = (packId: string): string => {
+    switch (packId) {
+      case 'standard_pack':
+        return BillingService.PRODUCT_IDS.STANDARD_PACK;
+      case 'fire_pack':
+      case 'water_pack':
+      case 'earth_pack':
+      case 'air_pack':
+        return BillingService.PRODUCT_IDS.ELEMENTAL_PACK;
+      case 'legendary_guaranteed_pack':
+        return BillingService.PRODUCT_IDS.LEGENDARY_PACK;
+      case 'mythic_guaranteed_pack':
+        return BillingService.PRODUCT_IDS.MYTHIC_PACK;
+      default:
+        return BillingService.PRODUCT_IDS.STANDARD_PACK;
+    }
+  };
+
+  const getDisplayPrice = (pack: BoosterPack): string => {
+    const productId = getProductId(pack.id);
+    
+    // Try to use real RevenueCat price first
+    if (realPrices[productId]) {
+      return realPrices[productId];
+    }
+    
+    // Fallback to localized hardcoded price
+    if (pack.realMoneyPrice) {
+      const price = pack.realMoneyPrice / 100;
+      
+      // Get locale in a platform-safe way
+      const getDeviceLocale = (): string => {
+        if (Platform.OS === 'web') {
+          // For web, use browser locale
+          return navigator.language || 'en-US';
+        } else {
+          // For native platforms, try to use expo-localization safely
+          try {
+            const Localization = require('expo-localization');
+            return Localization.locale || Localization.locales?.[0] || 'en-US';
+          } catch (error) {
+            // Fallback if expo-localization is not available
+            return 'en-US';
+          }
+        }
+      };
+      
+      const locale = getDeviceLocale();
+      
+      // Determine currency based on region
+      const getCurrencyFromLocale = (locale: string): string => {
+        const region = locale.split('-')[1] || locale.split('_')[1];
+        switch (region?.toUpperCase()) {
+          case 'US':
+          case 'CA':
+            return 'USD';
+          case 'GB':
+            return 'GBP';
+          case 'JP':
+            return 'JPY';
+          case 'AU':
+            return 'AUD';
+          default:
+            return 'EUR'; // Default to EUR for EU and other regions
+        }
+      };
+      
+      const currency = getCurrencyFromLocale(locale);
+      
+      // Use proper locale-aware currency formatting
+      try {
+        return new Intl.NumberFormat(locale, {
+          style: 'currency',
+          currency: currency,
+        }).format(price);
+      } catch (error) {
+        // Fallback if Intl is not supported
+        return `€${price.toFixed(2)}`;
+      }
+    }
+    
+    return 'N/A';
+  };
+
   const handleRealMoneyPurchase = async (pack: BoosterPack) => {
     if (!user) return;
 
@@ -171,26 +277,7 @@ export default function StoreScreen() {
     try {
       setLoading(true);
 
-      // Map pack names to product IDs
-      const getProductId = (packName: string): string => {
-        switch (packName.toLowerCase()) {
-          case 'standard pack':
-            return BillingService.PRODUCT_IDS.STANDARD_PACK;
-          case 'fire pack':
-          case 'water pack':
-          case 'earth pack':
-          case 'air pack':
-            return BillingService.PRODUCT_IDS.ELEMENTAL_PACK;
-          case 'legendary pack':
-            return BillingService.PRODUCT_IDS.LEGENDARY_PACK;
-          case 'mythic pack':
-            return BillingService.PRODUCT_IDS.MYTHIC_PACK;
-          default:
-            return BillingService.PRODUCT_IDS.STANDARD_PACK;
-        }
-      };
-
-      const productId = getProductId(pack.name);
+      const productId = getProductId(pack.id);
       
       // Initialize billing service
       await BillingService.initialize();
@@ -311,7 +398,7 @@ export default function StoreScreen() {
                   onPress={() => handleRealMoneyPurchase(pack)}
                 >
                   <Text style={styles.moneyPrice}>
-                    ${(pack.realMoneyPrice / 100).toFixed(2)}
+                    {getDisplayPrice(pack)}
                   </Text>
                 </TouchableOpacity>
               )}

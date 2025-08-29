@@ -1,5 +1,6 @@
 import Purchases, { 
-  CustomerInfo 
+  CustomerInfo,
+  LOG_LEVEL 
 } from 'react-native-purchases';
 
 export interface RCProduct {
@@ -23,8 +24,15 @@ export const PRODUCT_IDS = {
   NEXUS_COINS_1000: 'nexus_coins_1000',
 } as const;
 
+/** Resolve the correct "non-subscription" constant across SDK versions */
+const INAPP_OR_NON_SUBS: any =
+  (Purchases as any).PURCHASE_TYPE?.INAPP ??
+  (Purchases as any).PRODUCT_CATEGORY?.NON_SUBSCRIPTION ??
+  (Purchases as any).PRODUCT_TYPE?.NON_SUBSCRIPTION;
+
 export class RevenueCatService {
   private static isInitialized = false;
+  private static mockMode = false; // TEMP: Set to true for mock testing
   static readonly PRODUCT_IDS = PRODUCT_IDS;
 
   static async initialize(): Promise<void> {
@@ -33,7 +41,10 @@ export class RevenueCatService {
     this.isInitialized = true;
     
     if (__DEV__) {
+      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
       console.log('RevenueCatService initialized');
+    } else {
+      Purchases.setLogLevel(LOG_LEVEL.WARN);
     }
   }
 
@@ -53,9 +64,9 @@ export class RevenueCatService {
         PRODUCT_IDS.NEXUS_COINS_500,
         PRODUCT_IDS.NEXUS_COINS_1000,
       ];
-      
-      // Force 'inapp' type for Android compatibility
-      const storeProducts = await Purchases.getProducts(skus as string[], 'inapp');
+
+      // Force non-subscription type for Android compatibility across SDK versions
+      const storeProducts = await Purchases.getProducts(skus as string[], INAPP_OR_NON_SUBS);
 
       const products: RCProduct[] = storeProducts.map((p: any) => ({
         id: p.identifier,
@@ -91,31 +102,38 @@ export class RevenueCatService {
     success: boolean;
     error?: string;
     purchaseToken?: string;
+    cancelled?: boolean;
   }> {
     try {
       if (!this.isInitialized) {
         await this.initialize();
       }
 
-      // Achat direct par identifiant (SKU)
-      const { customerInfo, productIdentifier } = await Purchases.purchaseProduct(productId);
+      // Get the StoreProduct with correct type (force INAPP)
+      const storeProducts = await Purchases.getProducts([productId], INAPP_OR_NON_SUBS);
+      const storeProduct = storeProducts.find(p => p.identifier === productId);
+      
+      if (!storeProduct) {
+        throw new Error('Product not found in available products');
+      }
+
+      // Use purchaseStoreProduct to avoid type confusion
+      const { customerInfo, productIdentifier } = await Purchases.purchaseStoreProduct(storeProduct);
 
       if (__DEV__) {
         console.log('Purchase successful:', { productIdentifier });
       }
 
-      // RevenueCat gère les transactions ; on renvoie l'ID pour compat 'finishTransaction'
       return { success: true, purchaseToken: productIdentifier };
     } catch (error: any) {
-      if (__DEV__) {
-        console.error('Purchase failed:', error);
-      }
-      
-      let errorMessage = 'Purchase failed';
-      if (error?.userCancelled) {
+      const code = error?.code ?? error?.errorCode;
+      const cancelled = !!error?.userCancelled;
+      let errorMessage = typeof error?.message === 'string' ? error.message : 'Purchase failed';
+
+      if (cancelled) {
         errorMessage = 'User cancelled';
-      } else if (typeof error?.code === 'string') {
-        switch (error.code) {
+      } else if (typeof code === 'string') {
+        switch (code) {
           case 'PRODUCT_ALREADY_PURCHASED':
             errorMessage = 'Product already purchased';
             break;
@@ -129,7 +147,12 @@ export class RevenueCatService {
             errorMessage = error.message || errorMessage;
         }
       }
-      return { success: false, error: errorMessage };
+
+      if (__DEV__) {
+        console.error('Purchase failed:', { code, cancelled, error });
+      }
+
+      return { success: false, error: errorMessage, cancelled };
     }
   }
 
@@ -181,11 +204,18 @@ export class RevenueCatService {
   }
 
   static async disconnect(): Promise<void> {
-    // RevenueCat doesn't need explicit disconnection like expo-iap
-    this.isInitialized = false;
-    
-    if (__DEV__) {
-      console.log('RevenueCatService disconnected');
+    try {
+      await Purchases.logOut();
+    } catch (error) {
+      if (__DEV__) {
+        console.warn('RevenueCat logOut warning:', error);
+      }
+    } finally {
+      this.isInitialized = false;
+      
+      if (__DEV__) {
+        console.log('RevenueCatService disconnected');
+      }
     }
   }
 }
