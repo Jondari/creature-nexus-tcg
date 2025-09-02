@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.6.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.5...v0.6.0) (2025-09-02)
+
+
+### Features
+
+* add unified Scenes Engine for tutorials and story mode ([4ca4988](https://github.com/Jondari/creature-nexus-tcg/commit/4ca4988ab626e493e024e27bd44278ce7176cc57))
+
 ### [0.5.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.4...v0.5.5) (2025-08-29)
 
 
