@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     zIndex: 100,
+    opacity: 0.85,
   },
   containerSmall: {
     top: 4,
