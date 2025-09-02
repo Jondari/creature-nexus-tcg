@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.7.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.6.1...v0.7.0) (2025-09-02)
+
+
+### Features
+
+* implement multi-attack per turn with engine-level tracking ([3a16529](https://github.com/Jondari/creature-nexus-tcg/commit/3a1652961c5d7b7c425b8fab1b395112c1ed4be5))
+
 ### [0.6.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.6.0...v0.6.1) (2025-09-02)
 
 
