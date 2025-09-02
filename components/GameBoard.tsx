@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Platform } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
@@ -39,6 +39,7 @@ export function GameBoard() {
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
   const [showDeckSelection, setShowDeckSelection] = useState(false);
   
+  
   // Gesture and animation state
   const screenWidth = Dimensions.get('window').width;
   const isMobile = screenWidth <= 768;
@@ -65,6 +66,7 @@ export function GameBoard() {
     // If the player picks another card, drop the previous preview immediately
     setAttackMode(null);
   }, [selectedCard]);
+
 
   /**
    * Returns the affinity bonus: +20, -20, or 0.
@@ -235,13 +237,13 @@ export function GameBoard() {
     if (!isPlayerTurn || resolvingAttack) return;
 
     if (attackMode) {
-      // Predict lethal to decide if we should delay the engine update
+      // Predict lethality to decide if we should delay engine resolution
       const attacker = playerAtBottom.field.find(c => c.id === attackMode.cardId);
       const preview = attacker ? getPreviewDamage(attacker, attackMode.attackName, card) : null;
       const isPredictedLethal = !!(preview && card.hp != null && preview.total >= card.hp);
 
       // Play the hit animation on the target card first
-      const KILL_ANIM_MS = 600;   // keep this short and snappy
+      const KILL_ANIM_MS = 600;   // short & snappy so it feels responsive
       const NON_KILL_ANIM_MS = 1000;
       const animMs = isPredictedLethal ? KILL_ANIM_MS : NON_KILL_ANIM_MS;
 
@@ -258,12 +260,13 @@ export function GameBoard() {
         // Delay the engine attack so the card is not removed before the animation
         setResolvingAttack(true);
         setTimeout(() => {
-          attack(attackMode.cardId, attackMode.attackName, card.id!);
+          // Resolve attack in engine (engine will handle auto-end turn logic)
+          attack(attacker!.id!, attackMode.attackName, card.id!);
           setResolvingAttack(false);
         }, KILL_ANIM_MS);
       } else {
-        // Non-lethal: resolve immediately (current behavior)
-        attack(attackMode.cardId, attackMode.attackName, card.id!);
+        // Non-lethal: resolve immediately (engine will handle auto-end turn logic)
+        attack(attacker!.id!, attackMode.attackName, card.id!);
       }
     } else {
       setSelectedCard(card.id === selectedCard ? null : card.id!);
@@ -518,7 +521,12 @@ export function GameBoard() {
                   setAttackMode(null);
                 }}
                 onAttack={(attackName) => handleAttack(card.id!, attackName)}
-                showActions={currentPlayer.id === playerAtBottom.id && isPlayerTurn && selectedCard === card.id}
+                showActions={
+                  currentPlayer.id === playerAtBottom.id &&
+                  isPlayerTurn &&
+                  selectedCard === card.id &&
+                  !gameState.attackedThisTurn.has(card.id!)
+                }
                 disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn || resolvingAttack}
                 aiHighlight={getCardHighlightType(card.id!)}
                 damageAnimation={getDamageAnimationForCard(card.id!)}
@@ -530,7 +538,7 @@ export function GameBoard() {
               
               {/* Card Action Buttons */}
               <CardActionButtons
-                visible={selectedCard === card.id && currentPlayer.id === playerAtBottom.id && isPlayerTurn}
+                visible={selectedCard === card.id && currentPlayer.id === playerAtBottom.id && isPlayerTurn && !gameState.attackedThisTurn.has(card.id!)}
                 showRetire={true}
                 onRetire={() => handleRetire(card.id!)}
                 cardSize={cardSize}

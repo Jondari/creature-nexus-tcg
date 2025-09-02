@@ -21,6 +21,7 @@ export class GameEngine {
       turnNumber: 0,
       phase: 'draw',
       isGameOver: false,
+      attackedThisTurn: new Set<string>(),
     };
 
     this.initializeGame();
@@ -98,6 +99,11 @@ export class GameEngine {
     const attackerCard = attackerPlayer.field.find(c => c.id === attackerCardId);
     if (!attackerCard) return false;
 
+    // Guard: prevent same-card multiple attacks in the same turn
+    if (this.gameState.attackedThisTurn.has(attackerCardId)) {
+      return false; // Card has already attacked this turn
+    }
+
     const isFirstPlayer = attackerPlayerIndex === 0;
     if (!CardUtils.canAttack(attackerCard, this.gameState.turnNumber, isFirstPlayer)) return false;
 
@@ -133,6 +139,9 @@ export class GameEngine {
       updatedAttackerCard
     );
 
+    // Track that this card has attacked this turn
+    this.gameState.attackedThisTurn.add(attackerCardId);
+
     if (targetCard) {
       const damagedCard = CardUtils.takeDamage(targetCard, finalDamage);
       newPlayers[defenderPlayerIndex] = PlayerUtils.updateFieldCard(
@@ -161,9 +170,10 @@ export class GameEngine {
       return true;
     }
     
-    // Attack automatically ends the turn
-    this.gameState = TurnManager.endTurn(this.gameState);
+    // Check if turn should auto-end (all creatures that can attack have attacked)
+    this.autoEndTurnIfNeeded();
     
+    // If turn was auto-ended, handle the turn transition
     if (this.gameState.phase === 'draw') {
       // Store energy before turn start
       const previousEnergy = this.gameState.players[this.gameState.currentPlayerIndex].energy;
@@ -255,7 +265,38 @@ export class GameEngine {
     return this.gameState.winner;
   }
 
-  getPlayers(): [Player, Player] {
-    return this.gameState.players;
+  private hasMoreAttacksAvailable(): boolean {
+    const currentPlayer = this.getCurrentPlayer();
+    
+    // Check each creature on the field
+    for (const card of currentPlayer.field) {
+      if (!card.id) continue;
+      
+      // Skip if this card already attacked this turn
+      if (this.gameState.attackedThisTurn.has(card.id)) continue;
+      
+      // Skip if card is dead
+      if (card.hp <= 0) continue;
+      
+      // Check if card can attack (considering mythic cooldown and first player turn 1 restriction)
+      const isFirstPlayer = this.gameState.currentPlayerIndex === 0;
+      if (!CardUtils.canAttack(card, this.gameState.turnNumber, isFirstPlayer)) continue;
+      
+      // Check if player has energy for any of this card's attacks
+      for (const attack of card.attacks) {
+        if (currentPlayer.energy >= attack.energy) {
+          return true; // Found at least one available attack
+        }
+      }
+    }
+    
+    return false; // No more attacks available
+  }
+
+  private autoEndTurnIfNeeded(): void {
+    if (!this.hasMoreAttacksAvailable()) {
+      // No more attacks possible, auto-end the turn
+      this.gameState = TurnManager.endTurn(this.gameState);
+    }
   }
 }

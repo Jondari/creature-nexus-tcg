@@ -38,6 +38,7 @@ export interface GameState {
   phase: 'draw' | 'main' | 'combat' | 'end';
   winner?: string;
   isGameOver: boolean;
+  attackedThisTurn: Set<string>; // Card IDs that have attacked this turn
 }
 
 export interface AffinityMatrix {

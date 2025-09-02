@@ -18,6 +18,7 @@ export class TurnManager {
       players: newPlayers,
       phase: 'main' as const,
       turnNumber: gameState.turnNumber + 1,
+      attackedThisTurn: new Set<string>(), // Reset attack tracking for new turn
     };
 
     // Check win conditions after drawing card (deck-out condition)
