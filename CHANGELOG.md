@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.6.0...v0.6.1) (2025-09-02)
+
+
+### Features
+
+* add card action buttons overlay for play/retire actions on selected cards ([d4af82b](https://github.com/Jondari/creature-nexus-tcg/commit/d4af82b2b01b1a093399d14c537a9610551b30f9))
+* add translucent overlay to card action buttons to reduce visual interference ([edd10b8](https://github.com/Jondari/creature-nexus-tcg/commit/edd10b84591d5a1f0c7320c8e22efc6b5830b094))
+
 ## [0.6.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.5.5...v0.6.0) (2025-09-02)
 
 
