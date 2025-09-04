@@ -14,6 +14,7 @@ import { EnergyWaveAnimation } from './Animation/EnergyWaveAnimation';
 import { Card } from '../types/game';
 import { t } from '../utils/i18n';
 import { CardLoader } from '../utils/game/cardLoader';
+import { isSpellCard } from '../models/cards-extended';
 import Colors from '../constants/Colors';
 
 export function GameBoard() {
@@ -34,7 +35,7 @@ export function GameBoard() {
   } = useGame();
   const { activeDeck } = useDecks();
   const { cardSize, setCardSize, showBattleLog } = useSettings();
-  const { playCard, attack, retireCard, endTurn, processAITurn } = useGameActions();
+  const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
   const [showDeckSelection, setShowDeckSelection] = useState(false);
@@ -274,15 +275,32 @@ export function GameBoard() {
   };
 
   const handlePlayCard = (cardId: string) => {
-    // Validate field space before playing card
     const currentPlayer = gameEngine.getCurrentPlayer();
+    const card = currentPlayer.hand.find(c => c.id === cardId);
     
-    if (currentPlayer.field.length >= 4) {
-      showWarningAlert('Field Full', 'You cannot have more than 4 creatures on the field at once.');
+    if (!card) {
+      showErrorAlert('Card Not Found', 'The selected card could not be found in your hand.');
       return;
     }
     
-    playCard(cardId);
+    if (isSpellCard(card)) {
+      // Handle spell casting
+      if (currentPlayer.energy < card.energyCost) {
+        showWarningAlert('Insufficient Energy', `This spell requires ${card.energyCost} energy, but you only have ${currentPlayer.energy}.`);
+        return;
+      }
+      
+      castSpell(cardId);
+    } else {
+      // Handle monster card playing
+      if (currentPlayer.field.length >= 4) {
+        showWarningAlert('Field Full', 'You cannot have more than 4 creatures on the field at once.');
+        return;
+      }
+      
+      playCard(cardId);
+    }
+    
     setSelectedCard(null);
   };
 
@@ -582,6 +600,7 @@ export function GameBoard() {
                 showPlay={true}
                 onPlay={() => handlePlayCard(card.id!)}
                 cardSize={cardSize}
+                card={card}
               />
             </View>
           ))}

@@ -18,6 +18,19 @@ export function useGameActions() {
     executeAction(action);
   }, [executeAction, gameState, gameEngine]);
 
+  const castSpell = useCallback((cardId: string) => {
+    if (!gameState || !gameEngine) return;
+
+    const currentPlayer = gameEngine.getCurrentPlayer();
+    const action: GameAction = {
+      type: 'CAST_SPELL',
+      playerId: currentPlayer.id,
+      cardId,
+    };
+
+    executeAction(action);
+  }, [executeAction, gameState, gameEngine]);
+
   const attack = useCallback((attackerCardId: string, attackName: string, targetCardId?: string) => {
     if (!gameState || !gameEngine) return;
 
@@ -69,6 +82,7 @@ export function useGameActions() {
 
   return {
     playCard,
+    castSpell,
     attack,
     retireCard,
     endTurn,

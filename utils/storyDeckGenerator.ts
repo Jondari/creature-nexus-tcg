@@ -1,5 +1,5 @@
 import { Card } from '@/models/Card';
-import cardsData from '@/data/cards.json';
+import cardsData from '@/data/monster-cards.json';
 
 export type Element = 'fire' | 'water' | 'earth' | 'air' | 'all';
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'legendary';

@@ -4,6 +4,7 @@ import { PlayerUtils } from '../player';
 import { TurnManager } from '../turn';
 import { AffinityCalculator } from '../affinity';
 import { Deck } from '../card/Deck';
+import { isSpellCard } from '../../models/cards-extended';
 
 export class GameEngine {
   private gameState: GameState;
@@ -65,6 +66,9 @@ export class GameEngine {
         
       case 'RETIRE_CARD':
         return this.retireCard(action.playerId, action.cardId!);
+
+      case 'CAST_SPELL':
+        return this.castSpell(action.playerId, action.cardId!);
         
       case 'END_TURN':
         return this.endTurn();
@@ -203,6 +207,33 @@ export class GameEngine {
     const updatedPlayer = PlayerUtils.retireCard(this.gameState.players[playerIndex], cardId);
     if (updatedPlayer === this.gameState.players[playerIndex]) return false;
 
+    const newPlayers: [Player, Player] = [...this.gameState.players] as [Player, Player];
+    newPlayers[playerIndex] = updatedPlayer;
+    this.gameState.players = newPlayers;
+
+    return true;
+  }
+
+  private castSpell(playerId: string, cardId: string): boolean {
+    const playerIndex = this.gameState.players.findIndex(p => p.id === playerId);
+    if (playerIndex === -1) return false;
+
+    const player = this.gameState.players[playerIndex];
+    const handIndex = player.hand.findIndex(c => c.id === cardId);
+    if (handIndex === -1) return false;
+
+    const card = player.hand[handIndex];
+    if (!isSpellCard(card)) return false; // Only spells here
+    if (player.energy < card.energyCost) return false; // Not enough energy
+
+    // Cast the spell (handles Energy Catalyst → hasEnergyBooster = true)
+    let updatedPlayer = PlayerUtils.castSpell(player, card);
+
+    // Remove from hand
+    const newHand = updatedPlayer.hand.filter((_, i) => i !== handIndex);
+    updatedPlayer = { ...updatedPlayer, hand: newHand };
+
+    // Update player in game state
     const newPlayers: [Player, Player] = [...this.gameState.players] as [Player, Player];
     newPlayers[playerIndex] = updatedPlayer;
     this.gameState.players = newPlayers;

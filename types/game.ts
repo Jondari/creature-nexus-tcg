@@ -29,6 +29,7 @@ export interface Player {
   energy: number;
   points: number;
   isAI: boolean;
+  hasEnergyBooster: boolean; // Permanent effect: energy = turn number instead of 1
 }
 
 export interface GameState {
@@ -48,7 +49,7 @@ export interface AffinityMatrix {
 }
 
 export interface GameAction {
-  type: 'PLAY_CARD' | 'ATTACK' | 'RETIRE_CARD' | 'END_TURN' | 'DRAW_CARD';
+  type: 'PLAY_CARD' | 'ATTACK' | 'RETIRE_CARD' | 'END_TURN' | 'DRAW_CARD' | 'CAST_SPELL';
   playerId: string;
   cardId?: string;
   targetCardId?: string;

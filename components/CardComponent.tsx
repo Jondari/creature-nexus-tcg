@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Card, DamageAnimation, Attack } from '../types/game';
+import { ExtendedCard, MonsterCard, SpellCard, isMonsterCard, isSpellCard } from '../models/cards-extended';
 import { DamageEffect } from './DamageEffect';
 import { t } from '../utils/i18n';
 import Colors from '../constants/Colors';
@@ -25,7 +26,7 @@ const hexToRgba = (hex: string, opacity: number): string => {
 };
 
 interface CardComponentProps {
-  card: Card;
+  card: Card | ExtendedCard;
   onPress?: () => void;
   onAttack?: (attackName: string) => void;
   disabled?: boolean;
@@ -225,32 +226,37 @@ const CardComponent = React.memo(({
                 <Text style={[creatureNameStyle, { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }]}>
                   {card.name}
                 </Text>
-                <View style={styles.hpSection}>
-                  <Text style={[
-                    hpTextStyle, 
-                    { 
-                      color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text, 
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)' 
-                    }
-                  ]}>
-                    HP {card.hp}
-                  </Text>
-                  {isElementSymbolCard && getElementSymbol(card.element) ? (
-                    <Image
-                      source={getElementSymbol(card.element)}
-                      style={elementSymbolStyle}
-                      resizeMode="contain"
-                    />
-                  ) : (
-                    <View style={[elementIconStyle, { backgroundColor: elementColor }]} />
-                  )}
-                </View>
+                {/* HP section - only for monster cards */}
+                {isMonsterCard(card) && (
+                  <View style={styles.hpSection}>
+                    <Text style={[
+                      hpTextStyle, 
+                      { 
+                        color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text, 
+                        textShadow: '1px 1px 2px rgba(0,0,0,0.8)' 
+                      }
+                    ]}>
+                      HP {card.hp}
+                    </Text>
+                    {isElementSymbolCard && getElementSymbol(card.element) ? (
+                      <Image
+                        source={getElementSymbol(card.element)}
+                        style={elementSymbolStyle}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View style={[elementIconStyle, { backgroundColor: elementColor }]} />
+                    )}
+                  </View>
+                )}
               </View>
 
               {/* Footer */}
               <View style={styles.cardFooter}>
-                {/* Display all attacks for premium cards */}
-                {card.attacks.map((attack, index) => {
+                {/* Display special ability description if no attacks */}
+                {(
+                  /* Display all attacks for monster cards */
+                  isMonsterCard(card) && card.attacks.map((attack, index) => {
                   const attackAvailable = isAttackAvailable(attack);
                   return (
                     <TouchableOpacity
@@ -319,12 +325,41 @@ const CardComponent = React.memo(({
                     </View>
                   </TouchableOpacity>
                   );
-                })}
+                })
+                )}
+                
+                {/* Display spell information for spell cards */}
+                {isSpellCard(card) && (
+                  <View style={styles.spellInfoSection}>
+                    <View style={styles.spellCostRow}>
+                      <Text style={[
+                        size === 'small' ? styles.spellCostTextSmall : styles.spellCostText,
+                        { color: colors.text }
+                      ]}>
+                        Cost: {card.energyCost} Energy
+                      </Text>
+                      <Text style={[
+                        size === 'small' ? styles.spellTypeTextSmall : styles.spellTypeText,
+                        { color: colors.text }
+                      ]}>
+                        {card.spellType}
+                      </Text>
+                    </View>
+                    <Text style={[
+                      size === 'small' ? styles.spellEffectTextSmall : styles.spellEffectText,
+                      { color: colors.text }
+                    ]}>
+                      {card.effect}
+                    </Text>
+                  </View>
+                )}
                 
                 <View style={styles.cardBottomTags}>
-                  <View style={styles.retreatTag}>
-                    <Text style={bottomTextStyle}>retreat: ⚡</Text>
-                  </View>
+                  {(
+                    <View style={styles.retreatTag}>
+                      <Text style={bottomTextStyle}>retreat: ⚡</Text>
+                    </View>
+                  )}
                   <View style={styles.rarityTag}>
                     <Text style={cardIdStyle}>{card.rarity.toUpperCase()}</Text>
                   </View>
@@ -379,25 +414,28 @@ const CardComponent = React.memo(({
                 <Text style={[creatureNameStyle, { color: colors.text }]}>
                   {card.name}
                 </Text>
-                <View style={styles.hpSection}>
-                  <Text style={[
-                    hpTextStyle, 
-                    { 
-                      color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text 
-                    }
-                  ]}>
-                    HP {card.hp}
-                  </Text>
-                  {isElementSymbolCard && getElementSymbol(card.element) ? (
-                    <Image
-                      source={getElementSymbol(card.element)}
-                      style={elementSymbolStyle}
-                      resizeMode="contain"
-                    />
-                  ) : (
-                    <View style={[elementIconStyle, { backgroundColor: elementColor }]} />
-                  )}
-                </View>
+                {/* HP section - only for monster cards */}
+                {isMonsterCard(card) && (
+                  <View style={styles.hpSection}>
+                    <Text style={[
+                      hpTextStyle, 
+                      { 
+                          color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text 
+                      }
+                    ]}>
+                      HP {card.hp}
+                    </Text>
+                    {isElementSymbolCard && getElementSymbol(card.element) ? (
+                      <Image
+                        source={getElementSymbol(card.element)}
+                        style={elementSymbolStyle}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View style={[elementIconStyle, { backgroundColor: elementColor }]} />
+                    )}
+                  </View>
+                )}
               </View>
             </View>
 
@@ -429,8 +467,10 @@ const CardComponent = React.memo(({
             <View style={styles.contentAreaBottom}>
             {/* Attacks */}
             <View style={cardFooterStyle}>
-              {/* Display all attacks for standard cards */}
-              {card.attacks.map((attack, index) => {
+              {/* Display attacks for monster cards */}
+              {(
+                /* Display all attacks for standard monster cards */
+                isMonsterCard(card) && card.attacks.map((attack, index) => {
                 const attackAvailable = isAttackAvailable(attack);
                 return (
                   <TouchableOpacity
@@ -499,12 +539,41 @@ const CardComponent = React.memo(({
                   </View>
                 </TouchableOpacity>
                 );
-              })}
+              })
+              )}
+              
+              {/* Display spell information for spell cards */}
+              {isSpellCard(card) && (
+                <View style={styles.spellInfoSection}>
+                  <View style={styles.spellCostRow}>
+                    <Text style={[
+                      size === 'small' ? styles.spellCostTextSmall : styles.spellCostText,
+                      { color: colors.text }
+                    ]}>
+                      Cost: {card.energyCost} Energy
+                    </Text>
+                    <Text style={[
+                      size === 'small' ? styles.spellTypeTextSmall : styles.spellTypeText,
+                      { color: colors.text }
+                    ]}>
+                      {card.spellType}
+                    </Text>
+                  </View>
+                  <Text style={[
+                    size === 'small' ? styles.spellEffectTextSmall : styles.spellEffectText,
+                    { color: colors.text }
+                  ]}>
+                    {card.effect}
+                  </Text>
+                </View>
+              )}
               
               <View style={styles.cardBottomTags}>
-                <View style={styles.retreatTag}>
-                  <Text style={bottomTextStyle}>retreat: ⚡</Text>
-                </View>
+                {(
+                  <View style={styles.retreatTag}>
+                    <Text style={bottomTextStyle}>retreat: ⚡</Text>
+                  </View>
+                )}
                 <View style={styles.rarityTag}>
                   <Text style={cardIdStyle}>{card.rarity.toUpperCase()}</Text>
                 </View>
@@ -628,6 +697,7 @@ function getCardImage(card: Card) {
     Nixeth: require('../assets/images/epic/Nixeth.png'),
     
     // Legendary
+    'Energy Catalyst': require('../assets/images/legendary/Energy_Catalyst.png'),
     Golrok: require('../assets/images/legendary/Golrok.png'),
     Selel: require('../assets/images/legendary/Selel.png'),
     Solen: require('../assets/images/legendary/Solen.png'),
@@ -1202,5 +1272,52 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     textShadow: '0.5px 0.5px 1.5px rgba(76, 175, 80, 0.3)',
+  },
+  spellInfoSection: {
+    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 6,
+    marginBottom: 5,
+  },
+  spellCostRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  spellCostText: {
+    fontSize: 11,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 14,
+  },
+  spellTypeText: {
+    fontSize: 11,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 14,
+  },
+  spellEffectText: {
+    fontSize: 11,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 14,
+  },
+  spellCostTextSmall: {
+    fontSize: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 10,
+  },
+  spellTypeTextSmall: {
+    fontSize: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 10,
+  },
+  spellEffectTextSmall: {
+    fontSize: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 10,
   },
 });

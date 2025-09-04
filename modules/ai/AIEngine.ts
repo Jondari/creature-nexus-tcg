@@ -3,6 +3,7 @@ import { CardUtils } from '../card';
 import { PlayerUtils } from '../player';
 import { AffinityCalculator } from '../affinity';
 import { TurnManager } from '../turn';
+import { isSpellCard } from '../../models/cards-extended';
 
 export class AIEngine {
   static makeDecision(gameState: GameState): AIDecision {
@@ -52,6 +53,7 @@ export class AIEngine {
     const actions: AIDecision[] = [];
 
     actions.push(...AIEngine.getPlayCardActions(aiPlayer));
+    actions.push(...AIEngine.getCastSpellActions(aiPlayer));
     actions.push(...AIEngine.getAttackActions(gameState, aiPlayer, opponent));
     actions.push(...AIEngine.getRetireActions(aiPlayer));
 
@@ -71,6 +73,26 @@ export class AIEngine {
           },
           priority: 5,
           reasoning: `Play ${card.name} (${card.rarity})`,
+        });
+      }
+    }
+
+    return actions;
+  }
+
+  private static getCastSpellActions(player: Player): AIDecision[] {
+    const actions: AIDecision[] = [];
+
+    for (const card of player.hand) {
+      if (isSpellCard(card) && PlayerUtils.canCastSpell(player, card)) {
+        actions.push({
+          action: {
+            type: 'CAST_SPELL',
+            playerId: player.id,
+            cardId: card.id,
+          },
+          priority: AIEngine.getSpellPriority(card),
+          reasoning: `Cast ${card.name} (${card.spellType})`,
         });
       }
     }
@@ -155,6 +177,10 @@ export class AIEngine {
         score = AIEngine.scoreRetire(action, aiPlayer);
         break;
         
+      case 'CAST_SPELL':
+        score = AIEngine.scoreSpell(action, aiPlayer, gameState);
+        break;
+        
       default:
         score = 0;
     }
@@ -230,5 +256,62 @@ export class AIEngine {
     }
 
     return score;
+  }
+
+  private static scoreSpell(action: GameAction, player: Player, gameState: GameState): number {
+    const card = player.hand.find(c => c.id === action.cardId);
+    if (!card || !isSpellCard(card)) return 0;
+
+    let score = 40; // Base score for spell casting
+
+    // Energy Catalyst gets very high score if player doesn't already have energy booster
+    if (card.name === 'Energy Catalyst' && !player.hasEnergyBooster) {
+      score = 120; // Very high priority for AI
+      
+      // Extra bonus if it's early game (more turns to benefit from effect)
+      if (gameState.turnNumber <= 5) {
+        score += 50;
+      }
+    }
+
+    // General spell type scoring
+    if (card.spellType === 'permanent') {
+      score += 30; // Permanent effects are valuable
+    } else if (card.spellType === 'instant') {
+      score += 20; // Instant effects are decent
+    }
+
+    // Adjust score based on energy cost efficiency
+    if (card.energyCost <= 2) {
+      score += 10; // Cheap spells are good
+    } else if (card.energyCost >= 5) {
+      score -= 5; // Expensive spells are risky
+    }
+
+    return score;
+  }
+
+  private static getSpellPriority(card: any): number {
+    // Energy Catalyst gets very high priority for AI
+    if (card.name === 'Energy Catalyst') {
+      return 8; // Higher than most actions
+    }
+
+    // Permanent spells get high priority
+    if (card.spellType === 'permanent') {
+      return 7;
+    }
+
+    // Instant spells get medium priority
+    if (card.spellType === 'instant') {
+      return 6;
+    }
+
+    // Continuous spells get medium-low priority
+    if (card.spellType === 'continuous') {
+      return 5;
+    }
+
+    return 5; // Default priority
   }
 }

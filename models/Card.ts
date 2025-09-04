@@ -1,4 +1,4 @@
-import cardsData from '../data/cards.json';
+import cardsData from '../data/monster-cards.json';
 
 // Re-export battle engine types and interfaces
 export type { Element, Rarity, Attack, Card } from '../types/game';

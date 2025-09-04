@@ -1,4 +1,5 @@
 import { Player, Card } from '../../types/game';
+import { SpellCard } from '../../models/cards-extended';
 import { CardUtils } from '../card';
 import { Deck } from '../card/Deck';
 
@@ -13,6 +14,7 @@ export class PlayerUtils {
       energy: 0,
       points: 0,
       isAI,
+      hasEnergyBooster: false,
     };
   }
 
@@ -42,10 +44,14 @@ export class PlayerUtils {
     const newHand = player.hand.filter((_, index) => index !== cardIndex);
     const newField = [...player.field, card];
 
+    // Energy booster effect is now handled by spell casting, not monster cards
+    const hasEnergyBooster = player.hasEnergyBooster;
+
     return {
       ...player,
       hand: newHand,
       field: newField,
+      hasEnergyBooster,
     };
   }
 
@@ -126,5 +132,27 @@ export class PlayerUtils {
 
   static hasWon(player: Player): boolean {
     return player.points >= 4;
+  }
+
+  static canCastSpell(player: Player, spell: SpellCard): boolean {
+    return player.energy >= spell.energyCost;
+  }
+
+  static castSpell(player: Player, spell: SpellCard): Player {
+    if (!PlayerUtils.canCastSpell(player, spell)) {
+      return player;
+    }
+
+    let updatedPlayer = {
+      ...player,
+      energy: player.energy - spell.energyCost,
+    };
+
+    // Apply spell effects based on spell type
+    if (spell.spellType === 'permanent' && spell.name === 'Energy Catalyst') {
+      updatedPlayer.hasEnergyBooster = true;
+    }
+
+    return updatedPlayer;
   }
 }

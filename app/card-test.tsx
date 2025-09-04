@@ -3,23 +3,40 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { CardComponent } from '../components/CardComponent';
-import { CARDS_DATABASE } from '../models/Card';
+import { CardLoader } from '../utils/game/cardLoader';
+import { isMonsterCard, isSpellCard, ExtendedCard, MonsterCard, SpellCard } from '../models/cards-extended';
+import { useSettings } from '../context/SettingsContext';
 import Colors from '../constants/Colors';
 
 export default function CardTestScreen() {
   const router = useRouter();
+  const { cardSize, setCardSize } = useSettings();
   
-  // Group cards by rarity for organized display
-  const cardsByRarity = {
-    common: CARDS_DATABASE.filter(card => card.rarity === 'common'),
-    rare: CARDS_DATABASE.filter(card => card.rarity === 'rare'),
-    epic: CARDS_DATABASE.filter(card => card.rarity === 'epic'),
-    legendary: CARDS_DATABASE.filter(card => card.rarity === 'legendary'),
-    mythic: CARDS_DATABASE.filter(card => card.rarity === 'mythic'),
+  // Load all cards using CardLoader
+  const allCards = CardLoader.loadCards();
+  const monsterCards = CardLoader.getMonsterCards();
+  const spellCards = CardLoader.getSpellCards();
+  
+  // Group monster cards by rarity
+  const monstersByRarity = {
+    common: monsterCards.filter(card => card.rarity === 'common'),
+    rare: monsterCards.filter(card => card.rarity === 'rare'),
+    epic: monsterCards.filter(card => card.rarity === 'epic'),
+    legendary: monsterCards.filter(card => card.rarity === 'legendary'),
+    mythic: monsterCards.filter(card => card.rarity === 'mythic'),
   };
 
-  const renderRaritySection = (rarity: string, cards: any[]) => (
-    <View key={rarity} style={styles.raritySection}>
+  // Group spell cards by rarity
+  const spellsByRarity = {
+    common: spellCards.filter(card => card.rarity === 'common'),
+    rare: spellCards.filter(card => card.rarity === 'rare'),
+    epic: spellCards.filter(card => card.rarity === 'epic'),
+    legendary: spellCards.filter(card => card.rarity === 'legendary'),
+    mythic: spellCards.filter(card => card.rarity === 'mythic'),
+  };
+
+  const renderRaritySection = (rarity: string, cards: ExtendedCard[], cardType: string) => (
+    <View key={`${cardType}-${rarity}`} style={styles.raritySection}>
       <Text style={styles.rarityTitle}>
         {rarity.toUpperCase()} ({cards.length} cards)
       </Text>
@@ -27,14 +44,23 @@ export default function CardTestScreen() {
         {cards.map((card, index) => (
           <View key={`${card.name}-${index}`} style={styles.cardWrapper}>
             <CardComponent
-              card={card}
-              size="small"
+              card={card as any} // Type compatibility for now
+              size={cardSize}
               viewMode="collection"
             />
             <Text style={styles.cardName}>{card.name}</Text>
           </View>
         ))}
       </View>
+    </View>
+  );
+
+  const renderCardTypeSection = (title: string, cardsByRarity: any, cardType: string) => (
+    <View style={styles.cardTypeSection}>
+      <Text style={styles.cardTypeTitle}>{title}</Text>
+      {Object.entries(cardsByRarity).map(([rarity, cards]) => 
+        (cards as ExtendedCard[]).length > 0 ? renderRaritySection(rarity, cards as ExtendedCard[], cardType) : null
+      )}
     </View>
   );
 
@@ -49,20 +75,29 @@ export default function CardTestScreen() {
           <ArrowLeft size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.header}>Monster Cards Illustration Test</Text>
+          <Text style={styles.header}>Cards Illustration Test</Text>
           <Text style={styles.subtitle}>
-            Total: {CARDS_DATABASE.length} cards
+            Total: {allCards.length} cards ({monsterCards.length} monsters, {spellCards.length} spells)
           </Text>
         </View>
+        <TouchableOpacity
+          style={styles.sizeToggleButton}
+          onPress={() => setCardSize(cardSize === 'small' ? 'normal' : 'small')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.sizeToggleText}>
+            {cardSize === 'small' ? '⊞' : '⊟'}
+          </Text>
+        </TouchableOpacity>
       </View>
       
       <ScrollView 
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
+        indicatorStyle="white"
       >
-        {Object.entries(cardsByRarity).map(([rarity, cards]) => 
-          renderRaritySection(rarity, cards)
-        )}
+        {renderCardTypeSection('Monster Cards', monstersByRarity, 'monster')}
+        {renderCardTypeSection('Spell Cards', spellsByRarity, 'spell')}
         
         <View style={styles.footer}>
           <Text style={styles.footerText}>
@@ -96,6 +131,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  sizeToggleButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.background.card,
+    marginLeft: 16,
+  },
+  sizeToggleText: {
+    fontSize: 18,
+    color: Colors.text.primary,
+    fontWeight: 'bold',
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -111,6 +157,19 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  cardTypeSection: {
+    marginBottom: 40,
+  },
+  cardTypeTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.text.primary,
+    marginBottom: 20,
+    textAlign: 'center',
+    borderBottomWidth: 3,
+    borderBottomColor: Colors.accent[500],
+    paddingBottom: 12,
   },
   raritySection: {
     marginBottom: 32,

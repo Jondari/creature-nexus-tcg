@@ -7,7 +7,9 @@ export class TurnManager {
     const currentPlayer = gameState.players[gameState.currentPlayerIndex];
     const currentDeck = playerDecks[gameState.currentPlayerIndex];
     
-    let updatedPlayer = PlayerUtils.addEnergy(currentPlayer, 1);
+    // Calculate energy gain: 1 normal, or turn number if energy booster is active
+    const energyGain = currentPlayer.hasEnergyBooster ? gameState.turnNumber : 1;
+    let updatedPlayer = PlayerUtils.addEnergy(currentPlayer, energyGain);
     updatedPlayer = PlayerUtils.drawCard(updatedPlayer, currentDeck);
     
     const newPlayers: [Player, Player] = [...gameState.players] as [Player, Player];

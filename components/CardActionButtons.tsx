@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Play, X } from 'lucide-react-native';
+import { Play, X, Zap } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
+import { Card } from '../types/game';
+import { isSpellCard } from '../models/cards-extended';
 
 interface CardActionButtonsProps {
   visible: boolean;
@@ -11,6 +13,7 @@ interface CardActionButtonsProps {
   onPlay?: () => void;
   onRetire?: () => void;
   cardSize?: 'small' | 'normal';
+  card?: Card; // Optional card to determine spell vs monster
 }
 
 export function CardActionButtons({
@@ -20,6 +23,7 @@ export function CardActionButtons({
   onPlay,
   onRetire,
   cardSize = 'normal',
+  card,
 }: CardActionButtonsProps) {
   if (!visible) {
     return null;
@@ -35,6 +39,11 @@ export function CardActionButtons({
     isSmall ? styles.actionTextSmall : styles.actionTextNormal,
   ];
   const iconSize = isSmall ? 14 : 18;
+  
+  // Determine if card is a spell to show appropriate button text and icon
+  const isSpell = card && isSpellCard(card);
+  const playButtonText = isSpell ? 'Cast' : 'Play';
+  const PlayIcon = isSpell ? Zap : Play;
 
   return (
     <View style={[styles.container, isSmall ? styles.containerSmall : styles.containerNormal]}>
@@ -45,11 +54,11 @@ export function CardActionButtons({
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={[Colors.primary[600], Colors.primary[500]]}
+            colors={isSpell ? [Colors.accent[600], Colors.accent[500]] : [Colors.primary[600], Colors.primary[500]]}
             style={styles.buttonGradient}
           >
-            <Play size={iconSize} color={Colors.text.primary} />
-            <Text style={textStyle}>Play</Text>
+            <PlayIcon size={iconSize} color={Colors.text.primary} />
+            <Text style={textStyle}>{playButtonText}</Text>
           </LinearGradient>
         </TouchableOpacity>
       )}
