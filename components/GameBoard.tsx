@@ -11,6 +11,7 @@ import { CardActionButtons } from './CardActionButtons';
 import { ActionLog } from './ActionLog';
 import { Sidebar } from './Sidebar';
 import { EnergyWaveAnimation } from './Animation/EnergyWaveAnimation';
+import { SpellCastAnimation } from './Animation/SpellCastAnimation';
 import { Card } from '../types/game';
 import { t } from '../utils/i18n';
 import { CardLoader } from '../utils/game/cardLoader';
@@ -25,11 +26,14 @@ export function GameBoard() {
     damageAnimations,
     aiVisualState,
     energyWaveAnimation,
+    spellCastAnimation,
     isLoading, 
     error,
     triggerDamageAnimation,
     clearDamageAnimation,
     clearEnergyWaveAnimation,
+    triggerSpellCastAnimation,
+    clearSpellCastAnimation,
     resetGame,
     initializeGame
   } = useGame();
@@ -642,6 +646,15 @@ export function GameBoard() {
         <EnergyWaveAnimation
           energyAmount={energyWaveAnimation.amount}
           onComplete={clearEnergyWaveAnimation}
+        />
+      )}
+
+      {/* Spell Cast Animation */}
+      {spellCastAnimation && spellCastAnimation.show && (
+        <SpellCastAnimation
+          spell={spellCastAnimation.spell}
+          startPosition={spellCastAnimation.startPosition}
+          onComplete={clearSpellCastAnimation}
         />
       )}
     </View>

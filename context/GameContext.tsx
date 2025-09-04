@@ -12,6 +12,7 @@ interface GameContextState {
   damageAnimations: DamageAnimation[];
   aiVisualState: AIVisualState;
   energyWaveAnimation: { show: boolean; amount: number } | null;
+  spellCastAnimation: { show: boolean; spell: Card; startPosition: { x: number; y: number } } | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -25,6 +26,8 @@ interface GameContextActions {
   clearDamageAnimation: (cardId: string) => void;
   triggerEnergyWaveAnimation: (amount: number) => void;
   clearEnergyWaveAnimation: () => void;
+  triggerSpellCastAnimation: (spell: Card, startPosition: { x: number; y: number }) => void;
+  clearSpellCastAnimation: () => void;
   setAIStatus: (status: AIStatus, message?: string) => void;
   setAIHighlight: (cardId?: string, targetCardId?: string) => void;
   clearAIVisuals: () => void;
@@ -42,6 +45,8 @@ type GameAction_Context =
   | { type: 'CLEAR_DAMAGE_ANIMATION'; payload: string }
   | { type: 'TRIGGER_ENERGY_WAVE_ANIMATION'; payload: number }
   | { type: 'CLEAR_ENERGY_WAVE_ANIMATION' }
+  | { type: 'TRIGGER_SPELL_CAST_ANIMATION'; payload: { spell: Card; startPosition: { x: number; y: number } } }
+  | { type: 'CLEAR_SPELL_CAST_ANIMATION' }
   | { type: 'SET_AI_STATUS'; payload: { status: AIStatus; message?: string } }
   | { type: 'SET_AI_HIGHLIGHT'; payload: { cardId?: string; targetCardId?: string } }
   | { type: 'CLEAR_AI_VISUALS' }
@@ -59,6 +64,7 @@ const initialState: GameContextState = {
     isActive: false,
   },
   energyWaveAnimation: null,
+  spellCastAnimation: null,
   isLoading: false,
   error: null,
 };
@@ -102,6 +108,20 @@ function gameReducer(state: GameContextState, action: GameAction_Context): GameC
       return {
         ...state,
         energyWaveAnimation: null,
+      };
+    case 'TRIGGER_SPELL_CAST_ANIMATION':
+      return {
+        ...state,
+        spellCastAnimation: { 
+          show: true, 
+          spell: action.payload.spell,
+          startPosition: action.payload.startPosition
+        },
+      };
+    case 'CLEAR_SPELL_CAST_ANIMATION':
+      return {
+        ...state,
+        spellCastAnimation: null,
       };
     case 'SET_AI_STATUS':
       return {
@@ -375,6 +395,24 @@ export function GameProvider({ children }: GameProviderProps) {
         }
 
         // Execute the AI action after the (optional) delay
+        // Special handling for spell casting to trigger animation
+        if (aiDecision.action.type === 'CAST_SPELL' && aiDecision.action.cardId) {
+          const spell = aiPlayer?.hand.find(c => c.id === aiDecision.action.cardId);
+          if (spell) {
+            // Trigger spell cast animation for AI
+            dispatch({ 
+              type: 'TRIGGER_SPELL_CAST_ANIMATION', 
+              payload: { 
+                spell, 
+                startPosition: { x: 50, y: 100 } // AI spells from top area
+              } 
+            });
+            
+            // Delay execution to allow animation to start
+            await delay(1200);
+          }
+        }
+        
         const success = state.gameEngine.executeAction(aiDecision.action);
         
         // Log the AI action
@@ -471,6 +509,14 @@ export function GameProvider({ children }: GameProviderProps) {
     dispatch({ type: 'CLEAR_ENERGY_WAVE_ANIMATION' });
   };
 
+  const triggerSpellCastAnimation = (spell: Card, startPosition: { x: number; y: number }) => {
+    dispatch({ type: 'TRIGGER_SPELL_CAST_ANIMATION', payload: { spell, startPosition } });
+  };
+
+  const clearSpellCastAnimation = () => {
+    dispatch({ type: 'CLEAR_SPELL_CAST_ANIMATION' });
+  };
+
   const setAIStatus = (status: AIStatus, message?: string) => {
     dispatch({ type: 'SET_AI_STATUS', payload: { status, message } });
   };
@@ -495,6 +541,8 @@ export function GameProvider({ children }: GameProviderProps) {
         clearDamageAnimation,
         triggerEnergyWaveAnimation,
         clearEnergyWaveAnimation,
+        triggerSpellCastAnimation,
+        clearSpellCastAnimation,
         setAIStatus,
         setAIHighlight,
         clearAIVisuals,

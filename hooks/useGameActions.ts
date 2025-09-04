@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { GameAction } from '../types/game';
 
 export function useGameActions() {
-  const { executeAction, executeAITurn, gameState, gameEngine } = useGame();
+  const { executeAction, executeAITurn, gameState, gameEngine, triggerSpellCastAnimation } = useGame();
 
   const playCard = useCallback((cardId: string) => {
     if (!gameState || !gameEngine) return;
@@ -18,18 +18,31 @@ export function useGameActions() {
     executeAction(action);
   }, [executeAction, gameState, gameEngine]);
 
-  const castSpell = useCallback((cardId: string) => {
+  const castSpell = useCallback((cardId: string, startPosition?: { x: number; y: number }) => {
     if (!gameState || !gameEngine) return;
 
     const currentPlayer = gameEngine.getCurrentPlayer();
-    const action: GameAction = {
-      type: 'CAST_SPELL',
-      playerId: currentPlayer.id,
-      cardId,
-    };
-
-    executeAction(action);
-  }, [executeAction, gameState, gameEngine]);
+    const spell = currentPlayer.hand.find(c => c.id === cardId);
+    
+    if (spell) {
+      // Trigger animation for both human and AI players
+      const defaultPosition = startPosition || { 
+        x: currentPlayer.isAI ? 50 : 50,  // AI spells from top area, human from bottom
+        y: currentPlayer.isAI ? 100 : 600  // Different starting positions
+      };
+      triggerSpellCastAnimation(spell, defaultPosition);
+      
+      // Delay the actual spell execution to allow animation to start
+      setTimeout(() => {
+        const action: GameAction = {
+          type: 'CAST_SPELL',
+          playerId: currentPlayer.id,
+          cardId,
+        };
+        executeAction(action);
+      }, 1200); // Start execution after card reaches center
+    }
+  }, [executeAction, gameState, gameEngine, triggerSpellCastAnimation]);
 
   const attack = useCallback((attackerCardId: string, attackName: string, targetCardId?: string) => {
     if (!gameState || !gameEngine) return;

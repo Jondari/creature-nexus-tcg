@@ -5,15 +5,24 @@ import { ArrowLeft } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnergyOrbAnimation } from './EnergyOrbAnimation';
 import { EnergyWaveAnimation } from './EnergyWaveAnimation';
+import { SpellCastAnimation } from './SpellCastAnimation';
+import { CardLoader } from '../../utils/game/cardLoader';
 import Colors from '@/constants/Colors';
 
 export const EnergyAnimationDemo: React.FC = () => {
   const router = useRouter();
   const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
 
+  // Get a sample spell for testing
+  const spellCards = CardLoader.getSpellCards();
+  const energyCatalyst = spellCards.find(card => card.name === 'Energy Catalyst');
+  const testSpell = energyCatalyst || spellCards[0]; // Use Energy Catalyst or first spell as fallback
+
   const animations = [
     { name: 'Orb Animation', component: EnergyOrbAnimation, key: 'orb' },
     { name: 'Wave Animation', component: EnergyWaveAnimation, key: 'wave' },
+    { name: 'Spell Cast (Human)', component: SpellCastAnimation, key: 'spell-human' },
+    { name: 'Spell Cast (AI)', component: SpellCastAnimation, key: 'spell-ai' },
   ];
 
   const triggerAnimation = (key: string) => {
@@ -32,6 +41,22 @@ export const EnergyAnimationDemo: React.FC = () => {
         return <EnergyOrbAnimation energyAmount={energyAmount} onComplete={onAnimationComplete} />;
       case 'wave':
         return <EnergyWaveAnimation energyAmount={energyAmount} onComplete={onAnimationComplete} />;
+      case 'spell-human':
+        return testSpell ? (
+          <SpellCastAnimation 
+            spell={testSpell as any}
+            startPosition={{ x: 50, y: 600 }}
+            onComplete={onAnimationComplete}
+          />
+        ) : null;
+      case 'spell-ai':
+        return testSpell ? (
+          <SpellCastAnimation 
+            spell={testSpell as any}
+            startPosition={{ x: 50, y: 100 }}
+            onComplete={onAnimationComplete}
+          />
+        ) : null;
       default:
         return null;
     }
@@ -60,10 +85,10 @@ export const EnergyAnimationDemo: React.FC = () => {
             >
               <ArrowLeft size={24} color={Colors.text.primary} />
             </TouchableOpacity>
-            <Text style={styles.title}>Energy Animation Demo</Text>
+            <Text style={styles.title}>Animation Demo</Text>
             <View style={styles.placeholder} />
           </View>
-          <Text style={styles.subtitle}>Tap buttons to see different energy gain animations</Text>
+          <Text style={styles.subtitle}>Tap buttons to see different energy and spell animations</Text>
         </View>
         
         <ScrollView contentContainerStyle={styles.buttonContainer}>
