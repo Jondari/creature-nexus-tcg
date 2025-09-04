@@ -1,6 +1,7 @@
 import { GameState, Player, GameAction } from '../../types/game';
 import { PlayerUtils } from '../player';
 import { Deck } from '../card/Deck';
+import { isSpellCard } from '../../models/cards-extended';
 
 export class TurnManager {
   static startTurn(gameState: GameState, playerDecks: [Deck, Deck]): GameState {
@@ -81,6 +82,12 @@ export class TurnManager {
           return false;
         }
         return gameState.phase === 'main' || gameState.phase === 'combat';
+        
+      case 'CAST_SPELL':
+        if (!action.cardId) return false;
+        const spellCard = currentPlayer.hand.find(c => c.id === action.cardId);
+        if (!spellCard || !isSpellCard(spellCard)) return false;
+        return PlayerUtils.canCastSpell(currentPlayer, spellCard);
         
       case 'END_TURN':
         return true;

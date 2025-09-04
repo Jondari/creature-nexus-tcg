@@ -126,6 +126,7 @@ export function GameBoard() {
   const startWithDemoDeck = () => {
     const allCards = CardLoader.loadCards();
     const playerDeck = allCards.slice(0, 20); // Demo deck for player
+    
     startGameWithDeck(playerDeck);
   };
 

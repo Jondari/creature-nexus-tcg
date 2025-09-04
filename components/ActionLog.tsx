@@ -17,6 +17,8 @@ export function ActionLog({ logs, sidebarMode = false }: ActionLogProps) {
     switch (action.type) {
       case 'PLAY_CARD':
         return entry.description || `${t('actions.play')} card`;
+      case 'CAST_SPELL':
+        return entry.description || 'Cast spell';
       case 'ATTACK':
         return entry.description || `${t('actions.attack')} ${action.targetCardId ? 'creature' : 'directly'}`;
       case 'RETIRE_CARD':
@@ -33,6 +35,7 @@ export function ActionLog({ logs, sidebarMode = false }: ActionLogProps) {
     
     switch (actionType) {
       case 'PLAY_CARD': return '🃏';
+      case 'CAST_SPELL': return '✨';
       case 'ATTACK': return '⚔️';
       case 'RETIRE_CARD': return '🔄';
       case 'END_TURN': return '⏭️';

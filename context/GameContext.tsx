@@ -203,6 +203,9 @@ export function GameProvider({ children }: GameProviderProps) {
       case 'RETIRE_CARD':
         const retiredCard = player?.field.find(c => c.id === action.cardId);
         return `Retired ${retiredCard?.name || 'card'}`;
+      case 'CAST_SPELL':
+        const spellCard = player?.hand.find(c => c.id === action.cardId);
+        return spellCard ? `Cast ${spellCard.name}` : 'Cast a spell';
       case 'END_TURN':
         return 'Ended turn';
       default:

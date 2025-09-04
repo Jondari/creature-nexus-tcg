@@ -64,7 +64,8 @@ export class AIEngine {
     const actions: AIDecision[] = [];
 
     for (const card of player.hand) {
-      if (PlayerUtils.canPlayCard(player, card)) {
+      // Only generate PLAY_CARD actions for monster cards
+      if (!isSpellCard(card) && PlayerUtils.canPlayCard(player, card)) {
         actions.push({
           action: {
             type: 'PLAY_CARD',
@@ -84,16 +85,22 @@ export class AIEngine {
     const actions: AIDecision[] = [];
 
     for (const card of player.hand) {
-      if (isSpellCard(card) && PlayerUtils.canCastSpell(player, card)) {
-        actions.push({
-          action: {
-            type: 'CAST_SPELL',
-            playerId: player.id,
-            cardId: card.id,
-          },
-          priority: AIEngine.getSpellPriority(card),
-          reasoning: `Cast ${card.name} (${card.spellType})`,
-        });
+      if (isSpellCard(card)) {
+        const canCast = PlayerUtils.canCastSpell(player, card);
+        
+        if (canCast) {
+          const priority = AIEngine.getSpellPriority(card);
+          
+          actions.push({
+            action: {
+              type: 'CAST_SPELL',
+              playerId: player.id,
+              cardId: card.id,
+            },
+            priority: priority,
+            reasoning: `Cast ${card.name} (${card.spellType})`,
+          });
+        }
       }
     }
 
@@ -192,10 +199,16 @@ export class AIEngine {
     const card = player.hand.find(c => c.id === action.cardId);
     if (!card) return 0;
 
+    // Only score monster cards for PLAY_CARD actions
+    if (isSpellCard(card)) {
+      return 0; // Spells should use CAST_SPELL action, not PLAY_CARD
+    }
+
     let score = 50;
 
-    score += card.hp * 2;
-    score += card.attacks.reduce((sum, attack) => sum + attack.damage, 0);
+    // Safe to access monster card properties
+    score += (card.hp || 0) * 2;
+    score += (card.attacks || []).reduce((sum, attack) => sum + attack.damage, 0);
 
     if (card.isMythic) score += 30;
     if (player.field.length < 2) score += 20;
