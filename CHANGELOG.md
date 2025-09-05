@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.8.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.7.0...v0.8.0) (2025-09-05)
+
+
+### Features
+
+* add comprehensive spell casting animations with card movement and wave effects for both human and AI players ([5af5b59](https://github.com/Jondari/creature-nexus-tcg/commit/5af5b59b7a40892cbdfc3b85afd879a3d3a4ecb3))
+* implement comprehensive spell card system with Energy Catalyst integration ([de68b96](https://github.com/Jondari/creature-nexus-tcg/commit/de68b96d3c8d8b3ca10fbe8c7128d6706df75574))
+
+
+### Bug Fixes
+
+* resolve AI spell casting bugs and add comprehensive CAST_SPELL action support ([4ee9bcc](https://github.com/Jondari/creature-nexus-tcg/commit/4ee9bcccc667a57f02ac776bd0451843020b3d09))
+
 ## [0.7.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.6.1...v0.7.0) (2025-09-02)
 
 
