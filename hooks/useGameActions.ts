@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import { GameAction } from '../types/game';
+import { SPELL_CAST_ENGINE_DELAY_MS } from '../constants/animation';
 
 export function useGameActions() {
   const { executeAction, executeAITurn, gameState, gameEngine, triggerSpellCastAnimation } = useGame();
@@ -40,7 +41,7 @@ export function useGameActions() {
           cardId,
         };
         executeAction(action);
-      }, 1200); // Start execution after card reaches center
+      }, SPELL_CAST_ENGINE_DELAY_MS); // Start execution after card reaches center
     }
   }, [executeAction, gameState, gameEngine, triggerSpellCastAnimation]);
 

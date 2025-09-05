@@ -4,6 +4,7 @@ import { GameEngine } from '../modules/game';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
 import { initializeSounds } from '../utils/game/soundManager';
+import { SPELL_CAST_ENGINE_DELAY_MS } from '../constants/animation';
 
 interface GameContextState {
   gameEngine: GameEngine | null;
@@ -409,7 +410,7 @@ export function GameProvider({ children }: GameProviderProps) {
             });
             
             // Delay execution to allow animation to start
-            await delay(1200);
+            await delay(SPELL_CAST_ENGINE_DELAY_MS);
           }
         }
         
