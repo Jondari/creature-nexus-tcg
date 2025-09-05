@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.9.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.8.0...v0.9.0) (2025-09-05)
+
+
+### Features
+
+* implement reward system with card/pack/coin animations and redeem integration ([a415355](https://github.com/Jondari/creature-nexus-tcg/commit/a415355018e60f6245d69ba231bc6219122fc7d4))
+
 ## [0.8.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.7.0...v0.8.0) (2025-09-05)
 
 
