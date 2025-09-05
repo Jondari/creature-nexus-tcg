@@ -370,10 +370,10 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.linkButton}
-              onPress={() => router.push('/energy-demo' as any)}
+              onPress={() => router.push('/animation-demo' as any)}
             >
               <TestTube size={20} color={'#00ff9f'} />
-              <Text style={[styles.linkText, { color: '#00ff9f' }]}>Energy Animation Demo</Text>
+              <Text style={[styles.linkText, { color: '#00ff9f' }]}>Animation Demo</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -7,6 +7,9 @@ import { EnergyOrbAnimation } from './EnergyOrbAnimation';
 import { EnergyWaveAnimation } from './EnergyWaveAnimation';
 import { SpellCastAnimation } from './SpellCastAnimation';
 import { CardLoader } from '../../utils/game/cardLoader';
+import { RewardAnimation } from './RewardAnimation';
+import { generateRandomCard } from '@/utils/cardUtils';
+import { STANDARD_PACK } from '@/data/boosterPacks';
 import Colors from '@/constants/Colors';
 
 export const EnergyAnimationDemo: React.FC = () => {
@@ -23,6 +26,9 @@ export const EnergyAnimationDemo: React.FC = () => {
     { name: 'Wave Animation', component: EnergyWaveAnimation, key: 'wave' },
     { name: 'Spell Cast (Human)', component: SpellCastAnimation, key: 'spell-human' },
     { name: 'Spell Cast (AI)', component: SpellCastAnimation, key: 'spell-ai' },
+    { name: 'Reward: Coins', component: RewardAnimation, key: 'reward-coins' },
+    { name: 'Reward: Pack', component: RewardAnimation, key: 'reward-pack' },
+    { name: 'Reward: Card', component: RewardAnimation, key: 'reward-card' },
   ];
 
   const triggerAnimation = (key: string) => {
@@ -57,6 +63,35 @@ export const EnergyAnimationDemo: React.FC = () => {
             onComplete={onAnimationComplete}
           />
         ) : null;
+      case 'reward-coins':
+        return (
+          <RewardAnimation
+            type="coins"
+            message="You received 100 Nexus Coins!"
+            coins={100}
+            onComplete={onAnimationComplete}
+          />
+        );
+      case 'reward-pack':
+        return (
+          <RewardAnimation
+            type="pack"
+            message={`You received a ${STANDARD_PACK.name}!`}
+            pack={STANDARD_PACK as any}
+            onComplete={onAnimationComplete}
+          />
+        );
+      case 'reward-card': {
+        const demoCard = generateRandomCard();
+        return (
+          <RewardAnimation
+            type="card"
+            message={`You received ${demoCard.name}!`}
+            card={demoCard as any}
+            onComplete={onAnimationComplete}
+          />
+        );
+      }
       default:
         return null;
     }

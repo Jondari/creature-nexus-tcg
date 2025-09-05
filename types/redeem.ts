@@ -23,6 +23,12 @@ export interface RedeemResult {
   error?: string;
   rewards?: RedeemCodeRewards;
   message?: string; // Success message to show user
+  // Details of awarded items for UI animations
+  details?: {
+    coins?: number;
+    packs?: any[]; // BoosterPack
+    cards?: import('../models/cards-extended').ExtendedCard[];
+  };
 }
 
 export interface UserRedemptionHistory {

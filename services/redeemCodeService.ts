@@ -81,8 +81,8 @@ export class RedeemCodeService {
         return { success: false, error: 'Code already redeemed' };
       }
       
-      // 5. Award rewards
-      await this.processRewards(validCode.rewards, userId);
+      // 5. Award rewards and get details for UI animations
+      const details = await this.processRewards(validCode.rewards, userId);
       
       // 6. Mark code as used
       await this.markCodeAsUsed(normalizedCode, userId, validCode.id);
@@ -93,7 +93,8 @@ export class RedeemCodeService {
       return {
         success: true,
         rewards: validCode.rewards,
-        message: this.generateSuccessMessage(validCode.rewards)
+        message: this.generateSuccessMessage(validCode.rewards),
+        details
       };
       
     } catch (error) {
@@ -104,11 +105,13 @@ export class RedeemCodeService {
     }
   }
 
-  private static async processRewards(rewards: RedeemCodeRewards, userId: string): Promise<void> {
-    const promises: Promise<void>[] = [];
+  private static async processRewards(rewards: RedeemCodeRewards, userId: string): Promise<{ coins?: number; packs?: any[]; cards?: any[] }> {
+    const promises: Promise<any>[] = [];
+    const awarded = { coins: 0 as number | undefined, packs: [] as any[], cards: [] as any[] };
     
     // Award Nexus Coins
     if (rewards.nexusCoins && rewards.nexusCoins > 0) {
+      awarded.coins = (awarded.coins || 0) + rewards.nexusCoins;
       promises.push(addNexusCoins(userId, rewards.nexusCoins));
     }
     
@@ -122,6 +125,7 @@ export class RedeemCodeService {
         for (const packId of rewards.packs) {
           const pack = getPackById(packId);
           if (pack) {
+            awarded.packs.push(pack);
             promises.push(addPackToInventory(userId, pack, 'Redeem Code'));
           }
         }
@@ -132,14 +136,32 @@ export class RedeemCodeService {
       }
     }
     
-    // Award Individual Cards (future feature)
+    // Award Individual Cards
     if (rewards.cards && rewards.cards.length > 0) {
-      if (__DEV__) {
-        console.log('Individual card rewards not yet implemented');
+      try {
+        const { awardSpecificCard, awardRandomCard } = await import('@/utils/cardRewards');
+        for (const cardIdentifier of rewards.cards) {
+          if (cardIdentifier === 'random') {
+            const card = await awardRandomCard(userId, 'Redeem Code');
+            awarded.cards.push(card);
+          } else if (cardIdentifier.startsWith('random_')) {
+            const rarity = cardIdentifier.split('_')[1] as any;
+            const card = await awardRandomCard(userId, 'Redeem Code', rarity);
+            awarded.cards.push(card);
+          } else {
+            const card = await awardSpecificCard(userId, cardIdentifier, 'Redeem Code');
+            awarded.cards.push(card);
+          }
+        }
+      } catch (importError) {
+        if (__DEV__) {
+          console.error('Card rewards system not available:', importError);
+        }
       }
     }
     
     await Promise.all(promises);
+    return awarded;
   }
 
   private static async markCodeAsUsed(code: string, userId: string, codeId: string): Promise<void> {

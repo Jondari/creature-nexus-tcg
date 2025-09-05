@@ -11,6 +11,8 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { RedeemCodeService } from '@/services/redeemCodeService';
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
+import { RewardAnimation } from '@/components/Animation/RewardAnimation';
+import { BoosterPack } from '@/models/BoosterPack';
 import Colors from '@/constants/Colors';
 
 interface RedeemCodeModalProps {
@@ -26,6 +28,8 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
 }) => {
   const [code, setCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
+  const [pendingAnims, setPendingAnims] = useState<Array<{ type: 'coins' | 'pack' | 'card'; payload: any }>>([]);
+  const [currentAnim, setCurrentAnim] = useState<{ type: 'coins' | 'pack' | 'card'; payload: any } | null>(null);
   const { user } = useAuth();
 
   const handleRedeem = async () => {
@@ -37,10 +41,31 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
       const result = await RedeemCodeService.redeemCode(code, user.uid);
       
       if (result.success) {
-        showSuccessAlert('Code Redeemed!', result.message || 'Rewards added to your account');
-        setCode('');
-        onClose();
-        onSuccess?.();
+        // Queue reward animations: coins, packs, cards
+        const queue: Array<{ type: 'coins' | 'pack' | 'card'; payload: any }> = [];
+        if (result.details?.coins) {
+          queue.push({ type: 'coins', payload: { amount: result.details.coins } });
+        }
+        if (result.details?.packs?.length) {
+          for (const pack of result.details.packs as BoosterPack[]) {
+            queue.push({ type: 'pack', payload: { pack } });
+          }
+        }
+        if (result.details?.cards?.length) {
+          for (const card of result.details.cards) {
+            queue.push({ type: 'card', payload: { card } });
+          }
+        }
+
+        if (queue.length === 0) {
+          showSuccessAlert('Code Redeemed!', result.message || 'Rewards added to your account');
+          setCode('');
+          onClose();
+          onSuccess?.();
+        } else {
+          setPendingAnims(queue);
+          setCurrentAnim(queue[0]);
+        }
       } else {
         showErrorAlert('Redemption Failed', result.error || 'Invalid code');
       }
@@ -56,6 +81,21 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
       setCode('');
       onClose();
     }
+  };
+
+  const handleAnimComplete = () => {
+    if (pendingAnims.length <= 1) {
+      // Finished all animations
+      setPendingAnims([]);
+      setCurrentAnim(null);
+      setCode('');
+      onClose();
+      onSuccess?.();
+      return;
+    }
+    const next = pendingAnims.slice(1);
+    setPendingAnims(next);
+    setCurrentAnim(next[0]);
   };
 
   return (
@@ -104,6 +144,24 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
             </TouchableOpacity>
           </View>
         </View>
+        {/* Reward overlay animations */}
+        {currentAnim && (
+          <RewardAnimation
+            type={currentAnim.type}
+            message={
+              currentAnim.type === 'coins'
+                ? `You received ${currentAnim.payload.amount} Nexus Coins!`
+                : currentAnim.type === 'pack'
+                ? `You received a ${currentAnim.payload.pack.name}!`
+                : `You received ${currentAnim.payload.card.name}!`
+            }
+            coins={currentAnim.type === 'coins' ? currentAnim.payload.amount : undefined}
+            pack={currentAnim.type === 'pack' ? currentAnim.payload.pack : undefined}
+            card={currentAnim.type === 'card' ? currentAnim.payload.card : undefined}
+            onComplete={handleAnimComplete}
+            durationMs={1600}
+          />
+        )}
       </View>
     </Modal>
   );
