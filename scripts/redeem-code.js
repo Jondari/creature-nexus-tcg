@@ -31,6 +31,35 @@ const {
 } = require('firebase/firestore');
 const readline = require('readline');
 
+// Known valid pack IDs (keep in sync with data/boosterPacks.ts)
+const VALID_PACKS = [
+  { id: 'standard_pack', name: 'Standard Pack' },
+  { id: 'free_daily_pack', name: 'Daily Free Pack' },
+  { id: 'fire_pack', name: 'Fire Pack' },
+  { id: 'water_pack', name: 'Water Pack' },
+  { id: 'earth_pack', name: 'Earth Pack' },
+  { id: 'air_pack', name: 'Air Pack' },
+  { id: 'mythic_guaranteed_pack', name: 'Mythic Guaranteed Pack' },
+  { id: 'legendary_guaranteed_pack', name: 'Legendary Guaranteed Pack' },
+];
+
+const VALID_PACK_IDS = new Set(VALID_PACKS.map(p => p.id));
+
+function printValidPacks() {
+  console.log('Available Pack IDs:');
+  VALID_PACKS.forEach(p => console.log(`  - ${p.id} (${p.name})`));
+}
+
+function validatePackIds(packs) {
+  const unknown = packs.filter(p => !VALID_PACK_IDS.has(p));
+  if (unknown.length) {
+    console.log(`❌ Unknown pack ID(s): ${unknown.join(', ')}`);
+    printValidPacks();
+    return false;
+  }
+  return true;
+}
+
 // Initialize Firebase using same config as app
 function initializeFirebase() {
   const firebaseConfig = {
@@ -106,8 +135,13 @@ async function createCode(db) {
     console.log('\n📦 Configure Rewards:');
     const nexusCoins = parseInt(await question('Nexus Coins (0 for none): ')) || 0;
     
+    printValidPacks();
     const packsInput = await question('Pack IDs (comma-separated, empty for none): ');
     const packs = packsInput.trim() ? packsInput.split(',').map(p => p.trim()) : [];
+    if (packs.length && !validatePackIds(packs)) {
+      console.log('Aborting create — please use valid pack IDs.');
+      return;
+    }
     
     const cardsInput = await question('Card IDs (comma-separated, empty for none): ');
     const cards = cardsInput.trim() ? cardsInput.split(',').map(c => c.trim()) : [];

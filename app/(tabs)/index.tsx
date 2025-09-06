@@ -9,13 +9,49 @@ import { generatePackCards } from '@/utils/boosterUtils';
 import { FREE_DAILY_PACK, getPackById } from '@/data/boosterPacks';
 import { getInventoryPacks, removePackFromInventory, InventoryPack } from '@/utils/packInventory';
 import { Card } from '@/models/Card';
-import { PackageOpen } from 'lucide-react-native';
+import { PackageOpen, Gift } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import CountdownTimer from '@/components/CountdownTimer';
 import PackOpeningAnimation from '@/components/Animation/PackOpeningAnimation';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useFocusEffect } from '@react-navigation/native';
 import { NotificationService } from '@/services/notificationService';
+import { Sidebar } from '@/components/Sidebar';
+
+// Helper: format a user-friendly relative time (e.g., "3 hours ago")
+const formatRelativeDate = (isoString: string): string => {
+  try {
+    const date = new Date(isoString);
+    const now = Date.now();
+    const diffMs = now - date.getTime();
+    const sec = Math.floor(diffMs / 1000);
+    const min = Math.floor(sec / 60);
+    const hrs = Math.floor(min / 60);
+    const days = Math.floor(hrs / 24);
+
+    if (sec < 45) return 'just now';
+    if (sec < 90) return '1 minute ago';
+    if (min < 45) return `${min} minutes ago`;
+    if (min < 90) return '1 hour ago';
+    if (hrs < 24) return `${hrs} hours ago`;
+    if (hrs < 48) return 'yesterday';
+    if (days < 7) return `${days} days ago`;
+
+    // 7+ days: show a concise date
+    return date.toLocaleDateString(undefined, {
+      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return new Date(isoString).toLocaleString();
+  }
+};
+
+// Helper: sort packs by earnedAt descending (newest first)
+const sortInventoryPacks = (packs: InventoryPack[]): InventoryPack[] => {
+  return [...packs].sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime());
+};
 
 export default function OpenPackScreen() {
   const { user } = useAuth();
@@ -27,6 +63,7 @@ export default function OpenPackScreen() {
   const [packResults, setPackResults] = useState<Card[]>([]);
   const [inventoryPacks, setInventoryPacks] = useState<InventoryPack[]>([]);
   const [lastFetchTime, setLastFetchTime] = useState(0);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -79,7 +116,7 @@ export default function OpenPackScreen() {
       
       // Load inventory packs
       const userInventoryPacks = await getInventoryPacks(user.uid);
-      setInventoryPacks(userInventoryPacks);
+      setInventoryPacks(sortInventoryPacks(userInventoryPacks));
       setLastFetchTime(Date.now());
     } catch (error) {
       if (__DEV__) {
@@ -160,7 +197,7 @@ export default function OpenPackScreen() {
       
       // Refresh inventory
       const updatedInventory = await getInventoryPacks(user.uid);
-      setInventoryPacks(updatedInventory);
+      setInventoryPacks(sortInventoryPacks(updatedInventory));
     } catch (error) {
       if (__DEV__) {
         console.error('Error opening inventory pack:', error);
@@ -237,8 +274,26 @@ export default function OpenPackScreen() {
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>Creature Nexus</Text>
-          <Text style={styles.subtitle}>Open a new pack of cards</Text>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.title}>Creature Nexus</Text>
+              <Text style={styles.subtitle}>Open a new pack of cards</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.giftButton}
+              onPress={() => setSidebarVisible(true)}
+              activeOpacity={0.8}
+            >
+              <Gift size={22} color={Colors.text.primary} />
+              {inventoryPacks.length > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {inventoryPacks.length > 99 ? '99+' : inventoryPacks.length}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
         
         {timeRemaining > 0 ? (
@@ -321,6 +376,43 @@ export default function OpenPackScreen() {
           onComplete={handlePackOpeningComplete}
         />
       )}
+
+      {/* Packs Sidebar */}
+      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} title="My Packs" width={380}>
+        <ScrollView contentContainerStyle={styles.sidebarContent}>
+          {inventoryPacks.length === 0 ? (
+            <Text style={styles.emptySidebarText}>No unopened packs yet</Text>
+          ) : (
+            inventoryPacks.map((inv) => {
+              const pack = getPackById(inv.packId);
+              return (
+                <View key={`${inv.packId}_${inv.earnedAt}`} style={styles.packItem}>
+                  {pack?.imageUrl ? (
+                    <Image source={pack.imageUrl as any} style={styles.packItemImage} resizeMode="contain" />
+                  ) : (
+                    <View style={[styles.packItemImage, { alignItems: 'center', justifyContent: 'center' }]}> 
+                      <Text style={{ color: Colors.text.secondary, fontSize: 12 }}>No Image</Text>
+                    </View>
+                  )}
+                  <View style={styles.packItemInfo}>
+                    <Text style={styles.packItemName}>{inv.packName}</Text>
+                    <Text style={styles.packItemEarnedAt}>
+                      Earned {formatRelativeDate(inv.earnedAt)}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.openPackButton}
+                      onPress={() => handleOpenInventoryPack(inv)}
+                      disabled={opening}
+                    >
+                      <Text style={styles.openPackButtonText}>{opening ? 'Opening…' : 'Open'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })
+          )}
+        </ScrollView>
+      </Sidebar>
     </View>
   );
 }
@@ -345,6 +437,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingHorizontal: 20,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   title: {
     fontSize: 32,
     fontFamily: 'Poppins-Bold',
@@ -354,6 +451,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     color: Colors.text.secondary,
+  },
+  giftButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.background.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    backgroundColor: '#ff4757',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: 'Inter-Bold',
   },
   packContainer: {
     alignItems: 'center',
@@ -414,6 +537,50 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 20,
     marginTop: 20,
+  },
+  sidebarContent: {
+    padding: 12,
+    gap: 10,
+  },
+  packItem: {
+    flexDirection: 'row',
+    backgroundColor: Colors.background.primary,
+    borderRadius: 10,
+    padding: 10,
+    gap: 10,
+    alignItems: 'center',
+    marginHorizontal: 8,
+  },
+  packItemImage: {
+    width: 64,
+    height: 64,
+  },
+  packItemInfo: {
+    flex: 1,
+  },
+  packItemName: {
+    color: Colors.text.primary,
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 14,
+  },
+  packItemEarnedAt: {
+    color: Colors.text.secondary,
+    fontFamily: 'Inter-Regular',
+    fontSize: 12,
+    marginTop: 2,
+    marginBottom: 8,
+  },
+  openPackButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.accent[600],
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  openPackButtonText: {
+    color: Colors.text.primary,
+    fontFamily: 'Inter-Medium',
+    fontSize: 13,
   },
   infoTitle: {
     fontSize: 18,
