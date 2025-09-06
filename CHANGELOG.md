@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.10.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.9.0...v0.10.0) (2025-09-06)
+
+
+### Features
+
+* implement packs sidebar inventory (newest-first with friendly “earned” times) and validate pack IDs in redeem admin script ([c4a456d](https://github.com/Jondari/creature-nexus-tcg/commit/c4a456da6bdf8120ae5527931c2b3a58cf994f94))
+
 ## [0.9.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.8.0...v0.9.0) (2025-09-05)
 
 
