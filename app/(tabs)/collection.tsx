@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSettings } from '@/context/SettingsContext';
@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { Card, CardRarity } from '@/models/Card';
+import { groupByModel, CardGrouped } from '@/utils/cardUtils';
 import Colors from '@/constants/Colors';
 import CardGrid from '@/components/CardGrid';
 import LoadingOverlay from '@/components/LoadingOverlay';
@@ -13,7 +14,10 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 export default function CollectionScreen() {
   const { user } = useAuth();
   const { cardSize, setCardSize } = useSettings();
-  const [cards, setCards] = useState<Card[]>([]);
+  // Keep raw instances for accurate totals
+  const [allCards, setAllCards] = useState<Card[]>([]);
+  // Grouped list (unique models with a count) for fast rendering
+  const groupedCards: CardGrouped[] = useMemo(() => groupByModel(allCards), [allCards]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
   const [lastFetchTime, setLastFetchTime] = useState(0);
@@ -46,7 +50,8 @@ export default function CollectionScreen() {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        setCards(userData.cards || []);
+        // Store all owned card instances; we group them in-memory for the grid.
+        setAllCards(userData.cards || []);
         setLastFetchTime(Date.now());
       }
     } catch (error) {
@@ -72,8 +77,9 @@ export default function CollectionScreen() {
         <View style={styles.titleRow}>
           <View>
             <Text style={styles.title}>My Collection</Text>
+            {/* Show total instances owned, not grouped count */}
             <Text style={styles.subtitle}>
-              {cards.length} {cards.length === 1 ? 'card' : 'cards'} collected
+              {allCards.length} {allCards.length === 1 ? 'card' : 'cards'} collected
             </Text>
           </View>
           <TouchableOpacity 
@@ -87,9 +93,10 @@ export default function CollectionScreen() {
         </View>
       </View>
       
-      <CardGrid 
-        cards={cards} 
-        filter={filter} 
+      {/* Pass grouped items so the grid only renders unique models with x{count} */}
+      <CardGrid
+        items={groupedCards}
+        filter={filter}
         onFilterChange={handleFilterChange}
         cardSize={cardSize}
       />

@@ -60,6 +60,40 @@ export const groupCardsByName = (cards: Card[]): Record<string, Card[]> => {
   }, {} as Record<string, Card[]>);
 };
 
+// Grouped item used by collection UI: one entry per model with a count
+export interface CardGrouped {
+  // We do not have a separate "modelId" in the Card type; using "name"
+  // as the stable identifier for each card model in the collection.
+  modelId: string; // e.g., card name used as model key
+  name: string;
+  rarity: CardRarity;
+  // A representative card instance for rendering visuals (art, element, etc.)
+  sample: Card;
+  count: number;
+}
+
+// Group a large list of owned card instances into unique models with counts
+export const groupByModel = (cards: Card[]): CardGrouped[] => {
+  const map = new Map<string, CardGrouped>();
+
+  for (const card of cards) {
+    const key = card.name; // Use name as the model identifier
+    if (!map.has(key)) {
+      map.set(key, {
+        modelId: key,
+        name: card.name,
+        rarity: card.rarity,
+        sample: card, // Keep first instance for rendering
+        count: 0,
+      });
+    }
+    const entry = map.get(key)!;
+    entry.count++;
+  }
+
+  return Array.from(map.values());
+};
+
 // Filter cards by rarity
 export const filterCardsByRarity = (cards: Card[], rarity: CardRarity | 'all'): Card[] => {
   if (rarity === 'all') {

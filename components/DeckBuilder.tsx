@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatList } from 'react-native';
 import { Card, CardRarity } from '../models/Card';
 import { CardComponent } from './CardComponent';
 import { Sidebar } from './Sidebar';
-import { groupCardsByName } from '../utils/cardUtils';
+import { groupByModel, CardGrouped } from '../utils/cardUtils';
 import { showErrorAlert } from '@/utils/alerts';
 import Colors from '../constants/Colors';
 
@@ -31,35 +31,32 @@ export function DeckBuilder({
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
-  // Group available cards by name (memoized)
-  const groupedAvailable = useMemo(() => groupCardsByName(availableCards), [availableCards]);
-  const groupedDeck = useMemo(() => groupCardsByName(currentDeck), [currentDeck]);
+  // Group available cards and current deck by model (memoized)
+  const groupedAvailable: CardGrouped[] = useMemo(() => groupByModel(availableCards), [availableCards]);
+  const groupedDeck: CardGrouped[] = useMemo(() => groupByModel(currentDeck), [currentDeck]);
 
-  // Filter available cards (memoized)
-  const filteredGroups = useMemo(() => {
-    return Object.entries(groupedAvailable).filter(([_, cardGroup]) => {
-      if (filter === 'all') return true;
-      return cardGroup[0].rarity === filter;
-    });
+  // Filter available grouped items by rarity (memoized)
+  const filteredGroups: CardGrouped[] = useMemo(() => {
+    if (filter === 'all') return groupedAvailable;
+    return groupedAvailable.filter((g) => g.rarity === filter);
   }, [groupedAvailable, filter]);
 
 
   // Render item for FlatList
-  const renderCard = ({ item }: { item: [string, Card[]] }) => {
-    const [name, cardGroup] = item;
+  const renderCard = useCallback(({ item }: { item: CardGrouped }) => {
+    const name = item.name;
     const inDeck = getCardCountInDeck(name);
     const available = getAvailableCount(name);
     const canAdd = canAddCard(name);
-    
-    // 🔑 Dynamic key that updates when deck state changes
-    const itemKey = `${name}-${inDeck}-${available}-${currentDeck.length}`;
-    
+
+    const itemKey = `${item.modelId}-${inDeck}-${available}-${currentDeck.length}`;
+
     return (
       <View key={itemKey} style={styles.cardContainer}>
         <View style={styles.cardWithIndicator}>
           <CardComponent
-            card={cardGroup[0]}
-            onPress={() => canAdd && addCardToDeck(cardGroup[0])}
+            card={item.sample}
+            onPress={() => canAdd && addCardToDeck(item.sample)}
             disabled={!canAdd}
             size="small"
           />
@@ -79,7 +76,7 @@ export function DeckBuilder({
         </View>
       </View>
     );
-  };
+  }, [currentDeck.length]);
 
   const addCardToDeck = (card: Card) => {
     const cardsOfSameName = currentDeck.filter(c => c.name === card.name);
@@ -114,7 +111,7 @@ export function DeckBuilder({
   };
 
   const getAvailableCount = (cardName: string): number => {
-    const totalOwned = groupedAvailable[cardName]?.length || 0;
+    const totalOwned = groupedAvailable.find(g => g.name === cardName)?.count || 0;
     const inDeck = getCardCountInDeck(cardName);
     return totalOwned - inDeck;
   };
@@ -209,7 +206,7 @@ export function DeckBuilder({
             key={`deckbuilder-flatlist-${filter}`}
             data={filteredGroups}
             renderItem={renderCard}
-            keyExtractor={([name]) => name}
+            keyExtractor={(g) => g.modelId}
             contentContainerStyle={styles.gridContainer}
             showsVerticalScrollIndicator={false}
             removeClippedSubviews={true}
@@ -257,26 +254,26 @@ export function DeckBuilder({
 
           {/* Deck Cards */}
           <ScrollView style={styles.sidebarDeckList}>
-            {Object.entries(groupedDeck).length === 0 ? (
+            {groupedDeck.length === 0 ? (
               <Text style={styles.emptyDeckText}>
                 No cards in deck. Start adding cards from your collection!
               </Text>
             ) : (
-              Object.entries(groupedDeck).map(([name, cards]) => (
-                <View key={name} style={styles.sidebarDeckCard}>
+              groupedDeck.map((g) => (
+                <View key={g.modelId} style={styles.sidebarDeckCard}>
                   <CardComponent
-                    card={cards[0]}
-                    onPress={() => removeCardFromDeck(cards[0].id)}
+                    card={g.sample}
+                    onPress={() => removeCardFromDeck(g.sample.id)}
                     size="small"
                   />
                   <View style={styles.sidebarCardInfo}>
-                    <Text style={styles.sidebarCardName}>{name}</Text>
+                    <Text style={styles.sidebarCardName}>{g.name}</Text>
                     <Text style={styles.sidebarCardCount}>
-                      Quantity: {cards.length}
+                      Quantity: {g.count}
                     </Text>
                     <TouchableOpacity
                       style={styles.removeCardButton}
-                      onPress={() => removeCardFromDeck(cards[0].id)}
+                      onPress={() => removeCardFromDeck(g.sample.id)}
                     >
                       <Text style={styles.removeCardText}>Remove</Text>
                     </TouchableOpacity>

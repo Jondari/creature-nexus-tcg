@@ -1,46 +1,40 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, Text, TouchableOpacity, FlatList } from 'react-native';
 import { CardComponent } from './CardComponent';
-import { Card, CardRarity, RARITY_COLORS } from '../models/Card';
-import { groupCardsByName } from '../utils/cardUtils';
+import { CardRarity, RARITY_COLORS } from '../models/Card';
+import { CardGrouped } from '../utils/cardUtils';
 import { CardSize } from '../context/SettingsContext';
 import Colors from '../constants/Colors';
 
 interface CardGridProps {
-  cards: Card[];
+  // Pre-grouped items: one entry per model with a count
+  items: CardGrouped[];
   filter: CardRarity | 'all';
   onFilterChange: (filter: CardRarity | 'all') => void;
   cardSize?: CardSize;
 }
 
-export default function CardGrid({ cards, filter, onFilterChange, cardSize = 'small' }: CardGridProps) {
-  // Group cards by name to count duplicates (memoized)
-  const groupedCards = useMemo(() => groupCardsByName(cards), [cards]);
-  
-  // Filter cards if needed (memoized)
-  const filteredGroups = useMemo(() => {
-    return Object.entries(groupedCards).filter(([_, cardGroup]) => {
-      if (filter === 'all') return true;
-      return cardGroup[0].rarity === filter;
-    });
-  }, [groupedCards, filter]);
+export default function CardGrid({ items, filter, onFilterChange, cardSize = 'small' }: CardGridProps) {
+  // Filter grouped items by rarity, keeps the list small and fast for Android
+  const filteredItems = useMemo(() => {
+    if (filter === 'all') return items;
+    return items.filter((g) => g.rarity === filter);
+  }, [items, filter]);
   
   const filterOptions: Array<CardRarity | 'all'> = ['all', 'common', 'rare', 'epic', 'legendary', 'mythic'];
   
 
   // Render item for FlatList
-  const renderCard = ({ item }: { item: [string, Card[]] }) => {
-    const [name, cardGroup] = item;
-    return (
-      <CardComponent 
-        key={name} 
-        card={cardGroup[0]} 
-        viewMode="collection"
-        count={cardGroup.length}
-        size={cardSize}
-      />
-    );
-  };
+  // Render a single grouped tile with a quantity badge (x{count})
+  const renderCard = useCallback(({ item }: { item: CardGrouped }) => (
+    <CardComponent
+      key={item.modelId}
+      card={item.sample}
+      viewMode="collection"
+      count={item.count}
+      size={cardSize}
+    />
+  ), [cardSize]);
   
   const renderFilterButtons = () => {
     return (
@@ -80,7 +74,7 @@ export default function CardGrid({ cards, filter, onFilterChange, cardSize = 'sm
       </View>
       
       <View style={styles.contentSection}>
-        {filteredGroups.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No cards found</Text>
             <Text style={styles.emptySubtext}>Open some packs to add cards to your collection</Text>
@@ -88,9 +82,9 @@ export default function CardGrid({ cards, filter, onFilterChange, cardSize = 'sm
         ) : (
           <FlatList
             key={`collection-flatlist-${filter}`}
-            data={filteredGroups}
+            data={filteredItems}
             renderItem={renderCard}
-            keyExtractor={([name]) => name}
+            keyExtractor={(g) => g.modelId}
             contentContainerStyle={styles.gridContainer}
             showsVerticalScrollIndicator={false}
             removeClippedSubviews={true}
