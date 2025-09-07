@@ -84,20 +84,20 @@ export interface SpellCardData {
 export type CardData = MonsterCardData | SpellCardData;
 
 // Type guards to distinguish between card types
-export function isMonsterCard(card: ExtendedCard | CardData): card is MonsterCard | MonsterCardData {
-  return 'hp' in card && 'attacks' in card;
+export function isMonsterCard(card: ExtendedCard | CardData | unknown): card is MonsterCard | MonsterCardData {
+  return typeof card === 'object' && card !== null && 'hp' in card && 'attacks' in card;
 }
 
-export function isSpellCard(card: ExtendedCard | CardData): card is SpellCard | SpellCardData {
-  return 'effect' in card && 'energyCost' in card;
+export function isSpellCard(card: ExtendedCard | CardData | unknown): card is SpellCard | SpellCardData {
+  return typeof card === 'object' && card !== null && 'effect' in card && 'energyCost' in card;
 }
 
-export function isMonsterCardData(card: CardData): card is MonsterCardData {
-  return 'hp' in card && 'attacks' in card;
+export function isMonsterCardData(card: CardData | unknown): card is MonsterCardData {
+  return typeof card === 'object' && card !== null && 'hp' in card && 'attacks' in card;
 }
 
-export function isSpellCardData(card: CardData): card is SpellCardData {
-  return 'effect' in card && 'energyCost' in card;
+export function isSpellCardData(card: CardData | unknown): card is SpellCardData {
+  return typeof card === 'object' && card !== null && 'effect' in card && 'energyCost' in card;
 }
 
 // Spell effect definitions for common spell types

@@ -66,6 +66,13 @@ const CardComponent = React.memo(({
   currentTurn = 1,
   isFirstPlayer = false
 }: CardComponentProps) => {
+  // Dev guard to trace corrupted card prop sources
+  if (__DEV__ && (typeof (card as any) !== 'object' || card === null)) {
+    // eslint-disable-next-line no-console
+    console.warn('[CardComponent] Non-object card prop received:', card);
+    // eslint-disable-next-line no-console
+    console.warn(new Error('[CardComponent] Prop source trace').stack);
+  }
   const isPremium = card.rarity === 'legendary' || card.rarity === 'mythic';
   const isElementSymbolCard = true; // Always show element symbols
   const elementColor = getElementColor(card.element);

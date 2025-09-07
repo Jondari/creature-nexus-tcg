@@ -99,7 +99,20 @@ export default function OpenPackScreen() {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        setCards(userData.cards || []);
+        // Sanitize cards: keep only well-formed card objects; drop strings/partials
+        const sanitizeCards = (cards: any): Card[] => {
+          if (!Array.isArray(cards)) return [];
+          return cards.filter((c: any) => (
+            c && typeof c === 'object' &&
+            typeof c.id === 'string' &&
+            typeof c.name === 'string' &&
+            typeof c.rarity === 'string' &&
+            typeof c.element === 'string' &&
+            typeof c.hp === 'number' &&
+            Array.isArray(c.attacks)
+          ));
+        };
+        setCards(sanitizeCards(userData.cards));
         
         // Check if we can open a new pack
         const lastPackOpenedTimestamp = userData.lastPackOpened?.toMillis();

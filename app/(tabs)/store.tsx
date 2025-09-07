@@ -300,10 +300,10 @@ export default function StoreScreen() {
             // Purchase successful - grant the pack to the user
             const packCards = generatePackCards(pack);
             
-            // Add cards to user's collection
+            // Add full card objects to user's collection (not just IDs)
             const userRef = doc(db, 'users', user.uid);
             await updateDoc(userRef, {
-              cards: arrayUnion(...packCards.map(card => card.id)),
+              cards: arrayUnion(...packCards),
               lastPackOpened: new Date(),
               packHistory: arrayUnion({
                 packName: pack.name,

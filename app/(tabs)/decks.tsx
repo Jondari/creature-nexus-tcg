@@ -48,7 +48,20 @@ export default function DecksScreen() {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        setUserCards(userData.cards || []);
+        // Keep only well-formed card objects; drop invalid entries (e.g., string IDs)
+        const sanitizeCards = (cards: any): Card[] => {
+          if (!Array.isArray(cards)) return [];
+          return cards.filter((c: any) => (
+            c && typeof c === 'object' &&
+            typeof c.id === 'string' &&
+            typeof c.name === 'string' &&
+            typeof c.rarity === 'string' &&
+            typeof c.element === 'string' &&
+            typeof c.hp === 'number' &&
+            Array.isArray(c.attacks)
+          ));
+        };
+        setUserCards(sanitizeCards(userData.cards));
         setLastFetchTime(Date.now());
       }
     } catch (error) {

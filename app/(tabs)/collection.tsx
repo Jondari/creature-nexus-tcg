@@ -50,8 +50,21 @@ export default function CollectionScreen() {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
+        // Store only well-formed card objects; drop any invalid entries (e.g., string IDs)
+        const sanitizeCards = (cards: any): Card[] => {
+          if (!Array.isArray(cards)) return [];
+          return cards.filter((c: any) => (
+            c && typeof c === 'object' &&
+            typeof c.id === 'string' &&
+            typeof c.name === 'string' &&
+            typeof c.rarity === 'string' &&
+            typeof c.element === 'string' &&
+            typeof c.hp === 'number' &&
+            Array.isArray(c.attacks)
+          ));
+        };
         // Store all owned card instances; we group them in-memory for the grid.
-        setAllCards(userData.cards || []);
+        setAllCards(sanitizeCards(userData.cards));
         setLastFetchTime(Date.now());
       }
     } catch (error) {
