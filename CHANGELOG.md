@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.10.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.10.1...v0.10.2) (2025-09-07)
+
+
+### Bug Fixes
+
+* harden type guards, store full card objects (not IDs), and sanitize Firestore reads to prevent crashes from corrupted data ([00cae65](https://github.com/Jondari/creature-nexus-tcg/commit/00cae6526e950e43d7096a06ec9ceda28b4114ba))
+
 ### [0.10.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.10.0...v0.10.1) (2025-09-07)
 
 ## [0.10.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.9.0...v0.10.0) (2025-09-06)
