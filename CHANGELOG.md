@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.11.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.10.2...v0.11.0) (2025-09-17)
+
+
+### Features
+
+* add rules sidebar with info button to DeckBuilder and GameBoard components ([8ee36f8](https://github.com/Jondari/creature-nexus-tcg/commit/8ee36f812c0c8d52689d85cca95bc4cd1d74505f))
+
 ### [0.10.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.10.1...v0.10.2) (2025-09-07)
 
 
