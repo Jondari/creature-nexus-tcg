@@ -12,6 +12,7 @@ import { ActionLog } from './ActionLog';
 import { Sidebar } from './Sidebar';
 import { EnergyWaveAnimation } from './Animation/EnergyWaveAnimation';
 import { SpellCastAnimation } from './Animation/SpellCastAnimation';
+import { RulesContent } from './RulesContent';
 import { Card } from '../types/game';
 import { t } from '../utils/i18n';
 import { CardLoader } from '../utils/game/cardLoader';
@@ -42,6 +43,7 @@ export function GameBoard() {
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
+  const [rulesVisible, setRulesVisible] = useState(false);
   const [showDeckSelection, setShowDeckSelection] = useState(false);
   
   
@@ -514,6 +516,14 @@ export function GameBoard() {
                 {cardSize === 'small' ? '⊞' : '⊟'}
               </Text>
             </TouchableOpacity>
+            {/* Rules button */}
+            <TouchableOpacity
+              style={[styles.sizeToggle, { marginLeft: 8 }]}
+              onPress={() => setRulesVisible(true)}
+              accessibilityLabel="Show game rules"
+            >
+              <Text style={styles.sizeToggleText}>ℹ️</Text>
+            </TouchableOpacity>
             
             {showBattleLog && (
               <TouchableOpacity 
@@ -640,6 +650,15 @@ export function GameBoard() {
           <ActionLog logs={actionLog} sidebarMode={true} />
         </Sidebar>
       )}
+
+      {/* Rules Sidebar */}
+      <Sidebar
+        visible={rulesVisible}
+        onClose={() => setRulesVisible(false)}
+        title="Game Rules"
+      >
+        <RulesContent context="battle" />
+      </Sidebar>
 
       {/* Energy Wave Animation */}
       {energyWaveAnimation && energyWaveAnimation.show && (

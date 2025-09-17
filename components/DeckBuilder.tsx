@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatLi
 import { Card, CardRarity } from '../models/Card';
 import { CardComponent } from './CardComponent';
 import { Sidebar } from './Sidebar';
+import { RulesContent } from './RulesContent';
 import { groupByModel, CardGrouped } from '../utils/cardUtils';
 import { showErrorAlert } from '@/utils/alerts';
 import Colors from '../constants/Colors';
@@ -30,6 +31,7 @@ export function DeckBuilder({
   const [deckName, setDeckName] = useState(initialDeckName);
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [rulesVisible, setRulesVisible] = useState(false);
 
   // Group available cards and current deck by model (memoized)
   const groupedAvailable: CardGrouped[] = useMemo(() => groupByModel(availableCards), [availableCards]);
@@ -147,6 +149,14 @@ export function DeckBuilder({
         </TouchableOpacity>
         <Text style={styles.title}>Deck Builder</Text>
         <View style={styles.headerActions}>
+          {/* Rules button */}
+          <TouchableOpacity
+            onPress={() => setRulesVisible(true)}
+            style={[styles.deckButton, { backgroundColor: Colors.background.card }]}
+            accessibilityLabel="Show game rules"
+          >
+            <Text style={[styles.deckButtonText, { color: Colors.text.primary }]}>ℹ️</Text>
+          </TouchableOpacity>
           <TouchableOpacity 
             onPress={() => setSidebarVisible(true)} 
             style={styles.deckButton}
@@ -283,6 +293,16 @@ export function DeckBuilder({
             )}
           </ScrollView>
         </View>
+      </Sidebar>
+
+      {/* Rules Sidebar */}
+      <Sidebar
+        visible={rulesVisible}
+        onClose={() => setRulesVisible(false)}
+        title="Game Rules"
+        width={420}
+      >
+        <RulesContent context="deck" />
       </Sidebar>
     </View>
   );
