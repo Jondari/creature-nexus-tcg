@@ -151,14 +151,7 @@ export function DeckBuilder({
         <View style={styles.headerActions}>
           {/* Rules button */}
           <TouchableOpacity
-            onPress={() => setRulesVisible(true)}
-            style={[styles.deckButton, { backgroundColor: Colors.background.card }]}
-            accessibilityLabel="Show game rules"
-          >
-            <Text style={[styles.deckButtonText, { color: Colors.text.primary }]}>ℹ️</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={() => setSidebarVisible(true)} 
+            onPress={() => setSidebarVisible(true)}
             style={styles.deckButton}
           >
             <Text style={styles.deckButtonText}>
@@ -181,6 +174,20 @@ export function DeckBuilder({
             ? `Need ${DECK_SIZE_MIN - currentDeck.length} more cards` 
             : 'Deck is valid'}
         </Text>
+        <TouchableOpacity
+            onPress={() => setRulesVisible(true)}
+            style={[
+                styles.deckButton,
+              {
+                backgroundColor: Colors.background.primary,
+                padding: 8,
+                marginTop: 10,
+                alignSelf: 'flex-start'
+              }]}
+            accessibilityLabel="Show game rules"
+        >
+          <Text style={[styles.deckButtonText, { color: Colors.text.primary }]}>ℹ️</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
