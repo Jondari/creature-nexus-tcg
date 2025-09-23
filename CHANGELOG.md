@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.11.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.11.0...v0.11.1) (2025-09-23)
+
+
+### Bug Fixes
+
+* add skip button to welcome animation to allow direct navigation to auth page ([250eab9](https://github.com/Jondari/creature-nexus-tcg/commit/250eab9d37c1786dae69a8a6f91da9de50077dd1))
+
 ## [0.11.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.10.2...v0.11.0) (2025-09-17)
 
 
