@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Image, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
+import { View, Image, StyleSheet, Animated, Dimensions, Platform, TouchableOpacity, Text } from 'react-native';
 
 // Import monster images from different rarities
 const PC_MONSTERS = [
@@ -60,6 +60,7 @@ interface MonsterShowcaseAnimationProps {
   autoStart?: boolean;
   fullScreen?: boolean; // Whether to display in full screen mode
   onAnimationComplete?: () => void;
+  onSkip?: () => void; // Callback when skip button is pressed
 }
 
 const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
@@ -69,6 +70,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
   autoStart = true,
   fullScreen = false,
   onAnimationComplete,
+  onSkip,
 }) => {
   const [visibleImages, setVisibleImages] = useState<number[]>([]); // Array of visible image indices
   const [isAnimating, setIsAnimating] = useState(false);
@@ -87,6 +89,23 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
     }));
   }
   const intervalRef = useRef<NodeJS.Timeout>();
+
+  const handleSkip = () => {
+    // Clear any running intervals
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    // Stop current animation and hide immediately
+    setIsAnimating(false);
+    setAnimationComplete(true);
+    setShouldHide(true);
+    
+    // Call the skip callback if provided
+    if (onSkip) {
+      onSkip();
+    }
+  };
 
   const startAnimation = () => {
     if (isAnimating || visibleImages.length >= SHOWCASE_MONSTERS.length) return;
@@ -236,6 +255,26 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
         />
       )}
       
+      {/* Skip button - only show in fullscreen mode and while animating */}
+      {fullScreen && !shouldHide && onSkip && (
+        <Animated.View
+          style={[
+            styles.skipButtonContainer,
+            {
+              opacity: containerFadeAnim,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.skipButton}
+            onPress={handleSkip}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.skipButtonText}>Skip</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+      
       {/* Render all visible images stacked on top of each other */}
       {visibleImages.map((imageIndex, stackIndex) => {
         // Safety check to ensure imageAnimations exists for this index
@@ -347,6 +386,25 @@ const styles = StyleSheet.create({
     shadowRadius: 30,
     elevation: 8,
     zIndex: 1,
+  },
+  skipButtonContainer: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 100,
+  },
+  skipButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  skipButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

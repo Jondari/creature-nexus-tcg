@@ -42,6 +42,7 @@ export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(true);
   
   // Random showcase monsters (2 different ones)
   const [showcaseMonsters] = useState(() => getRandomShowcaseMonsters());
@@ -108,6 +109,10 @@ export default function AuthScreen() {
       }
       showErrorAlert('Error', 'Failed to sign in with Google. Please try again.');
     }
+  };
+
+  const hideAnimation = () => {
+    setShowAnimation(false);
   };
   
   if (loading) {
@@ -242,12 +247,16 @@ export default function AuthScreen() {
       </Modal>
 
       {/* Full Screen Monster Animation Overlay */}
-      <MonsterShowcaseAnimation
-        transitionDuration={1200}
-        fadeDuration={600}
-        autoStart={true}
-        fullScreen={true}
-      />
+      {showAnimation && (
+        <MonsterShowcaseAnimation
+          transitionDuration={1200}
+          fadeDuration={600}
+          autoStart={true}
+          fullScreen={true}
+          onAnimationComplete={hideAnimation}
+          onSkip={hideAnimation}
+        />
+      )}
     </View>
   );
 }
