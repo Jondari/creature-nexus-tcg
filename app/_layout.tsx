@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider } from '@/context/AuthContext';
@@ -16,6 +16,8 @@ import { SplashScreen } from 'expo-router';
 import * as NavigationBar from 'expo-navigation-bar';
 import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import { useAudio, MusicType } from '@/hooks/useAudio';
+import { AudioPermissionBanner } from '@/components/AudioPermissionBanner';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -33,12 +35,28 @@ export default function RootLayout() {
   });
 
   const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
+  
+  // Initialize background music
+  const { playMusic } = useAudio();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
+
+      // Determine music based on current route
+      // Support both with and without group segments in pathname
+      const battleRoutes = [
+        '/quick-battle',
+        '/story-battle',
+        '/(tabs)/quick-battle',
+        '/(tabs)/story-battle',
+      ];
+      const isBattle = battleRoutes.some((r) => pathname?.startsWith(r));
+
+      playMusic(isBattle ? MusicType.BATTLE : MusicType.GENERAL);
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, pathname, playMusic]);
 
   // Hide Android navigation bar
   useEffect(() => {
@@ -93,6 +111,9 @@ export default function RootLayout() {
         <AuthProvider>
           <DeckProvider>
             <StoryModeProvider>
+              {/* Audio Permission Banner */}
+              <AudioPermissionBanner />
+              
               <Stack screenOptions={{ 
                 headerShown: false,
                 contentStyle: { backgroundColor: Colors.background.primary }

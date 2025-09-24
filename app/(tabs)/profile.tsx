@@ -9,6 +9,7 @@ import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube, Gift, Shield } fro
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import { addNexusCoins } from '@/utils/currencyUtils';
 import { RedeemCodeModal } from '@/components/RedeemCodeModal';
+import { MusicControls } from '@/components/MusicControls';
 import Colors from '@/constants/Colors';
 
 const packageJson = require('../../package.json');
@@ -271,6 +272,11 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+
+        {/* Music Controls */}
+        <View style={styles.card}>
+          <MusicControls />
         </View>
 
         <View style={styles.card}>
