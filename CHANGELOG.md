@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.12.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.11.2...v0.12.0) (2025-09-24)
+
+
+### Features
+
+* implement comprehensive background music system with crossfade, route-based switching, and web audio permissions ([42f9bba](https://github.com/Jondari/creature-nexus-tcg/commit/42f9bba847713e22a16a072022e432b38bfe3624))
+
 ### [0.11.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.11.1...v0.11.2) (2025-09-23)
 
 
