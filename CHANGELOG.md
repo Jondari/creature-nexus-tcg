@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.12.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.12.0...v0.12.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* display spell cards in collection/decks ([624c062](https://github.com/Jondari/creature-nexus-tcg/commit/624c062bbc213127ee344a30bd515e42e18449b9))
+
 ## [0.12.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.11.2...v0.12.0) (2025-09-24)
 
 
