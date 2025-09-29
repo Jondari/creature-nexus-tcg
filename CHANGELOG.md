@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.12.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.12.2...v0.12.3) (2025-09-29)
+
+
+### Bug Fixes
+
+* gate on music only and add dismiss button ([9c63bb2](https://github.com/Jondari/creature-nexus-tcg/commit/9c63bb2742e73245c7c693943034b77b1959bc48))
+
 ### [0.12.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.12.1...v0.12.2) (2025-09-29)
 
 
