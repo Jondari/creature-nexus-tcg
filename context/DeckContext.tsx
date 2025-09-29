@@ -4,11 +4,12 @@ import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { Card } from '../models/Card';
+import { ExtendedCard } from '@/models/cards-extended';
 
 export interface SavedDeck {
   id: string;
   name: string;
-  cards: Card[];
+  cards: Array<Card | ExtendedCard>;
   createdAt: Date;
   updatedAt: Date;
   isActive?: boolean;
@@ -17,7 +18,7 @@ export interface SavedDeck {
 interface DeckContextType {
   savedDecks: SavedDeck[];
   activeDeck: SavedDeck | null;
-  saveDeck: (cards: Card[], name: string, deckId?: string) => Promise<void>;
+  saveDeck: (cards: Array<Card | ExtendedCard>, name: string, deckId?: string) => Promise<void>;
   deleteDeck: (deckId: string) => Promise<void>;
   setActiveDeck: (deckId: string) => Promise<void>;
   loadDecks: () => Promise<void>;
@@ -191,7 +192,7 @@ export function DeckProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const saveDeck = async (cards: Card[], name: string, deckId?: string) => {
+  const saveDeck = async (cards: Array<Card | ExtendedCard>, name: string, deckId?: string) => {
     try {
       const now = new Date();
       let updatedDecks: SavedDeck[];

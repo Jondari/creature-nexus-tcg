@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatList } from 'react-native';
 import { Card, CardRarity } from '../models/Card';
+import { ExtendedCard } from '@/models/cards-extended';
 import { CardComponent } from './CardComponent';
 import { Sidebar } from './Sidebar';
 import { RulesContent } from './RulesContent';
@@ -9,10 +10,10 @@ import { showErrorAlert } from '@/utils/alerts';
 import Colors from '../constants/Colors';
 
 interface DeckBuilderProps {
-  availableCards: Card[];
-  onSaveDeck: (deck: Card[], deckName: string) => void;
+  availableCards: Array<Card | ExtendedCard>;
+  onSaveDeck: (deck: Array<Card | ExtendedCard>, deckName: string) => void;
   onClose: () => void;
-  initialDeck?: Card[];
+  initialDeck?: Array<Card | ExtendedCard>;
   deckName?: string;
 }
 
@@ -27,7 +28,7 @@ export function DeckBuilder({
   initialDeck = [],
   deckName: initialDeckName = ''
 }: DeckBuilderProps) {
-  const [currentDeck, setCurrentDeck] = useState<Card[]>(initialDeck);
+  const [currentDeck, setCurrentDeck] = useState<Array<Card | ExtendedCard>>(initialDeck as Array<Card | ExtendedCard>);
   const [deckName, setDeckName] = useState(initialDeckName);
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -80,7 +81,7 @@ export function DeckBuilder({
     );
   }, [currentDeck.length]);
 
-  const addCardToDeck = (card: Card) => {
+  const addCardToDeck = (card: Card | ExtendedCard) => {
     const cardsOfSameName = currentDeck.filter(c => c.name === card.name);
     
     if (cardsOfSameName.length >= MAX_COPIES_PER_CARD) {
@@ -97,7 +98,7 @@ export function DeckBuilder({
     const availableCard = availableCards.find(c => 
       c.name === card.name && 
       !currentDeck.some(deckCard => deckCard.id === c.id)
-    );
+    ) as Card | ExtendedCard | undefined;
 
     if (availableCard) {
       setCurrentDeck([...currentDeck, availableCard]);

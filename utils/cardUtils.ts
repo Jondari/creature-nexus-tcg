@@ -1,4 +1,5 @@
 import { Card, CardRarity, Element, RARITY_WEIGHTS, CARDS_DATABASE, getRandomCardByRarity } from '../models/Card';
+import { ExtendedCard } from '../models/cards-extended';
 
 // Generate a random rarity based on weights
 export const generateRandomRarity = (): CardRarity => {
@@ -68,12 +69,12 @@ export interface CardGrouped {
   name: string;
   rarity: CardRarity;
   // A representative card instance for rendering visuals (art, element, etc.)
-  sample: Card;
+  sample: Card | ExtendedCard;
   count: number;
 }
 
 // Group a large list of owned card instances into unique models with counts
-export const groupByModel = (cards: Card[]): CardGrouped[] => {
+export const groupByModel = (cards: Array<Card | ExtendedCard>): CardGrouped[] => {
   const map = new Map<string, CardGrouped>();
 
   for (const card of cards) {
@@ -83,7 +84,7 @@ export const groupByModel = (cards: Card[]): CardGrouped[] => {
         modelId: key,
         name: card.name,
         rarity: card.rarity,
-        sample: card, // Keep first instance for rendering
+        sample: card, // Keep first instance for rendering (monster or spell)
         count: 0,
       });
     }

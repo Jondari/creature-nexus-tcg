@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { Card, CardRarity } from '@/models/Card';
+import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { groupByModel, CardGrouped } from '@/utils/cardUtils';
 import Colors from '@/constants/Colors';
 import CardGrid from '@/components/CardGrid';
@@ -15,7 +16,7 @@ export default function CollectionScreen() {
   const { user } = useAuth();
   const { cardSize, setCardSize } = useSettings();
   // Keep raw instances for accurate totals
-  const [allCards, setAllCards] = useState<Card[]>([]);
+  const [allCards, setAllCards] = useState<Array<Card | ExtendedCard>>([]);
   // Grouped list (unique models with a count) for fast rendering
   const groupedCards: CardGrouped[] = useMemo(() => groupByModel(allCards), [allCards]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +52,7 @@ export default function CollectionScreen() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         // Store only well-formed card objects; drop any invalid entries (e.g., string IDs)
-        const sanitizeCards = (cards: any): Card[] => {
+        const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
           if (!Array.isArray(cards)) return [];
           return cards.filter((c: any) => (
             c && typeof c === 'object' &&
@@ -59,8 +60,7 @@ export default function CollectionScreen() {
             typeof c.name === 'string' &&
             typeof c.rarity === 'string' &&
             typeof c.element === 'string' &&
-            typeof c.hp === 'number' &&
-            Array.isArray(c.attacks)
+            (isMonsterCard(c) || isSpellCard(c))
           ));
         };
         // Store all owned card instances; we group them in-memory for the grid.

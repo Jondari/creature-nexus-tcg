@@ -6,6 +6,7 @@ import { useDecks } from '@/context/DeckContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { Card } from '@/models/Card';
+import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { DeckBuilder } from '@/components/DeckBuilder';
 import { showSuccessAlert, showErrorAlert, showConfirmAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
@@ -14,7 +15,7 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 export default function DecksScreen() {
   const { user } = useAuth();
   const { savedDecks, activeDeck, saveDeck, deleteDeck, setActiveDeck } = useDecks();
-  const [userCards, setUserCards] = useState<Card[]>([]);
+  const [userCards, setUserCards] = useState<Array<Card | ExtendedCard>>([]);
   const [loading, setLoading] = useState(true);
   const [showDeckBuilder, setShowDeckBuilder] = useState(false);
   const [editingDeck, setEditingDeck] = useState<any>(null);
@@ -49,7 +50,7 @@ export default function DecksScreen() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         // Keep only well-formed card objects; drop invalid entries (e.g., string IDs)
-        const sanitizeCards = (cards: any): Card[] => {
+        const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
           if (!Array.isArray(cards)) return [];
           return cards.filter((c: any) => (
             c && typeof c === 'object' &&
@@ -57,8 +58,7 @@ export default function DecksScreen() {
             typeof c.name === 'string' &&
             typeof c.rarity === 'string' &&
             typeof c.element === 'string' &&
-            typeof c.hp === 'number' &&
-            Array.isArray(c.attacks)
+            (isMonsterCard(c) || isSpellCard(c))
           ));
         };
         setUserCards(sanitizeCards(userData.cards));
@@ -83,7 +83,7 @@ export default function DecksScreen() {
     setShowDeckBuilder(true);
   };
 
-  const handleSaveDeck = async (cards: Card[], deckName: string) => {
+  const handleSaveDeck = async (cards: Array<Card | ExtendedCard>, deckName: string) => {
     try {
       await saveDeck(cards, deckName, editingDeck?.id);
       setShowDeckBuilder(false);
