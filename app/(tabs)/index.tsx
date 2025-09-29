@@ -9,6 +9,7 @@ import { generatePackCards } from '@/utils/boosterUtils';
 import { FREE_DAILY_PACK, getPackById } from '@/data/boosterPacks';
 import { getInventoryPacks, removePackFromInventory, InventoryPack } from '@/utils/packInventory';
 import { Card } from '@/models/Card';
+import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { PackageOpen, Gift } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import CountdownTimer from '@/components/CountdownTimer';
@@ -55,7 +56,7 @@ const sortInventoryPacks = (packs: InventoryPack[]): InventoryPack[] => {
 
 export default function OpenPackScreen() {
   const { user } = useAuth();
-  const [cards, setCards] = useState<Card[]>([]);
+  const [cards, setCards] = useState<Array<Card | ExtendedCard>>([]);
   const [loading, setLoading] = useState(true);
   const [opening, setOpening] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -100,7 +101,7 @@ export default function OpenPackScreen() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         // Sanitize cards: keep only well-formed card objects; drop strings/partials
-        const sanitizeCards = (cards: any): Card[] => {
+        const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
           if (!Array.isArray(cards)) return [];
           return cards.filter((c: any) => (
             c && typeof c === 'object' &&
@@ -108,8 +109,7 @@ export default function OpenPackScreen() {
             typeof c.name === 'string' &&
             typeof c.rarity === 'string' &&
             typeof c.element === 'string' &&
-            typeof c.hp === 'number' &&
-            Array.isArray(c.attacks)
+            (isMonsterCard(c) || isSpellCard(c))
           ));
         };
         setCards(sanitizeCards(userData.cards));
