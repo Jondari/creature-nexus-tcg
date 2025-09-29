@@ -6,15 +6,18 @@ import { useAudio } from '../hooks/useAudio';
 
 export const AudioPermissionBanner: React.FC = () => {
   const { hasUserInteracted, settings, enableAudio, isPlaying } = useAudio();
+  const [dismissed, setDismissed] = React.useState(false);
 
   // Show banner when:
   // 1. Platform is web (mobile apps don't need user interaction for audio) AND
   // 2. User hasn't interacted yet AND
   // 3. At least one audio feature is enabled (music OR sound effects)
   const shouldShow = Platform.OS === 'web' &&
+                    !dismissed &&
                     !hasUserInteracted &&
                     !isPlaying &&
-                    (settings.musicEnabled || settings.soundEffectsEnabled);
+                    // Only prompt when background music is enabled (SFX are user-initiated)
+                    settings.musicEnabled;
 
   if (!shouldShow) {
     return null;
@@ -23,6 +26,10 @@ export const AudioPermissionBanner: React.FC = () => {
   const handleEnableAudio = async () => {
     await enableAudio();
   };
+  
+  const handleDismiss = () => {
+    setDismissed(true);
+  };
 
   return (
     <View style={styles.container} pointerEvents="box-none">
@@ -30,7 +37,7 @@ export const AudioPermissionBanner: React.FC = () => {
         <Volume2 size={20} color={Colors.accent[500]} />
         <View style={styles.textContainer}>
           <Text style={styles.title}>Enable Audio</Text>
-          <Text style={styles.subtitle}>Tap to enable background music and sound effects</Text>
+          <Text style={styles.subtitle}>Tap to enable background music</Text>
         </View>
         <TouchableOpacity 
           style={styles.button} 
@@ -38,6 +45,14 @@ export const AudioPermissionBanner: React.FC = () => {
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Enable</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.dismissButton}
+          onPress={handleDismiss}
+          accessibilityLabel="Dismiss audio banner"
+          hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+        >
+          <Text style={styles.dismissText}>×</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -62,6 +77,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     // Remove external margins; container handles positioning
+  },
+  dismissButton: {
+    marginLeft: 8,
+    paddingHorizontal: 6,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+  },
+  dismissText: {
+    fontSize: 18,
+    color: Colors.text.secondary,
+    fontWeight: '700',
   },
   textContainer: {
     flex: 1,
