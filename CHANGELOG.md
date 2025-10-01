@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.13.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.12.3...v0.13.0) (2025-10-01)
+
+
+### Features
+
+* Integrate translation keys across the app and expose all user-facing strings to the i18n system ([f571a43](https://github.com/Jondari/creature-nexus-tcg/commit/f571a43f08abb385b508dc3699c0ad23ebe12b74))
+
 ### [0.12.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.12.2...v0.12.3) (2025-09-29)
 
 
