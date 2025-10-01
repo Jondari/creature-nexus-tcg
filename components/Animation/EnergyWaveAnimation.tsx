@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { t } from '@/utils/i18n';
 
 interface EnergyWaveAnimationProps {
   energyAmount: number;
@@ -146,7 +147,10 @@ export const EnergyWaveAnimation: React.FC<EnergyWaveAnimationProps> = ({
             textShadowRadius: 10,
           }}
         >
-          +{energyAmount} Energy ⚡
+          {t(
+            energyAmount > 1 ? 'animations.energyGainPlural' : 'animations.energyGain',
+            { amount: String(energyAmount) }
+          )}
         </Text>
       </Animated.View>
     </View>

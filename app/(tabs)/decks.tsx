@@ -10,6 +10,7 @@ import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extende
 import { DeckBuilder } from '@/components/DeckBuilder';
 import { showSuccessAlert, showErrorAlert, showConfirmAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 import LoadingOverlay from '@/components/LoadingOverlay';
 
 export default function DecksScreen() {
@@ -88,41 +89,41 @@ export default function DecksScreen() {
       await saveDeck(cards, deckName, editingDeck?.id);
       setShowDeckBuilder(false);
       setEditingDeck(null);
-      showSuccessAlert('Success', 'Deck saved successfully!');
+      showSuccessAlert(t('common.success'), t('alerts.deckSaved'));
     } catch (error) {
-      showErrorAlert('Error', 'Failed to save deck. Please try again.');
+      showErrorAlert(t('common.error'), t('alerts.errorSaveDeck'));
     }
   };
 
   const handleDeleteDeck = (deck: any) => {
     showConfirmAlert(
-      'Delete Deck',
-      `Are you sure you want to delete "${deck.name}"?`,
+      t('decks.confirmDelete.title'),
+      t('decks.confirmDelete.message', { name: String(deck.name) }),
       async () => {
         try {
           await deleteDeck(deck.id);
-          showSuccessAlert('Success', 'Deck deleted successfully!');
+          showSuccessAlert(t('common.success'), t('alerts.deckDeleted'));
         } catch (error) {
-          showErrorAlert('Error', 'Failed to delete deck. Please try again.');
+          showErrorAlert(t('common.error'), t('alerts.errorDeleteDeck'));
         }
       },
       undefined, // onCancel
-      'Delete',
-      'Cancel'
+      t('decks.confirmDelete.confirm'),
+      t('decks.confirmDelete.cancel')
     );
   };
 
   const handleSetActiveDeck = async (deck: any) => {
     try {
       await setActiveDeck(deck.id);
-      showSuccessAlert('Success', `"${deck.name}" is now your active deck!`);
+      showSuccessAlert(t('common.success'), t('alerts.setActive', { name: String(deck.name) }));
     } catch (error) {
-      showErrorAlert('Error', 'Failed to set active deck. Please try again.');
+      showErrorAlert(t('common.error'), t('alerts.errorSetActive'));
     }
   };
 
   if (loading) {
-    return <LoadingOverlay message="Loading your collection..." />;
+    return <LoadingOverlay message={t('decks.loading')} />;
   }
 
   if (showDeckBuilder) {
@@ -143,15 +144,15 @@ export default function DecksScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Decks</Text>
+        <Text style={styles.title}>{t('decks.title')}</Text>
         <TouchableOpacity style={styles.createButton} onPress={handleCreateDeck}>
-          <Text style={styles.createButtonText}>+ New Deck</Text>
+          <Text style={styles.createButtonText}>{t('decks.newDeck')}</Text>
         </TouchableOpacity>
       </View>
 
       {activeDeck && (
         <View style={styles.activeDeckSection}>
-          <Text style={styles.sectionTitle}>Active Deck</Text>
+          <Text style={styles.sectionTitle}>{t('decks.activeDeck')}</Text>
           <View style={[styles.deckCard, styles.activeDeckCard]}>
             <View style={styles.deckInfo}>
               <Text style={styles.deckName}>{activeDeck.name}</Text>
@@ -163,20 +164,20 @@ export default function DecksScreen() {
               style={styles.editButton}
               onPress={() => handleEditDeck(activeDeck)}
             >
-              <Text style={styles.editButtonText}>Edit</Text>
+              <Text style={styles.editButtonText}>{t('decks.edit')}</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
 
       <View style={styles.allDecksSection}>
-        <Text style={styles.sectionTitle}>All Decks ({savedDecks.length})</Text>
+        <Text style={styles.sectionTitle}>{t('decks.allDecks', { count: String(savedDecks.length) })}</Text>
         
         {savedDecks.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No decks created yet</Text>
+            <Text style={styles.emptyText}>{t('decks.emptyTitle')}</Text>
             <Text style={styles.emptySubtext}>
-              Create your first deck to start battling!
+              {t('decks.emptySubtitle')}
             </Text>
           </View>
         ) : (
@@ -189,7 +190,7 @@ export default function DecksScreen() {
                     {deck.cards.length} cards
                   </Text>
                   <Text style={styles.deckDate}>
-                    Updated: {deck.updatedAt.toLocaleDateString()}
+                    {t('decks.updatedAt', { date: deck.updatedAt.toLocaleDateString() })}
                   </Text>
                 </View>
                 
@@ -199,7 +200,7 @@ export default function DecksScreen() {
                       style={styles.setActiveButton}
                       onPress={() => handleSetActiveDeck(deck)}
                     >
-                      <Text style={styles.setActiveButtonText}>Set Active</Text>
+                      <Text style={styles.setActiveButtonText}>{t('decks.setActive')}</Text>
                     </TouchableOpacity>
                   )}
                   
@@ -207,14 +208,14 @@ export default function DecksScreen() {
                     style={styles.editButton}
                     onPress={() => handleEditDeck(deck)}
                   >
-                    <Text style={styles.editButtonText}>Edit</Text>
+                    <Text style={styles.editButtonText}>{t('decks.edit')}</Text>
                   </TouchableOpacity>
                   
                   <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => handleDeleteDeck(deck)}
                   >
-                    <Text style={styles.deleteButtonText}>Delete</Text>
+                    <Text style={styles.deleteButtonText}>{t('decks.delete')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>

@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Coins, ShoppingCart, Star, Zap } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { t } from '@/utils/i18n';
 import PackOpeningAnimation from '@/components/Animation/PackOpeningAnimation';
 import { PACK_CATEGORIES, getAvailablePacks, BoosterPack } from '@/data/boosterPacks';
 import { UserCurrency } from '@/models/BoosterPack';
@@ -79,7 +80,7 @@ export default function StoreScreen() {
       if (__DEV__) {
         console.error('Error fetching user currency:', error);
       }
-      showErrorAlert('Error', 'Failed to load your currency. Please try again.');
+      showErrorAlert(t('common.error'), t('store.errorLoadCurrency'));
     } finally {
       setLoading(false);
     }
@@ -129,22 +130,22 @@ export default function StoreScreen() {
           try {
             await addNexusCoins(user.uid, totalCost);
             await fetchUserCurrency(); // Refresh to show refund
-            showErrorAlert('Purchase Failed', 'Pack opening failed. Your Nexus Coins have been refunded.');
+            showErrorAlert(t('store.purchaseFailed'), t('store.packOpenFailedRefunded'));
           } catch (refundError) {
             if (__DEV__) {
               console.error('Error refunding coins:', refundError);
             }
-            showErrorAlert('Purchase Failed', 'Pack opening failed and refund failed. Please contact support.');
+            showErrorAlert(t('store.purchaseFailed'), t('store.packOpenFailedRefundFailed'));
           }
         }
       } else {
-        showErrorAlert('Purchase Failed', 'Transaction failed. Please try again.');
+        showErrorAlert(t('store.purchaseFailed'), t('store.txnFailedTryAgain'));
       }
     } catch (error) {
       if (__DEV__) {
         console.error('Error executing purchase:', error);
       }
-      showErrorAlert('Purchase Failed', 'Failed to purchase pack. Please try again.');
+      showErrorAlert(t('store.purchaseFailed'), t('store.purchaseFailedGeneric'));
     }
   };
 
@@ -161,8 +162,8 @@ export default function StoreScreen() {
       }
 
       showConfirmAlert(
-        'Confirm Purchase',
-        `Purchase ${quantity} ${pack.name}${quantity > 1 ? 's' : ''} for ${totalCost} Nexus Coins?`,
+        t('store.confirmPurchaseTitle'),
+        t('store.confirmPurchaseCoins', { quantity: String(quantity), name: pack.name, plural: quantity > 1 ? 's' : '', cost: String(totalCost) }),
         () => {
           // Call the async purchase function without making the callback async
           executePurchase(pack, quantity, totalCost);
@@ -173,7 +174,7 @@ export default function StoreScreen() {
       if (__DEV__) {
         console.error('Error purchasing pack:', error);
       }
-      showErrorAlert('Purchase Failed', 'Failed to purchase pack. Please try again.');
+      showErrorAlert(t('store.purchaseFailed'), t('store.purchaseFailedGeneric'));
     }
   };
 
@@ -267,10 +268,7 @@ export default function StoreScreen() {
 
     // Check if billing is supported on this platform
     if (Platform.OS === 'web') {
-      showErrorAlert(
-        'Not Available', 
-        'In-app purchases are only available on mobile devices. Please use the mobile app to make purchases.'
-      );
+      showErrorAlert(t('store.notAvailableTitle'), t('store.notAvailableDesc'));
       return;
     }
 
@@ -285,14 +283,14 @@ export default function StoreScreen() {
       // Get product details to show current price
       const product = await BillingService.getProduct(productId);
       if (!product) {
-        showErrorAlert('Error', 'This product is not available for purchase.');
+        showErrorAlert(t('common.error'), t('store.productUnavailable'));
         return;
       }
 
       // Show confirmation with real price
       showConfirmAlert(
-        'Confirm Purchase',
-        `Purchase ${pack.name} for ${product.price}?`,
+        t('store.confirmPurchaseTitle'),
+        t('store.confirmPurchaseRealMoney', { name: pack.name, price: String(product.price) }),
         async () => {
           const result = await BillingService.purchaseProduct(productId);
           
@@ -323,12 +321,9 @@ export default function StoreScreen() {
             setCurrentPackName(pack.name);
             setShowPackResults(true);
             
-            showSuccessAlert(
-              'Purchase Successful!',
-              `You purchased ${pack.name} for ${product.price}!`
-            );
+            showSuccessAlert(t('store.purchaseSuccessTitle'), t('store.purchaseSuccessRealMoney', { name: pack.name, price: String(product.price) }));
           } else {
-            showErrorAlert('Purchase Failed', result.error || 'Failed to complete purchase.');
+            showErrorAlert(t('store.purchaseFailed'), result.error || t('store.purchaseFailedComplete'));
           }
         }
       );
@@ -336,7 +331,7 @@ export default function StoreScreen() {
       if (__DEV__) {
         console.error('Real money purchase error:', error);
       }
-      showErrorAlert('Error', 'Failed to process purchase. Please try again.');
+      showErrorAlert(t('common.error'), t('store.processPurchaseFailed'));
     } finally {
       setLoading(false);
     }
@@ -353,17 +348,21 @@ export default function StoreScreen() {
         >
 
           <View style={styles.packHeader}>
-            <Text style={styles.packName}>{pack.name}</Text>
+            <Text style={styles.packName}>
+              {(() => { const k = `packs.${pack.id}.name`; const v = t(k); return v === k ? pack.name : v; })()}
+            </Text>
             {pack.isPremium && <Star size={16} color="#ffd700" />}
           </View>
           
-          <Text style={styles.packDescription}>{pack.description}</Text>
+          <Text style={styles.packDescription}>
+            {(() => { const k = `packs.${pack.id}.desc`; const v = t(k); return v === k ? pack.description : v; })()}
+          </Text>
           
           <View style={styles.packDetails}>
-            <Text style={styles.cardCount}>{pack.cardCount} Cards</Text>
+            <Text style={styles.cardCount}>{t('packs.cardCount', { count: String(pack.cardCount) })}</Text>
             {pack.guaranteedRarity && (
               <Text style={styles.guaranteed}>
-                +1 {pack.guaranteedRarity} guaranteed
+                {t('packs.guaranteed', { rarity: t(`rarities.${pack.guaranteedRarity}`) })}
               </Text>
             )}
           </View>
@@ -387,7 +386,7 @@ export default function StoreScreen() {
               >
                 <View style={styles.priceRow}>
                   <Coins size={16} color="#ffd700" />
-                  <Text style={styles.coinPrice}>{pack.nexusCoinPrice}</Text>
+              <Text style={styles.coinPrice}>{pack.nexusCoinPrice}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -397,9 +396,7 @@ export default function StoreScreen() {
                   style={styles.moneyPurchaseButton}
                   onPress={() => handleRealMoneyPurchase(pack)}
                 >
-                  <Text style={styles.moneyPrice}>
-                    {getDisplayPrice(pack)}
-                  </Text>
+                  <Text style={styles.moneyPrice}>{getDisplayPrice(pack)}</Text>
                 </TouchableOpacity>
               )}
 
@@ -410,7 +407,7 @@ export default function StoreScreen() {
                   onPress={() => handlePurchasePack(pack, pack.bundleDiscount!.quantity)}
                 >
                   <Text style={styles.bundleText}>
-                    Buy {pack.bundleDiscount.quantity} + {pack.bundleDiscount.bonus} Free
+                    {t('store.bundleOffer', { quantity: String(pack.bundleDiscount.quantity), bonus: String(pack.bundleDiscount.bonus) })}
                   </Text>
                   <View style={styles.priceRow}>
                     <Coins size={14} color="#ffd700" />
@@ -426,7 +423,7 @@ export default function StoreScreen() {
               style={styles.freePurchaseButton}
               onPress={() => handlePurchasePack(pack)}
             >
-              <Text style={styles.freePurchaseText}>Claim Free Pack</Text>
+              <Text style={styles.freePurchaseText}>{t('store.claimFreePack')}</Text>
             </TouchableOpacity>
           )}
         </LinearGradient>
@@ -451,21 +448,18 @@ export default function StoreScreen() {
 
   const handlePackOpeningComplete = () => {
     setShowPackResults(false);
-    showSuccessAlert(
-      'Purchase Successful!',
-      `You received ${packResults.length} new cards from ${currentPackName}!`
-    );
+    showSuccessAlert(t('store.purchaseSuccessTitle'), t('store.purchaseSuccessCards', { count: String(packResults.length), name: currentPackName }));
   };
 
   if (loading) {
-    return <LoadingOverlay message="Loading store..." />;
+    return <LoadingOverlay message={t('store.loading')} />;
   }
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Booster Pack Store</Text>
+        <Text style={styles.title}>{t('store.title')}</Text>
         <View style={styles.currencyDisplay}>
           <Coins size={20} color="#ffd700" />
           <Text style={styles.currencyAmount}>{userCurrency.nexusCoins}</Text>
@@ -474,9 +468,9 @@ export default function StoreScreen() {
 
       {/* Category Selection */}
       <View style={styles.categoryContainer}>
-        {renderCategory('standard', 'Standard', <ShoppingCart size={16} color={selectedCategory === 'standard' ? Colors.text.primary : Colors.text.secondary} />)}
-        {renderCategory('elemental', 'Elemental', <Zap size={16} color={selectedCategory === 'elemental' ? Colors.text.primary : Colors.text.secondary} />)}
-        {renderCategory('premium', 'Premium', <Star size={16} color={selectedCategory === 'premium' ? Colors.text.primary : Colors.text.secondary} />)}
+        {renderCategory('standard', t('store.standard'), <ShoppingCart size={16} color={selectedCategory === 'standard' ? Colors.text.primary : Colors.text.secondary} />)}
+        {renderCategory('elemental', t('store.elemental'), <Zap size={16} color={selectedCategory === 'elemental' ? Colors.text.primary : Colors.text.secondary} />)}
+        {renderCategory('premium', t('store.premium'), <Star size={16} color={selectedCategory === 'premium' ? Colors.text.primary : Colors.text.secondary} />)}
       </View>
 
       {/* Pack Grid */}

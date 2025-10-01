@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Volume2 } from 'lucide-react-native';
 import Colors from '../constants/Colors';
+import { t } from '@/utils/i18n';
 import { useAudio } from '../hooks/useAudio';
 
 export const AudioPermissionBanner: React.FC = () => {
@@ -36,15 +37,15 @@ export const AudioPermissionBanner: React.FC = () => {
       <View style={styles.banner}>
         <Volume2 size={20} color={Colors.accent[500]} />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>Enable Audio</Text>
-          <Text style={styles.subtitle}>Tap to enable background music</Text>
+          <Text style={styles.title}>{t('audio.enableTitle')}</Text>
+          <Text style={styles.subtitle}>{t('audio.enableSubtitle')}</Text>
         </View>
         <TouchableOpacity 
           style={styles.button} 
           onPress={handleEnableAudio}
           activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>Enable</Text>
+          <Text style={styles.buttonText}>{t('audio.enableButton')}</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.dismissButton}

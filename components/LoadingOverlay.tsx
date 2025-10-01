@@ -1,17 +1,18 @@
 import React from 'react';
 import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import Colors from '../constants/Colors';
+import { t } from '@/utils/i18n';
 
 interface LoadingOverlayProps {
   message?: string;
 }
 
-export default function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
+export default function LoadingOverlay({ message }: LoadingOverlayProps) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <ActivityIndicator size="large" color={Colors.accent[500]} />
-        <Text style={styles.message}>{message}</Text>
+        <Text style={styles.message}>{message || t('common.loading')}</Text>
       </View>
     </View>
   );

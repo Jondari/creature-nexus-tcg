@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle, Defs, RadialGradient, Stop, Line } from 'react-native-svg';
 import { StoryBattle, StoryChapter } from '@/data/storyMode';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 
 interface StoryMapProps {
   chapter: StoryChapter;
@@ -194,7 +195,7 @@ export default function StoryMap({ chapter, onBattleSelect }: StoryMapProps) {
             styles.nodeLabel,
             { color: battle.isAccessible ? Colors.text.primary : Colors.text.secondary }
           ]}>
-            {battle.name}
+            {t(battle.name)}
           </Text>
         </Animated.View>
       );

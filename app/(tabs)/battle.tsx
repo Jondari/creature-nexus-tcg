@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Sword, BookOpen } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 
 export default function BattleScreen() {
   const router = useRouter();
@@ -27,8 +28,8 @@ export default function BattleScreen() {
       
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Battle Arena</Text>
-          <Text style={styles.subtitle}>Choose your battle mode</Text>
+          <Text style={styles.title}>{t('battle.arena.title')}</Text>
+          <Text style={styles.subtitle}>{t('battle.arena.subtitle')}</Text>
         </View>
 
         <View style={styles.optionsContainer}>
@@ -44,9 +45,9 @@ export default function BattleScreen() {
               end={{ x: 1, y: 1 }}
             >
               <Sword size={48} color={Colors.text.primary} />
-              <Text style={styles.optionTitle}>Quick Battle</Text>
+              <Text style={styles.optionTitle}>{t('battle.arena.quickTitle')}</Text>
               <Text style={styles.optionDescription}>
-                Jump straight into battle against an AI opponent
+                {t('battle.arena.quickDescription')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -63,9 +64,9 @@ export default function BattleScreen() {
               end={{ x: 1, y: 1 }}
             >
               <BookOpen size={48} color={Colors.text.primary} />
-              <Text style={styles.optionTitle}>Story Mode</Text>
+              <Text style={styles.optionTitle}>{t('battle.arena.storyTitle')}</Text>
               <Text style={styles.optionDescription}>
-                Embark on an epic adventure through the Creature Nexus
+                {t('battle.arena.storyDescription')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>

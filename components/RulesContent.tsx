@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import Colors from '../constants/Colors';
+import { t } from '@/utils/i18n';
 
 export type RulesContext = 'battle' | 'deck' | 'general';
 
@@ -13,42 +14,42 @@ export function RulesContent({ context = 'general' }: Props) {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container} showsVerticalScrollIndicator>
       {(context === 'general' || context === 'battle') && (
         <>
-          <Text style={styles.h2}>Basics</Text>
-          <Bullet>Each player starts with a 5–card hand.</Bullet>
-          <Bullet>Field capacity: up to 4 creatures.</Bullet>
-          <Bullet>Start of turn energy: +1 by default.</Bullet>
+          <Text style={styles.h2}>{t('rules.sections.basics')}</Text>
+          <Bullet>{t('rules.basics.hand')}</Bullet>
+          <Bullet>{t('rules.basics.field')}</Bullet>
+          <Bullet>{t('rules.basics.energyStart')}</Bullet>
 
-          <Text style={styles.h2}>Turn & Phases</Text>
-          <Bullet>Turn begins: draw a card and gain energy.</Bullet>
-          <Bullet>Main phase: play creatures (free), cast spells, attack, retire.</Bullet>
-          <Bullet>Auto end turn if no more attacks are possible.</Bullet>
+          <Text style={styles.h2}>{t('rules.sections.turn')}</Text>
+          <Bullet>{t('rules.turn.drawEnergy')}</Bullet>
+          <Bullet>{t('rules.turn.mainPhase')}</Bullet>
+          <Bullet>{t('rules.turn.autoEnd')}</Bullet>
 
-          <Text style={styles.h2}>Energy & Spells</Text>
-          <Bullet>Attacks consume the attack’s energy cost.</Bullet>
-          <Bullet>Retire costs 1 energy and returns the creature to your hand.</Bullet>
-          <Bullet>Energy Catalyst (legendary spell): starting next turn, you gain energy equal to the turn number.</Bullet>
+          <Text style={styles.h2}>{t('rules.sections.energySpells')}</Text>
+          <Bullet>{t('rules.energy.attacksCost')}</Bullet>
+          <Bullet>{t('rules.energy.retireCost')}</Bullet>
+          <Bullet>{t('rules.energy.catalyst')}</Bullet>
 
-          <Text style={styles.h2}>Attacks & Affinity</Text>
-          <Bullet>Player 1 cannot attack on global turn 1.</Bullet>
-          <Bullet>One attack per creature per turn.</Bullet>
-          <Bullet>Mythic creatures can attack only once every 4 turns.</Bullet>
-          <Bullet>Affinity modifiers (+20 / −20):</Bullet>
-          <SubBullet>Water &gt; Fire (+20), Fire &gt; Air (+20), Air &gt; Earth (+20), Earth &gt; Water (+20)</SubBullet>
-          <SubBullet>Reverse matchups: −20. “All” is neutral.</SubBullet>
+          <Text style={styles.h2}>{t('rules.sections.attacksAffinity')}</Text>
+          <Bullet>{t('rules.attacks.p1NoAttack')}</Bullet>
+          <Bullet>{t('rules.attacks.onePerTurn')}</Bullet>
+          <Bullet>{t('rules.attacks.mythicCooldown')}</Bullet>
+          <Bullet>{t('rules.affinity.title')}</Bullet>
+          <SubBullet>{t('rules.affinity.line1')}</SubBullet>
+          <SubBullet>{t('rules.affinity.line2')}</SubBullet>
 
-          <Text style={styles.h2}>Targets & Scoring</Text>
-          <Bullet>Versus creature: if target dies, attacker gains +1 point.</Bullet>
-          <Bullet>Win at 4 points.</Bullet>
-          <Bullet>Lose on deck‑out or if your field is empty after global turn 2.</Bullet>
+          <Text style={styles.h2}>{t('rules.sections.targetsScoring')}</Text>
+          <Bullet>{t('rules.targets.creatureKill')}</Bullet>
+          <Bullet>{t('rules.targets.win')}</Bullet>
+          <Bullet>{t('rules.targets.lose')}</Bullet>
         </>
       )}
 
       {(context === 'general' || context === 'deck') && (
         <>
-          <Text style={styles.h2}>Deck Building</Text>
-          <Bullet>Deck size: 20–60 cards.</Bullet>
-          <Bullet>Max 3 copies per card model (by name).</Bullet>
-          <Bullet>You can save multiple decks; one active deck is persisted.</Bullet>
+          <Text style={styles.h2}>{t('rules.sections.deckBuilding')}</Text>
+          <Bullet>{t('rules.deck.size')}</Bullet>
+          <Bullet>{t('rules.deck.copies')}</Bullet>
+          <Bullet>{t('rules.deck.save')}</Bullet>
         </>
       )}
     </ScrollView>

@@ -11,12 +11,13 @@ import { addNexusCoins } from '@/utils/currencyUtils';
 import { RedeemCodeModal } from '@/components/RedeemCodeModal';
 import { MusicControls } from '@/components/MusicControls';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 
 const packageJson = require('../../package.json');
 
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
-  const { cardSize, setCardSize, showBattleLog, setShowBattleLog } = useSettings();
+  const { cardSize, setCardSize, showBattleLog, setShowBattleLog, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
   
@@ -43,7 +44,7 @@ export default function ProfileScreen() {
       if (__DEV__) {
         console.error('Error signing out:', error);
       }
-      showErrorAlert('Error', 'Failed to sign out. Please try again.');
+      showErrorAlert(t('common.error'), t('profile.signOutFailed'));
     }
   };
 
@@ -51,28 +52,28 @@ export default function ProfileScreen() {
     if (error.code) {
       switch (error.code) {
         case 'auth/weak-password':
-          return 'Password should be at least 6 characters long.';
+          return t('profile.linkEmail.errors.weakPassword');
         case 'auth/email-already-in-use':
-          return 'This email is already registered. Please use a different email or sign in instead.';
+          return t('profile.linkEmail.errors.emailInUse');
         case 'auth/invalid-email':
-          return 'Please enter a valid email address.';
+          return t('profile.linkEmail.errors.invalidEmail');
         case 'auth/credential-already-in-use':
-          return 'This email is already linked to another account.';
+          return t('profile.linkEmail.errors.credentialInUse');
         default:
-          return error.message || 'Failed to save account. Please try again.';
+          return error.message || t('profile.linkEmail.errors.generic');
       }
     }
-    return error.message || 'Failed to save account. Please try again.';
+    return error.message || t('profile.linkEmail.errors.generic');
   };
 
   const handleLinkWithEmail = async () => {
     if (!email || !password) {
-      showErrorAlert('Error', 'Please enter both email and password.');
+      showErrorAlert(t('common.error'), t('profile.enterEmailPassword'));
       return;
     }
 
     if (password.length < 6) {
-      showErrorAlert('Error', 'Password should be at least 6 characters long.');
+      showErrorAlert(t('common.error'), t('profile.passwordTooShort'));
       return;
     }
 
@@ -82,12 +83,12 @@ export default function ProfileScreen() {
       setShowLinkModal(false);
       setEmail('');
       setPassword('');
-      showSuccessAlert('Success', 'Your account has been saved! You can now sign in with this email on any device.');
+      showSuccessAlert(t('common.success'), t('profile.linkEmail.success'));
     } catch (error: any) {
       if (__DEV__) {
         console.error('Error linking account:', error);
       }
-      showErrorAlert('Error', getErrorMessage(error));
+      showErrorAlert(t('common.error'), getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -97,12 +98,12 @@ export default function ProfileScreen() {
     try {
       setLoading(true);
       await linkWithGoogle();
-      showSuccessAlert('Success', 'Your account has been saved with Google! You can now sign in with Google on any device.');
+      showSuccessAlert(t('common.success'), t('profile.linkGoogle.success'));
     } catch (error: any) {
       if (__DEV__) {
         console.error('Error linking with Google:', error);
       }
-      showErrorAlert('Error', 'Failed to link with Google. Please try again.');
+      showErrorAlert(t('common.error'), t('profile.linkGoogle.failed'));
     } finally {
       setLoading(false);
     }
@@ -122,7 +123,7 @@ export default function ProfileScreen() {
       if (__DEV__) {
         console.error('Error deleting account:', error);
       }
-      showErrorAlert('Error', 'Failed to delete account. Please try again.');
+      showErrorAlert(t('common.error'), t('profile.deleteAccountFailed'));
     } finally {
       setDeleteLoading(false);
     }
@@ -139,48 +140,45 @@ export default function ProfileScreen() {
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>Profile</Text>
-          <Text style={styles.subtitle}>Your game information</Text>
+          <Text style={styles.title}>{t('profile.title')}</Text>
+          <Text style={styles.subtitle}>{t('profile.subtitle')}</Text>
         </View>
         
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Account</Text>
+          <Text style={styles.cardTitle}>{t('profile.accountTitle')}</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>User ID</Text>
+            <Text style={styles.infoLabel}>{t('profile.userId')}</Text>
             <Text style={styles.infoValue}>{user?.uid.substring(0, 8)}...</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Account Type</Text>
-            <Text style={styles.infoValue}>{isAnonymous ? 'Anonymous' : 'Registered'}</Text>
+            <Text style={styles.infoLabel}>{t('profile.accountType')}</Text>
+            <Text style={styles.infoValue}>{isAnonymous ? t('profile.accountTypeAnonymous') : t('profile.accountTypeRegistered')}</Text>
           </View>
           {!isAnonymous && user?.email && (
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoLabel}>{t('profile.email')}</Text>
               <Text style={styles.infoValue}>{user.email}</Text>
             </View>
           )}
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Created</Text>
-            <Text style={styles.infoValue}>{user?.metadata.creationTime 
+            <Text style={styles.infoLabel}>{t('profile.created')}</Text>
+              <Text style={styles.infoValue}>{user?.metadata.creationTime 
               ? new Date(user.metadata.creationTime).toLocaleDateString() 
-              : 'Unknown'}</Text>
+              : t('common.unknown')}</Text>
           </View>
         </View>
         
         {isAnonymous && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>⚠️ Save Your Progress</Text>
-            <Text style={styles.cardText}>
-              You're playing as an anonymous user. Create an account to save your progress 
-              and access your collection from any device!
-            </Text>
+            <Text style={styles.cardTitle}>{t('profile.saveProgressTitle')}</Text>
+            <Text style={styles.cardText}>{t('profile.saveProgressText')}</Text>
             <TouchableOpacity
               style={styles.saveProgressButton}
               onPress={() => setShowLinkModal(true)}
               activeOpacity={0.8}
             >
               <Save size={20} color={Colors.text.primary} />
-              <Text style={styles.saveProgressText}>Create Account with Email</Text>
+              <Text style={styles.saveProgressText}>{t('profile.createAccountEmail')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.saveProgressButton, styles.googleSaveButton]}
@@ -188,19 +186,41 @@ export default function ProfileScreen() {
               activeOpacity={0.8}
             >
               <Text style={styles.googleIcon}>G</Text>
-              <Text style={styles.googleSaveText}>Save with Google</Text>
+              <Text style={styles.googleSaveText}>{t('profile.saveWithGoogle')}</Text>
             </TouchableOpacity>
           </View>
         )}
         
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Game Settings</Text>
+          <Text style={styles.cardTitle}>{t('profile.language')}</Text>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Card Size</Text>
-              <Text style={styles.settingDescription}>
-                Choose how cards are displayed throughout the game
-              </Text>
+              <Text style={styles.settingLabel}>{t('profile.appLanguage')}</Text>
+              <Text style={styles.settingDescription}>{t('profile.appLanguageDesc')}</Text>
+            </View>
+            <View style={styles.settingButtons}>
+              <TouchableOpacity
+                style={[styles.settingButton, locale === 'en' && styles.settingButtonActive]}
+                onPress={() => setLocale('en')}
+              >
+                <Text style={[styles.settingButtonText, locale === 'en' && styles.settingButtonTextActive]}>{t('common.lang.english')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.settingButton, locale === 'fr' && styles.settingButtonActive]}
+                onPress={() => setLocale('fr')}
+              >
+                <Text style={[styles.settingButtonText, locale === 'fr' && styles.settingButtonTextActive]}>{t('common.lang.french')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t('profile.gameSettings')}</Text>
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>{t('profile.cardSize')}</Text>
+              <Text style={styles.settingDescription}>{t('profile.cardSizeDesc')}</Text>
             </View>
             <View style={styles.settingButtons}>
               <TouchableOpacity
@@ -214,7 +234,7 @@ export default function ProfileScreen() {
                   styles.settingButtonText,
                   cardSize === 'small' && styles.settingButtonTextActive
                 ]}>
-                  Small
+                  {t('profile.cardSizeSmall')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -228,7 +248,7 @@ export default function ProfileScreen() {
                   styles.settingButtonText,
                   cardSize === 'normal' && styles.settingButtonTextActive
                 ]}>
-                  Normal
+                  {t('profile.cardSizeNormal')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -236,10 +256,8 @@ export default function ProfileScreen() {
           
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Battle Log</Text>
-              <Text style={styles.settingDescription}>
-                Show or hide the battle log during gameplay
-              </Text>
+              <Text style={styles.settingLabel}>{t('profile.battleLog')}</Text>
+              <Text style={styles.settingDescription}>{t('profile.battleLogDesc')}</Text>
             </View>
             <View style={styles.settingButtons}>
               <TouchableOpacity
@@ -253,7 +271,7 @@ export default function ProfileScreen() {
                   styles.settingButtonText,
                   !showBattleLog && styles.settingButtonTextActive
                 ]}>
-                  Hidden
+                  {t('profile.battleLogHidden')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -267,7 +285,7 @@ export default function ProfileScreen() {
                   styles.settingButtonText,
                   showBattleLog && styles.settingButtonTextActive
                 ]}>
-                  Visible
+                  {t('profile.battleLogVisible')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -280,14 +298,12 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Redeem Code</Text>
+          <Text style={styles.cardTitle}>{t('profile.redeemTitle')}</Text>
           
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Enter Code</Text>
-              <Text style={styles.settingDescription}>
-                Redeem codes to unlock rewards like Nexus Coins and booster packs
-              </Text>
+              <Text style={styles.settingLabel}>{t('profile.redeemEnterCode')}</Text>
+              <Text style={styles.settingDescription}>{t('profile.redeemDesc')}</Text>
             </View>
             <View style={styles.settingButtons}>
               <TouchableOpacity 
@@ -296,7 +312,7 @@ export default function ProfileScreen() {
                 activeOpacity={0.8}
               >
                 <Gift size={16} color={Colors.text.primary} />
-                <Text style={styles.redeemButtonText}>Redeem</Text>
+                <Text style={styles.redeemButtonText}>{t('profile.redeemButton')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -305,10 +321,8 @@ export default function ProfileScreen() {
         {/* A supprimer */}
         {__DEV__ && (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Development Tools</Text>
-          <Text style={styles.cardText}>
-            Testing and debugging utilities for the development team.
-          </Text>
+          <Text style={styles.cardTitle}>{t('profile.devToolsTitle')}</Text>
+          <Text style={styles.cardText}>{t('profile.devToolsText')}</Text>
           
           <View style={styles.links}>
             <TouchableOpacity 
@@ -316,7 +330,7 @@ export default function ProfileScreen() {
               onPress={() => router.push('/card-test' as any)}
             >
               <TestTube size={20} color={Colors.text.primary} />
-              <Text style={styles.linkText}>Card Illustrations Test</Text>
+              <Text style={styles.linkText}>{t('profile.cardIllustrationsTest')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -324,7 +338,7 @@ export default function ProfileScreen() {
               onPress={() => router.push('/dev-storymap' as any)}
             >
               <TestTube size={20} color={'#9333ea'} />
-              <Text style={[styles.linkText, { color: '#9333ea' }]}>StoryMap Visualizer</Text>
+              <Text style={[styles.linkText, { color: '#9333ea' }]}>{t('profile.storyMapVisualizer')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -333,15 +347,21 @@ export default function ProfileScreen() {
                 if (user) {
                   try {
                     await addNexusCoins(user.uid, 10000);
-                    showSuccessAlert('Dev Tools', 'Added 10,000 Nexus Coins to your account!');
+                    showSuccessAlert(
+                      t('profile.devToolsTitle'),
+                      t('profile.dev.addCoinsSuccess', { amount: '10,000' })
+                    );
                   } catch (error) {
-                    showErrorAlert('Dev Tools', 'Failed to add coins. Please try again.');
+                    showErrorAlert(
+                      t('profile.devToolsTitle'),
+                      t('profile.dev.addCoinsFailed')
+                    );
                   }
                 }
               }}
             >
               <TestTube size={20} color={'#ffd700'} />
-              <Text style={[styles.linkText, { color: '#ffd700' }]}>Add 10,000 Nexus Coins</Text>
+              <Text style={[styles.linkText, { color: '#ffd700' }]}>{t('profile.addCoinsDev')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -349,14 +369,20 @@ export default function ProfileScreen() {
               onPress={async () => {
                 try {
                   await resetProgress();
-                  showSuccessAlert('Dev Tools', 'Story mode progress has been reset!');
+                  showSuccessAlert(
+                    t('profile.devToolsTitle'),
+                    t('profile.dev.resetStorySuccess')
+                  );
                 } catch (error) {
-                  showErrorAlert('Dev Tools', 'Failed to reset progress. Please try again.');
+                  showErrorAlert(
+                    t('profile.devToolsTitle'),
+                    t('profile.dev.resetStoryFailed')
+                  );
                 }
               }}
             >
               <TestTube size={20} color={'#ff6b6b'} />
-              <Text style={[styles.linkText, { color: '#ff6b6b' }]}>Reset Story</Text>
+              <Text style={[styles.linkText, { color: '#ff6b6b' }]}>{t('profile.resetStory')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -364,14 +390,20 @@ export default function ProfileScreen() {
               onPress={async () => {
                 try {
                   await unlockAllChapters();
-                  showSuccessAlert('Dev Tools', 'All chapters have been unlocked!');
+                  showSuccessAlert(
+                    t('profile.devToolsTitle'),
+                    t('profile.dev.unlockAllSuccess')
+                  );
                 } catch (error) {
-                  showErrorAlert('Dev Tools', 'Failed to unlock chapters. Please try again.');
+                  showErrorAlert(
+                    t('profile.devToolsTitle'),
+                    t('profile.dev.unlockAllFailed')
+                  );
                 }
               }}
             >
               <TestTube size={20} color={'#4ecdc4'} />
-              <Text style={[styles.linkText, { color: '#4ecdc4' }]}>Unlock All Chapters</Text>
+              <Text style={[styles.linkText, { color: '#4ecdc4' }]}>{t('profile.unlockAllChapters')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -379,19 +411,15 @@ export default function ProfileScreen() {
               onPress={() => router.push('/animation-demo' as any)}
             >
               <TestTube size={20} color={'#00ff9f'} />
-              <Text style={[styles.linkText, { color: '#00ff9f' }]}>Animation Demo</Text>
+              <Text style={[styles.linkText, { color: '#00ff9f' }]}>{t('profile.animationDemo')}</Text>
             </TouchableOpacity>
           </View>
         </View>
         )}
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>About Creature Nexus TCG</Text>
-          <Text style={styles.cardText}>
-            Creature Nexus is a digital trading card game featuring mythical creatures and 
-            legendary beings from various world mythologies. Collect rare cards, build your 
-            collection, and discover powerful synergies between creatures.
-          </Text>
+          <Text style={styles.cardTitle}>{t('profile.aboutTitle')}</Text>
+          <Text style={styles.cardText}>{t('profile.aboutText')}</Text>
           
           <View style={styles.links}>
             <TouchableOpacity 
@@ -403,7 +431,7 @@ export default function ProfileScreen() {
               }}
             >
               <Github size={20} color={Colors.text.primary} />
-              <Text style={styles.linkText}>GitHub Repository</Text>
+              <Text style={styles.linkText}>{t('profile.github')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -415,7 +443,7 @@ export default function ProfileScreen() {
               }}
             >
               <Globe size={20} color={Colors.text.primary} />
-              <Text style={styles.linkText}>Official Website</Text>
+              <Text style={styles.linkText}>{t('profile.website')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -423,7 +451,7 @@ export default function ProfileScreen() {
               onPress={() => router.push('/privacy-policy' as any)}
             >
               <Shield size={20} color={Colors.text.primary} />
-              <Text style={styles.linkText}>Privacy Policy</Text>
+              <Text style={styles.linkText}>{t('profile.privacy')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -434,7 +462,7 @@ export default function ProfileScreen() {
           activeOpacity={0.8}
         >
           <LogOut size={20} color={Colors.text.primary} />
-          <Text style={styles.signOutText}>Sign Out</Text>
+          <Text style={styles.signOutText}>{t('profile.signOut')}</Text>
         </TouchableOpacity>
 
         {!isAnonymous && (
@@ -444,11 +472,11 @@ export default function ProfileScreen() {
             activeOpacity={0.8}
           >
             <Trash2 size={20} color={Colors.error || '#ff4444'} />
-            <Text style={styles.deleteAccountText}>Delete Account</Text>
+            <Text style={styles.deleteAccountText}>{t('profile.deleteAccount')}</Text>
           </TouchableOpacity>
         )}
         
-        <Text style={styles.versionText}>Creature Nexus TCG v{packageJson.version}</Text>
+        <Text style={styles.versionText}>{t('profile.version', { version: packageJson.version })}</Text>
       </ScrollView>
 
       <Modal
@@ -459,14 +487,12 @@ export default function ProfileScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create Account</Text>
-            <Text style={styles.modalSubtitle}>
-              Save your progress and access your collection from any device
-            </Text>
+            <Text style={styles.modalTitle}>{t('profile.createAccountModalTitle')}</Text>
+            <Text style={styles.modalSubtitle}>{t('profile.createAccountModalSubtitle')}</Text>
             
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={t('profile.emailPlaceholder')}
               placeholderTextColor={Colors.text.secondary}
               value={email}
               onChangeText={setEmail}
@@ -476,7 +502,7 @@ export default function ProfileScreen() {
             
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={t('profile.passwordPlaceholder')}
               placeholderTextColor={Colors.text.secondary}
               value={password}
               onChangeText={setPassword}
@@ -488,7 +514,7 @@ export default function ProfileScreen() {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowLinkModal(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{t('profile.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -497,7 +523,7 @@ export default function ProfileScreen() {
                 disabled={loading}
               >
                 <Text style={styles.saveButtonText}>
-                  {loading ? 'Saving...' : 'Save Account'}
+                  {loading ? t('profile.saving') : t('profile.saveAccount')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -513,17 +539,15 @@ export default function ProfileScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Delete Account</Text>
-            <Text style={styles.modalSubtitle}>
-              Are you sure you want to permanently delete your account? This action cannot be undone and you will lose all your cards and progress.
-            </Text>
+            <Text style={styles.modalTitle}>{t('profile.deleteAccountModalTitle')}</Text>
+            <Text style={styles.modalSubtitle}>{t('profile.deleteAccountModalSubtitle')}</Text>
             
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowDeleteModal(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{t('profile.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -532,7 +556,7 @@ export default function ProfileScreen() {
                 disabled={deleteLoading}
               >
                 <Text style={styles.deleteButtonText}>
-                  {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                  {deleteLoading ? t('common.loading') : t('profile.confirmDelete')}
                 </Text>
               </TouchableOpacity>
             </View>

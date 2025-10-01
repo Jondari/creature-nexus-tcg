@@ -7,6 +7,7 @@ import { CardLoader } from '../utils/game/cardLoader';
 import { isMonsterCard, isSpellCard, ExtendedCard, MonsterCard, SpellCard } from '../models/cards-extended';
 import { useSettings } from '../context/SettingsContext';
 import Colors from '../constants/Colors';
+import { t } from '@/utils/i18n';
 
 export default function CardTestScreen() {
   const router = useRouter();
@@ -35,11 +36,16 @@ export default function CardTestScreen() {
     mythic: spellCards.filter(card => card.rarity === 'mythic'),
   };
 
-  const renderRaritySection = (rarity: string, cards: ExtendedCard[], cardType: string) => (
-    <View key={`${cardType}-${rarity}`} style={styles.raritySection}>
-      <Text style={styles.rarityTitle}>
-        {rarity.toUpperCase()} ({cards.length} cards)
-      </Text>
+  const renderRaritySection = (rarity: string, cards: ExtendedCard[], cardType: string) => {
+    const rarityLabel = t(`rarities.${rarity}`);
+    return (
+      <View key={`${cardType}-${rarity}`} style={styles.raritySection}>
+        <Text style={styles.rarityTitle}>
+          {t('cardTest.rarityHeader', {
+            rarity: rarityLabel ? rarityLabel.toUpperCase() : rarity.toUpperCase(),
+            count: String(cards.length)
+          })}
+        </Text>
       <View style={styles.cardsGrid}>
         {cards.map((card, index) => (
           <View key={`${card.name}-${index}`} style={styles.cardWrapper}>
@@ -52,8 +58,9 @@ export default function CardTestScreen() {
           </View>
         ))}
       </View>
-    </View>
-  );
+      </View>
+    );
+  };
 
   const renderCardTypeSection = (title: string, cardsByRarity: any, cardType: string) => (
     <View style={styles.cardTypeSection}>
@@ -75,9 +82,13 @@ export default function CardTestScreen() {
           <ArrowLeft size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.header}>Cards Illustration Test</Text>
+          <Text style={styles.header}>{t('profile.cardIllustrationsTest')}</Text>
           <Text style={styles.subtitle}>
-            Total: {allCards.length} cards ({monsterCards.length} monsters, {spellCards.length} spells)
+            {t('cardTest.subtitle', {
+              total: String(allCards.length),
+              monsters: String(monsterCards.length),
+              spells: String(spellCards.length)
+            })}
           </Text>
         </View>
         <TouchableOpacity
@@ -96,13 +107,11 @@ export default function CardTestScreen() {
         showsVerticalScrollIndicator={true}
         indicatorStyle="white"
       >
-        {renderCardTypeSection('Monster Cards', monstersByRarity, 'monster')}
-        {renderCardTypeSection('Spell Cards', spellsByRarity, 'spell')}
+        {renderCardTypeSection(t('cardTest.monsterSection'), monstersByRarity, 'monster')}
+        {renderCardTypeSection(t('cardTest.spellSection'), spellsByRarity, 'spell')}
         
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Check each card for missing or incorrect illustrations
-          </Text>
+          <Text style={styles.footerText}>{t('cardTest.footer')}</Text>
         </View>
       </ScrollView>
     </View>

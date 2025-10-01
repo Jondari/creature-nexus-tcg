@@ -8,6 +8,7 @@ import { useStoryMode } from '@/context/StoryModeContext';
 import { StoryChapter, StoryBattle } from '@/data/storyMode';
 import { showAlert, showErrorAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 
 export default function ChapterMapScreen() {
   const router = useRouter();
@@ -28,17 +29,17 @@ export default function ChapterMapScreen() {
 
   const handleBattleSelect = (battle: StoryBattle) => {
     if (!battle.isAccessible) {
-      showErrorAlert('Battle Locked', 'Complete previous battles to unlock this one.');
+      showErrorAlert(t('story.battleLockedTitle'), t('story.battleLockedDesc'));
       return;
     }
 
     if (battle.isCompleted) {
       showAlert(
-        'Battle Completed',
-        'You have already completed this battle. Do you want to replay it?',
+        t('story.chapterMap.replayTitle'),
+        t('story.chapterMap.replayMessage'),
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Replay', onPress: () => setTimeout(() => startBattle(battle), 0) }
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('story.chapterMap.replay'), onPress: () => setTimeout(() => startBattle(battle), 0) }
         ],
         'warning'
       );
@@ -51,21 +52,35 @@ export default function ChapterMapScreen() {
   const startBattle = (battle: StoryBattle) => {
     if (!chapter) return;
 
+    const difficulty = battle.isBoss
+      ? t('story.chapterMap.difficulty.boss')
+      : t('story.chapterMap.difficulty.normal');
+    const elementName = (() => {
+      const elementKey = `elements.${chapter.element}`;
+      const translated = t(elementKey);
+      return translated !== elementKey ? translated : chapter.element;
+    })();
+    const summary = [
+      t(battle.description),
+      '',
+      `${t('story.chapterMap.difficultyLabel')} ${difficulty}`,
+      `${t('story.chapterMap.elementLabel')} ${elementName}`
+    ].join('\n');
+
     showAlert(
-      `${battle.name}`,
-      `${battle.description}\n\nDifficulty: ${battle.isBoss ? 'Boss Battle' : 'Normal Battle'}\nElement: ${chapter.element}`,
+      t(battle.name),
+      summary,
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Start Battle', 
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('story.chapterMap.start'),
           onPress: () => {
-            // Navigate to story battle screen
             router.push({
               pathname: '/(tabs)/story-battle',
-              params: { 
+              params: {
                 chapterId: chapter.id.toString(),
                 battleId: battle.id,
-                session: Date.now().toString(), // cache-buster for provider remount
+                session: Date.now().toString(),
               }
             });
           }
@@ -87,11 +102,14 @@ export default function ChapterMapScreen() {
           style={styles.background}
         />
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading chapter...</Text>
+          <Text style={styles.loadingText}>{t('story.chapterMap.loading')}</Text>
         </View>
       </View>
     );
   }
+
+  const completedCount = chapter.battles.filter(b => b.isCompleted).length;
+  const totalBattles = chapter.battles.length;
 
   return (
     <View style={styles.container}>
@@ -113,8 +131,8 @@ export default function ChapterMapScreen() {
         </TouchableOpacity>
         
         <View style={styles.headerContent}>
-          <Text style={styles.chapterNumber}>Chapter {chapter.id}</Text>
-          <Text style={styles.chapterTitle}>{chapter.name}</Text>
+          <Text style={styles.chapterNumber}>{t('story.chapter.label', { id: String(chapter.id) })}</Text>
+          <Text style={styles.chapterTitle}>{t(chapter.name)}</Text>
         </View>
       </View>
 
@@ -132,14 +150,17 @@ export default function ChapterMapScreen() {
           colors={[chapter.colorTheme.primary + '20', 'transparent']}
           style={styles.infoGradient}
         >
-          <Text style={styles.chapterDescription}>{chapter.description}</Text>
+          <Text style={styles.chapterDescription}>{t(chapter.description)}</Text>
           
           <View style={styles.progressInfo}>
             <Text style={styles.progressText}>
-              Progress: {chapter.battles.filter(b => b.isCompleted).length}/{chapter.battles.length} battles
+              {t('story.chapterMap.progress', {
+                completed: String(completedCount),
+                total: String(totalBattles)
+              })}
             </Text>
             {chapter.isCompleted && (
-              <Text style={styles.completedText}>✓ Chapter Completed!</Text>
+              <Text style={styles.completedText}>{t('story.chapterMap.completed')}</Text>
             )}
           </View>
         </LinearGradient>

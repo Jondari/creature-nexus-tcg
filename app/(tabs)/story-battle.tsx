@@ -7,6 +7,7 @@ import { GameBoard } from '@/components/GameBoard';
 import {getAIDeckForBattle, useStoryMode} from '@/context/StoryModeContext';
 import { StoryChapter, StoryBattle } from '@/data/storyMode';
 import { showAlert, showErrorAlert, showSuccessAlert, showConfirmAlert } from '@/utils/alerts';
+import { t } from '@/utils/i18n';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
 
@@ -42,12 +43,12 @@ function StoryBattleContent() {
         // Stop loading and show alert immediately
         setLoading(false);
         showAlert(
-          'No Decks Available',
-          'You need to build at least one deck before entering battle. Go to the Decks tab to build your first deck.',
+          t('story.noDecksAvailable.title'),
+          t('story.noDecksAvailable.message'),
           [
-            { text: 'Go to Decks', onPress: () => router.push('/(tabs)/decks') },
+            { text: t('story.noDecksAvailable.goToDecks'), onPress: () => router.push('/(tabs)/decks') },
             { 
-              text: 'Cancel', 
+              text: t('story.noDecksAvailable.cancel'), 
               onPress: () => {
                 // Return to chapter map if we have chapterId, otherwise story mode
                 if (chapterId) {
@@ -85,12 +86,12 @@ function StoryBattleContent() {
       if (savedDecks.length === 0 && chapterId && battleId) {
         setLoading(false);
         showAlert(
-          'No Decks Available',
-          'You need to build at least one deck before entering battle. Go to the Decks tab to build your first deck.',
+          t('story.noDecksAvailable.title'),
+          t('story.noDecksAvailable.message'),
           [
-            { text: 'Go to Decks', onPress: () => router.push('/(tabs)/decks') },
+            { text: t('story.noDecksAvailable.goToDecks'), onPress: () => router.push('/(tabs)/decks') },
             { 
-              text: 'Cancel', 
+              text: t('story.noDecksAvailable.cancel'), 
               onPress: () => {
                 // Return to chapter map if we have chapterId, otherwise story mode
                 if (chapterId) {
@@ -129,13 +130,13 @@ function StoryBattleContent() {
 
       const foundChapter = chapters.find(c => c.id === parseInt(chapterId));
       if (!foundChapter) {
-        showErrorAlert('Error', 'Chapter not found', () => router.replace('/(tabs)/story-mode'));
+        showErrorAlert(t('common.error'), t('story.errors.chapterNotFound'), () => router.replace('/(tabs)/story-mode'));
         return;
       }
 
       const foundBattle = foundChapter.battles.find(b => b.id === battleId);
       if (!foundBattle) {
-        showErrorAlert('Error', 'Battle not found', () => router.replace('/(tabs)/chapter-map?chapterId=' + foundChapter.id));
+        showErrorAlert(t('common.error'), t('story.errors.battleNotFound'), () => router.replace('/(tabs)/chapter-map?chapterId=' + foundChapter.id));
         return;
       }
 
@@ -153,11 +154,11 @@ function StoryBattleContent() {
       // Always clear any previous engine before starting a new battle (important on replay)
       resetGame(); // ensure a clean engine/context
       // Initialize the game with player deck vs AI deck
-      initializeGame('Player', activeDeck.cards, aiDeck);
+      initializeGame(t('player.you'), activeDeck.cards, aiDeck);
       
     } catch (error) {
       console.error('Error initializing story battle:', error);
-      showErrorAlert('Error', 'Failed to initialize battle', () => router.back());
+      showErrorAlert(t('common.error'), t('story.errors.initFailed'), () => router.back());
     } finally {
       setLoading(false);
     }
@@ -173,8 +174,8 @@ function StoryBattleContent() {
       completeBattle(chapter.id, battle.id);
       
       showSuccessAlert(
-        'Victory!',
-        `You have defeated ${battle.name}! ${battle.isBoss ? 'Boss conquered!' : 'Well fought!'}`,
+        t('story.battleComplete.victoryTitle'),
+        t('story.battleComplete.victoryMessage', { name: t(battle.name), tail: battle.isBoss ? t('story.battleComplete.victoryTailBoss') : t('story.battleComplete.victoryTail') }),
         () => {
           resetGame();
           // Navigate back to the specific chapter map
@@ -186,18 +187,18 @@ function StoryBattleContent() {
       );
     } else {
       showAlert(
-        'Defeat',
-        `You were defeated by ${battle.name}. Train harder and try again!`,
+        t('story.battleComplete.defeatTitle'),
+        t('story.battleComplete.defeatMessage', { name: t(battle.name) }),
         [
           {
-            text: 'Retry',
+            text: t('story.battleComplete.retry'),
             onPress: () => {
               resetGame();
               initializeBattle(); // Restart the battle
             }
           },
           {
-            text: 'Return to Map',
+            text: t('story.battleComplete.returnToMap'),
             onPress: () => {
               resetGame();
               // Navigate back to the specific chapter map
@@ -215,25 +216,25 @@ function StoryBattleContent() {
 
   const handleBackPress = () => {
     showConfirmAlert(
-      'Leave Battle',
-      'Are you sure you want to leave this battle? Your progress will be lost.',
+      t('story.leaveBattle.title'),
+      t('story.leaveBattle.message'),
       () => {
         resetGame();
         // Navigate back to story mode instead of using router.back()
         router.push('/(tabs)/story-mode');
       },
       undefined,
-      'Leave',
-      'Stay'
+      t('story.leaveBattle.confirm'),
+      t('story.leaveBattle.cancel')
     );
   };
 
   if (loading) {
-    return <LoadingOverlay message="Preparing battle..." />;
+    return <LoadingOverlay message={t('story.preparingBattle')} />;
   }
 
   if (!gameState || !gameEngine) {
-    return <LoadingOverlay message="Loading game..." />;
+    return <LoadingOverlay message={t('story.loadingGame')} />;
   }
 
   return (

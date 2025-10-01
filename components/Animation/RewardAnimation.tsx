@@ -7,6 +7,7 @@ import { ExtendedCard } from '@/models/cards-extended';
 import { CardComponent } from '@/components/CardComponent';
 import { BoosterPack } from '@/models/BoosterPack';
 import { Coins } from 'lucide-react-native';
+import { t } from '@/utils/i18n';
 
 type RewardType = 'card' | 'pack' | 'coins';
 
@@ -73,7 +74,9 @@ export const RewardAnimation: React.FC<RewardAnimationProps> = ({
                 colors={[Colors.primary[700], Colors.primary[900]] as any}
                 style={{ width: 180, height: 120, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}
               >
-                <Text style={{ color: Colors.text.primary, fontFamily: 'Poppins-Bold' }}>{pack?.name || 'Pack'}</Text>
+                <Text style={{ color: Colors.text.primary, fontFamily: 'Poppins-Bold' }}>
+                  {pack?.name || t('demo.animation.genericPack')}
+                </Text>
               </LinearGradient>
             )}
             {pack?.name ? (

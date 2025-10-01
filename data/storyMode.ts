@@ -31,8 +31,8 @@ export interface StoryChapter {
 export const STORY_CHAPTERS: StoryChapter[] = [
   {
     id: 1,
-    name: "Central Nexus World",
-    description: "The mysterious hub where all elemental energies converge. Discover the origins of the Nexus portals.",
+    name: 'story.data.chapter_1.name',
+    description: 'story.data.chapter_1.description',
     element: "all",
     colorTheme: {
       primary: "#8B5CF6", // Purple
@@ -43,8 +43,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     battles: [
       {
         id: "nexus_1",
-        name: "First Encounter",
-        description: "Your first battle in the mysterious Nexus",
+        name: 'story.data.chapter_1.battles.nexus_1.name',
+        description: 'story.data.chapter_1.battles.nexus_1.description',
         x: 20,
         y: 80,
         connections: ["nexus_2"],
@@ -54,8 +54,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "nexus_2",
-        name: "Portal Discovery",
-        description: "Uncover the secrets of the elemental portals",
+        name: 'story.data.chapter_1.battles.nexus_2.name',
+        description: 'story.data.chapter_1.battles.nexus_2.description',
         x: 40,
         y: 60,
         connections: ["nexus_3", "nexus_4"],
@@ -65,8 +65,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "nexus_3",
-        name: "Ancient Guardians",
-        description: "Face the ancient protectors of the Nexus",
+        name: 'story.data.chapter_1.battles.nexus_3.name',
+        description: 'story.data.chapter_1.battles.nexus_3.description',
         x: 60,
         y: 40,
         connections: ["nexus_boss"],
@@ -76,8 +76,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "nexus_4",
-        name: "Elemental Convergence",
-        description: "Witness the power of converging elements",
+        name: 'story.data.chapter_1.battles.nexus_4.name',
+        description: 'story.data.chapter_1.battles.nexus_4.description',
         x: 60,
         y: 80,
         connections: ["nexus_boss"],
@@ -87,8 +87,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "nexus_boss",
-        name: "Nexus Core Guardian",
-        description: "Confront the powerful entity at the heart of the Nexus",
+        name: 'story.data.chapter_1.battles.nexus_boss.name',
+        description: 'story.data.chapter_1.battles.nexus_boss.description',
         x: 80,
         y: 60,
         connections: [],
@@ -102,8 +102,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
   },
   {
     id: 2,
-    name: "Water World",
-    description: "Dive into the depths of aquatic realms filled with marine creatures and ice crystals.",
+    name: 'story.data.chapter_2.name',
+    description: 'story.data.chapter_2.description',
     element: "water",
     colorTheme: {
       primary: "#0EA5E9", // Blue
@@ -114,8 +114,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     battles: [
       {
         id: "water_1",
-        name: "Tidal Pools",
-        description: "Explore the shallow waters and their inhabitants",
+        name: 'story.data.chapter_2.battles.water_1.name',
+        description: 'story.data.chapter_2.battles.water_1.description',
         x: 15,
         y: 85,
         connections: ["water_2"],
@@ -125,8 +125,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "water_2",
-        name: "Coral Gardens",
-        description: "Navigate through vibrant underwater gardens",
+        name: 'story.data.chapter_2.battles.water_2.name',
+        description: 'story.data.chapter_2.battles.water_2.description',
         x: 35,
         y: 70,
         connections: ["water_3", "water_4"],
@@ -136,8 +136,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "water_3",
-        name: "Frozen Caverns",
-        description: "Venture into the icy depths of the frozen caves",
+        name: 'story.data.chapter_2.battles.water_3.name',
+        description: 'story.data.chapter_2.battles.water_3.description',
         x: 25,
         y: 45,
         connections: ["water_5"],
@@ -147,8 +147,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "water_4",
-        name: "Deep Currents",
-        description: "Battle against the creatures of the deep ocean",
+        name: 'story.data.chapter_2.battles.water_4.name',
+        description: 'story.data.chapter_2.battles.water_4.description',
         x: 55,
         y: 55,
         connections: ["water_5"],
@@ -158,8 +158,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "water_5",
-        name: "Maelstrom's Edge",
-        description: "Face the challenges at the edge of the great whirlpool",
+        name: 'story.data.chapter_2.battles.water_5.name',
+        description: 'story.data.chapter_2.battles.water_5.description',
         x: 65,
         y: 30,
         connections: ["water_boss"],
@@ -169,8 +169,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "water_boss",
-        name: "Leviathan Portal",
-        description: "Confront the massive guardian of the Water Portal",
+        name: 'story.data.chapter_2.battles.water_boss.name',
+        description: 'story.data.chapter_2.battles.water_boss.description',
         x: 85,
         y: 50,
         connections: [],
@@ -184,8 +184,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
   },
   {
     id: 3,
-    name: "Fire World",
-    description: "Brave the scorching landscapes of volcanoes, magma flows, and burning ash.",
+    name: 'story.data.chapter_3.name',
+    description: 'story.data.chapter_3.description',
     element: "fire",
     colorTheme: {
       primary: "#F97316", // Orange
@@ -196,8 +196,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     battles: [
       {
         id: "fire_1",
-        name: "Ember Plains",
-        description: "Cross the smoldering grasslands",
+        name: 'story.data.chapter_3.battles.fire_1.name',
+        description: 'story.data.chapter_3.battles.fire_1.description',
         x: 20,
         y: 75,
         connections: ["fire_2"],
@@ -207,8 +207,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "fire_2",
-        name: "Lava Flows",
-        description: "Navigate the dangerous rivers of molten rock",
+        name: 'story.data.chapter_3.battles.fire_2.name',
+        description: 'story.data.chapter_3.battles.fire_2.description',
         x: 40,
         y: 60,
         connections: ["fire_3", "fire_4"],
@@ -218,8 +218,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "fire_3",
-        name: "Ash Storms",
-        description: "Survive the blinding volcanic ash tempests",
+        name: 'story.data.chapter_3.battles.fire_3.name',
+        description: 'story.data.chapter_3.battles.fire_3.description',
         x: 30,
         y: 35,
         connections: ["fire_5"],
@@ -229,8 +229,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "fire_4",
-        name: "Magma Chambers",
-        description: "Explore the heart of the volcanic chambers",
+        name: 'story.data.chapter_3.battles.fire_4.name',
+        description: 'story.data.chapter_3.battles.fire_4.description',
         x: 60,
         y: 45,
         connections: ["fire_5"],
@@ -240,8 +240,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "fire_5",
-        name: "Crater's Edge",
-        description: "Stand at the edge of the great volcanic crater",
+        name: 'story.data.chapter_3.battles.fire_5.name',
+        description: 'story.data.chapter_3.battles.fire_5.description',
         x: 70,
         y: 25,
         connections: ["fire_boss"],
@@ -251,8 +251,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "fire_boss",
-        name: "Inferno Portal",
-        description: "Face the blazing guardian of the Fire Portal",
+        name: 'story.data.chapter_3.battles.fire_boss.name',
+        description: 'story.data.chapter_3.battles.fire_boss.description',
         x: 85,
         y: 40,
         connections: [],
@@ -266,8 +266,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
   },
   {
     id: 4,
-    name: "Earth World",
-    description: "Journey through dense forests, towering mountains, and living stone formations.",
+    name: 'story.data.chapter_4.name',
+    description: 'story.data.chapter_4.description',
     element: "earth",
     colorTheme: {
       primary: "#65A30D", // Green
@@ -278,8 +278,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     battles: [
       {
         id: "earth_1",
-        name: "Ancient Grove",
-        description: "Walk among the oldest trees in existence",
+        name: 'story.data.chapter_4.battles.earth_1.name',
+        description: 'story.data.chapter_4.battles.earth_1.description',
         x: 25,
         y: 80,
         connections: ["earth_2"],
@@ -289,8 +289,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "earth_2",
-        name: "Stone Gardens",
-        description: "Navigate through the living rock formations",
+        name: 'story.data.chapter_4.battles.earth_2.name',
+        description: 'story.data.chapter_4.battles.earth_2.description',
         x: 45,
         y: 65,
         connections: ["earth_3", "earth_4"],
@@ -300,8 +300,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "earth_3",
-        name: "Root Networks",
-        description: "Discover the underground root highways",
+        name: 'story.data.chapter_4.battles.earth_3.name',
+        description: 'story.data.chapter_4.battles.earth_3.description',
         x: 30,
         y: 40,
         connections: ["earth_5"],
@@ -311,8 +311,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "earth_4",
-        name: "Mountain Peaks",
-        description: "Climb to the highest mountain summits",
+        name: 'story.data.chapter_4.battles.earth_4.name',
+        description: 'story.data.chapter_4.battles.earth_4.description',
         x: 65,
         y: 50,
         connections: ["earth_5"],
@@ -322,8 +322,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "earth_5",
-        name: "Crystal Caverns",
-        description: "Explore caves filled with earth crystals",
+        name: 'story.data.chapter_4.battles.earth_5.name',
+        description: 'story.data.chapter_4.battles.earth_5.description',
         x: 75,
         y: 30,
         connections: ["earth_boss"],
@@ -333,8 +333,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "earth_boss",
-        name: "Terra Portal",
-        description: "Challenge the mountain-sized guardian of Earth",
+        name: 'story.data.chapter_4.battles.earth_boss.name',
+        description: 'story.data.chapter_4.battles.earth_boss.description',
         x: 90,
         y: 45,
         connections: [],
@@ -348,8 +348,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
   },
   {
     id: 5,
-    name: "Air World",
-    description: "Soar through floating islands, wind currents, and lightning storms.",
+    name: 'story.data.chapter_5.name',
+    description: 'story.data.chapter_5.description',
     element: "air",
     colorTheme: {
       primary: "#E5E7EB", // Silver/White
@@ -360,8 +360,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     battles: [
       {
         id: "air_1",
-        name: "Wind Valleys",
-        description: "Glide through the valleys of eternal wind",
+        name: 'story.data.chapter_5.battles.air_1.name',
+        description: 'story.data.chapter_5.battles.air_1.description',
         x: 20,
         y: 70,
         connections: ["air_2"],
@@ -371,8 +371,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "air_2",
-        name: "Floating Islands",
-        description: "Hop between the levitating landmasses",
+        name: 'story.data.chapter_5.battles.air_2.name',
+        description: 'story.data.chapter_5.battles.air_2.description',
         x: 40,
         y: 55,
         connections: ["air_3", "air_4"],
@@ -382,8 +382,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "air_3",
-        name: "Storm Clouds",
-        description: "Battle within the heart of thunderstorms",
+        name: 'story.data.chapter_5.battles.air_3.name',
+        description: 'story.data.chapter_5.battles.air_3.description',
         x: 35,
         y: 30,
         connections: ["air_5"],
@@ -393,8 +393,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "air_4",
-        name: "Sky Bridges",
-        description: "Cross the ethereal bridges in the sky",
+        name: 'story.data.chapter_5.battles.air_4.name',
+        description: 'story.data.chapter_5.battles.air_4.description',
         x: 60,
         y: 40,
         connections: ["air_5"],
@@ -404,8 +404,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "air_5",
-        name: "Lightning Spires",
-        description: "Ascend the towers of pure electrical energy",
+        name: 'story.data.chapter_5.battles.air_5.name',
+        description: 'story.data.chapter_5.battles.air_5.description',
         x: 70,
         y: 20,
         connections: ["air_boss"],
@@ -415,8 +415,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "air_boss",
-        name: "Tempest Portal",
-        description: "Face the storm-wreathed guardian of Air",
+        name: 'story.data.chapter_5.battles.air_boss.name',
+        description: 'story.data.chapter_5.battles.air_boss.description',
         x: 85,
         y: 35,
         connections: [],
@@ -430,8 +430,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
   },
   {
     id: 6,
-    name: "The Return to the Final Nexus",
-    description: "Return to a transformed Nexus where all elemental energies clash in chaotic harmony.",
+    name: 'story.data.chapter_6.name',
+    description: 'story.data.chapter_6.description',
     element: "all",
     colorTheme: {
       primary: "#7C3AED", // Deep Purple
@@ -442,8 +442,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     battles: [
       {
         id: "final_1",
-        name: "Unstable Convergence",
-        description: "Navigate the chaotic elemental storms",
+        name: 'story.data.chapter_6.battles.final_1.name',
+        description: 'story.data.chapter_6.battles.final_1.description',
         x: 15,
         y: 85,
         connections: ["final_2", "final_3"],
@@ -453,8 +453,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "final_2",
-        name: "Elemental Chaos",
-        description: "Battle through the merging elemental forces",
+        name: 'story.data.chapter_6.battles.final_2.name',
+        description: 'story.data.chapter_6.battles.final_2.description',
         x: 30,
         y: 60,
         connections: ["final_4"],
@@ -464,8 +464,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "final_3",
-        name: "Mythical Awakening",
-        description: "Witness the awakening of ancient mythical creatures",
+        name: 'story.data.chapter_6.battles.final_3.name',
+        description: 'story.data.chapter_6.battles.final_3.description',
         x: 50,
         y: 70,
         connections: ["final_4"],
@@ -475,8 +475,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "final_4",
-        name: "Nexus Heart",
-        description: "Reach the very core of the destabilized Nexus",
+        name: 'story.data.chapter_6.battles.final_4.name',
+        description: 'story.data.chapter_6.battles.final_4.description',
         x: 65,
         y: 45,
         connections: ["final_boss"],
@@ -486,8 +486,8 @@ export const STORY_CHAPTERS: StoryChapter[] = [
       },
       {
         id: "final_boss",
-        name: "Ultimate Nexus Entity",
-        description: "Face the ultimate entity threatening all worlds",
+        name: 'story.data.chapter_6.battles.final_boss.name',
+        description: 'story.data.chapter_6.battles.final_boss.description',
         x: 85,
         y: 50,
         connections: [],

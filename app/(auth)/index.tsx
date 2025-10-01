@@ -7,6 +7,7 @@ import { Mail, LogIn } from 'lucide-react-native';
 import { showErrorAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { t } from '@/utils/i18n';
 import MonsterShowcaseAnimation from '@/components/Animation/MonsterShowcaseAnimation';
 
 // Premium monster showcase images
@@ -62,25 +63,25 @@ export default function AuthScreen() {
     if (error.code) {
       switch (error.code) {
         case 'auth/user-not-found':
-          return 'No account found with this email. Please check your email or create a new account.';
+          return t('auth.errors.userNotFound');
         case 'auth/wrong-password':
-          return 'Incorrect password. Please try again.';
+          return t('auth.errors.wrongPassword');
         case 'auth/invalid-email':
-          return 'Please enter a valid email address.';
+          return t('auth.errors.invalidEmail');
         case 'auth/user-disabled':
-          return 'This account has been disabled. Please contact support.';
+          return t('auth.errors.userDisabled');
         case 'auth/too-many-requests':
-          return 'Too many failed attempts. Please try again later.';
+          return t('auth.errors.tooManyRequests');
         default:
-          return error.message || 'Failed to sign in. Please check your credentials.';
+          return error.message || t('auth.errors.generic');
       }
     }
-    return error.message || 'Failed to sign in. Please check your credentials.';
+    return error.message || t('auth.errors.generic');
   };
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
-      showErrorAlert('Error', 'Please enter both email and password.');
+      showErrorAlert(t('common.error'), t('auth.enterEmailPassword'));
       return;
     }
 
@@ -94,7 +95,7 @@ export default function AuthScreen() {
       if (__DEV__) {
         console.error('Error signing in:', error);
       }
-      showErrorAlert('Error', getSignInErrorMessage(error));
+      showErrorAlert(t('common.error'), getSignInErrorMessage(error));
     } finally {
       setLoginLoading(false);
     }
@@ -107,7 +108,7 @@ export default function AuthScreen() {
       if (__DEV__) {
         console.error('Error signing in with Google:', error);
       }
-      showErrorAlert('Error', 'Failed to sign in with Google. Please try again.');
+      showErrorAlert(t('common.error'), t('auth.googleFailed'));
     }
   };
 
@@ -116,7 +117,7 @@ export default function AuthScreen() {
   };
   
   if (loading) {
-    return <LoadingOverlay message="Getting things ready..." />;
+    return <LoadingOverlay message={t('auth.preparing')} />;
   }
   
   return (
@@ -135,7 +136,7 @@ export default function AuthScreen() {
           <Text style={styles.logoAccent}>Nexus</Text>
         </View>
         
-        <Text style={styles.subtitle}>The Ultimate Trading Card Game</Text>
+        <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>
         
         <View style={styles.cardsPreviewContainer}>
           <Image
@@ -159,7 +160,7 @@ export default function AuthScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <Text style={styles.buttonText}>Start Your Adventure</Text>
+            <Text style={styles.buttonText}>{t('auth.start')}</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -169,7 +170,7 @@ export default function AuthScreen() {
           activeOpacity={0.8}
         >
           <Mail size={20} color={Colors.accent[500]} />
-          <Text style={styles.loginButtonText}>Sign In with Email</Text>
+          <Text style={styles.loginButtonText}>{t('auth.signInWithEmail')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -178,17 +179,18 @@ export default function AuthScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.googleIcon}>G</Text>
-          <Text style={styles.googleButtonText}>Continue with Google</Text>
+          <Text style={styles.googleButtonText}>{t('auth.continueWithGoogle')}</Text>
         </TouchableOpacity>
         
         <Text style={styles.termsText}>
-          By continuing, you agree to our Terms of Service and{' '}
+          {t('auth.terms.prefix')}
           <Text 
             style={styles.privacyLink}
             onPress={() => router.push('/privacy-policy' as any)}
           >
-            Privacy Policy
+            {t('auth.terms.privacy')}
           </Text>
+          {t('auth.terms.suffix')}
         </Text>
       </View>
 
@@ -200,14 +202,12 @@ export default function AuthScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Sign In</Text>
-            <Text style={styles.modalSubtitle}>
-              Welcome back! Sign in to access your collection.
-            </Text>
+            <Text style={styles.modalTitle}>{t('auth.modal.title')}</Text>
+            <Text style={styles.modalSubtitle}>{t('auth.modal.subtitle')}</Text>
             
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={t('auth.emailPlaceholder')}
               placeholderTextColor={Colors.text.secondary}
               value={email}
               onChangeText={setEmail}
@@ -217,7 +217,7 @@ export default function AuthScreen() {
             
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={t('auth.passwordPlaceholder')}
               placeholderTextColor={Colors.text.secondary}
               value={password}
               onChangeText={setPassword}
@@ -229,7 +229,7 @@ export default function AuthScreen() {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowLoginModal(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -238,7 +238,7 @@ export default function AuthScreen() {
                 disabled={loginLoading}
               >
                 <Text style={styles.signInButtonText}>
-                  {loginLoading ? 'Signing In...' : 'Sign In'}
+                  {loginLoading ? t('auth.signingIn') : t('auth.signIn')}
                 </Text>
               </TouchableOpacity>
             </View>

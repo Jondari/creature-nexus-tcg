@@ -7,6 +7,7 @@ import { Sidebar } from './Sidebar';
 import { RulesContent } from './RulesContent';
 import { groupByModel, CardGrouped } from '../utils/cardUtils';
 import { showErrorAlert } from '@/utils/alerts';
+import { t } from '@/utils/i18n';
 import Colors from '../constants/Colors';
 
 interface DeckBuilderProps {
@@ -71,10 +72,10 @@ export function DeckBuilder({
         </View>
         <View style={styles.cardInfo}>
           <Text style={styles.cardStats}>
-            In Deck: {inDeck}/{MAX_COPIES_PER_CARD}
+            {t('decks.inDeckCount', { count: String(inDeck), max: String(MAX_COPIES_PER_CARD) })}
           </Text>
           <Text style={styles.cardStats}>
-            Available: {available}
+            {t('decks.availableCount', { count: String(available) })}
           </Text>
         </View>
       </View>
@@ -85,12 +86,12 @@ export function DeckBuilder({
     const cardsOfSameName = currentDeck.filter(c => c.name === card.name);
     
     if (cardsOfSameName.length >= MAX_COPIES_PER_CARD) {
-      showErrorAlert('Deck Limit', `You can only have ${MAX_COPIES_PER_CARD} copies of ${card.name} in your deck.`);
+      showErrorAlert(t('common.error'), t('decks.limitCopies', { max: String(MAX_COPIES_PER_CARD), name: card.name }));
       return;
     }
 
     if (currentDeck.length >= DECK_SIZE_MAX) {
-      showErrorAlert('Deck Full', `Your deck cannot exceed ${DECK_SIZE_MAX} cards.`);
+      showErrorAlert(t('common.error'), t('decks.deckFull', { max: String(DECK_SIZE_MAX) }));
       return;
     }
 
@@ -127,12 +128,15 @@ export function DeckBuilder({
 
   const handleSave = () => {
     if (currentDeck.length < DECK_SIZE_MIN) {
-      showErrorAlert('Deck Too Small', `Your deck must have at least ${DECK_SIZE_MIN} cards.`);
+      showErrorAlert(
+        t('decks.tooSmallTitle'),
+        t('decks.tooSmallBody', { min: String(DECK_SIZE_MIN) })
+      );
       return;
     }
 
     if (!deckName.trim()) {
-      showErrorAlert('Deck Name Required', 'Please enter a name for your deck.');
+      showErrorAlert(t('common.error'), t('decks.nameRequired'));
       return;
     }
 
@@ -148,32 +152,28 @@ export function DeckBuilder({
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Deck Builder</Text>
+        <Text style={styles.title}>{t('decks.builderTitle')}</Text>
         <View style={styles.headerActions}>
           {/* Rules button */}
           <TouchableOpacity
             onPress={() => setSidebarVisible(true)}
             style={styles.deckButton}
           >
-            <Text style={styles.deckButtonText}>
-              Deck ({currentDeck.length})
-            </Text>
+            <Text style={styles.deckButtonText}>{t('decks.currentDeckButton', { count: String(currentDeck.length) })}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-            <Text style={styles.saveText}>Save</Text>
+            <Text style={styles.saveText}>{t('common.ok')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Deck Info */}
       <View style={styles.deckInfo}>
-        <Text style={styles.deckSize}>
-          Deck: {currentDeck.length}/{DECK_SIZE_MAX} cards
-        </Text>
+        <Text style={styles.deckSize}>{t('decks.deckSize', { count: String(currentDeck.length), max: String(DECK_SIZE_MAX) })}</Text>
         <Text style={styles.deckStatus}>
           {currentDeck.length < DECK_SIZE_MIN 
-            ? `Need ${DECK_SIZE_MIN - currentDeck.length} more cards` 
-            : 'Deck is valid'}
+            ? t('decks.needMore', { count: String(DECK_SIZE_MIN - currentDeck.length) })
+            : t('decks.deckValid')}
         </Text>
         <TouchableOpacity
             onPress={() => setRulesVisible(true)}
@@ -185,7 +185,7 @@ export function DeckBuilder({
                 marginTop: 10,
                 alignSelf: 'flex-start'
               }]}
-            accessibilityLabel="Show game rules"
+            accessibilityLabel={t('decks.rulesA11y')}
         >
           <Text style={[styles.deckButtonText, { color: Colors.text.primary }]}>ℹ️</Text>
         </TouchableOpacity>
@@ -194,7 +194,7 @@ export function DeckBuilder({
       <View style={styles.content}>
         {/* Available Cards - Using collection-style layout */}
         <View style={styles.collectionSection}>
-          <Text style={styles.sectionTitle}>Your Collection</Text>
+          <Text style={styles.sectionTitle}>{t('collection.title')}</Text>
         </View>
 
         {/* Filter Section */}
@@ -211,7 +211,7 @@ export function DeckBuilder({
                 onPress={() => setFilter(option)}
               >
                 <Text style={[styles.filterText, filter === option && styles.filterTextActive]}>
-                  {option === 'all' ? 'All' : option.charAt(0).toUpperCase() + option.slice(1)}
+                  {option === 'all' ? t('collection.filters.all') : t(`rarities.${option}`)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -239,43 +239,39 @@ export function DeckBuilder({
       <Sidebar
         visible={sidebarVisible}
         onClose={() => setSidebarVisible(false)}
-        title="Current Deck"
+        title={t('decks.activeDeck')}
         width={400}
       >
         <View style={styles.sidebarContent}>
           {/* Deck Name Input */}
           <View style={styles.deckNameSection}>
-            <Text style={styles.deckNameLabel}>Deck Name:</Text>
+            <Text style={styles.deckNameLabel}>{t('decks.deckName')}</Text>
             <TextInput
               style={styles.deckNameInput}
               value={deckName}
               onChangeText={setDeckName}
-              placeholder="Enter deck name..."
+              placeholder={t('decks.deckNamePlaceholder')}
               placeholderTextColor={Colors.text.secondary}
             />
           </View>
 
           {/* Deck Stats */}
           <View style={styles.deckStats}>
-            <Text style={styles.deckStatsText}>
-              Total Cards: {currentDeck.length}/{DECK_SIZE_MAX}
-            </Text>
+            <Text style={styles.deckStatsText}>{t('decks.totalCards', { count: String(currentDeck.length), max: String(DECK_SIZE_MAX) })}</Text>
             <Text style={[
               styles.deckStatsText,
               currentDeck.length >= DECK_SIZE_MIN ? styles.validDeck : styles.invalidDeck
             ]}>
               {currentDeck.length < DECK_SIZE_MIN 
-                ? `Need ${DECK_SIZE_MIN - currentDeck.length} more cards` 
-                : 'Deck is valid'}
+                ? t('decks.needMore', { count: String(DECK_SIZE_MIN - currentDeck.length) }) 
+                : t('decks.deckValid')}
             </Text>
           </View>
 
           {/* Deck Cards */}
           <ScrollView style={styles.sidebarDeckList}>
             {groupedDeck.length === 0 ? (
-              <Text style={styles.emptyDeckText}>
-                No cards in deck. Start adding cards from your collection!
-              </Text>
+              <Text style={styles.emptyDeckText}>{t('decks.emptyDeck')}</Text>
             ) : (
               groupedDeck.map((g) => (
                 <View key={g.modelId} style={styles.sidebarDeckCard}>
@@ -286,14 +282,12 @@ export function DeckBuilder({
                   />
                   <View style={styles.sidebarCardInfo}>
                     <Text style={styles.sidebarCardName}>{g.name}</Text>
-                    <Text style={styles.sidebarCardCount}>
-                      Quantity: {g.count}
-                    </Text>
+                    <Text style={styles.sidebarCardCount}>{t('decks.quantity', { count: String(g.count) })}</Text>
                     <TouchableOpacity
                       style={styles.removeCardButton}
                       onPress={() => removeCardFromDeck(g.sample.id)}
                     >
-                      <Text style={styles.removeCardText}>Remove</Text>
+                      <Text style={styles.removeCardText}>{t('decks.remove')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -307,7 +301,7 @@ export function DeckBuilder({
       <Sidebar
         visible={rulesVisible}
         onClose={() => setRulesVisible(false)}
-        title="Game Rules"
+        title={t('decks.rulesTitle')}
         width={420}
       >
         <RulesContent context="deck" />

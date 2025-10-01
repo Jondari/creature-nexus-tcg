@@ -10,6 +10,7 @@ import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extende
 import { groupByModel, CardGrouped } from '@/utils/cardUtils';
 import Colors from '@/constants/Colors';
 import CardGrid from '@/components/CardGrid';
+import { t } from '@/utils/i18n';
 import LoadingOverlay from '@/components/LoadingOverlay';
 
 export default function CollectionScreen() {
@@ -81,7 +82,7 @@ export default function CollectionScreen() {
   };
   
   if (loading) {
-    return <LoadingOverlay message="Loading your collection..." />;
+    return <LoadingOverlay message={t('collection.loading')} />;
   }
   
   return (
@@ -89,10 +90,10 @@ export default function CollectionScreen() {
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <View>
-            <Text style={styles.title}>My Collection</Text>
+            <Text style={styles.title}>{t('collection.title')}</Text>
             {/* Show total instances owned, not grouped count */}
             <Text style={styles.subtitle}>
-              {allCards.length} {allCards.length === 1 ? 'card' : 'cards'} collected
+              {allCards.length} {t('home.cardsCollected')}
             </Text>
           </View>
           <TouchableOpacity 

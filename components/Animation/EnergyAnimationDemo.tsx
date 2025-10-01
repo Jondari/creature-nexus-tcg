@@ -11,6 +11,7 @@ import { RewardAnimation } from './RewardAnimation';
 import { generateRandomCard } from '@/utils/cardUtils';
 import { STANDARD_PACK } from '@/data/boosterPacks';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 
 export const EnergyAnimationDemo: React.FC = () => {
   const router = useRouter();
@@ -22,14 +23,14 @@ export const EnergyAnimationDemo: React.FC = () => {
   const testSpell = energyCatalyst || spellCards[0]; // Use Energy Catalyst or first spell as fallback
 
   const animations = [
-    { name: 'Orb Animation', component: EnergyOrbAnimation, key: 'orb' },
-    { name: 'Wave Animation', component: EnergyWaveAnimation, key: 'wave' },
-    { name: 'Spell Cast (Human)', component: SpellCastAnimation, key: 'spell-human' },
-    { name: 'Spell Cast (AI)', component: SpellCastAnimation, key: 'spell-ai' },
-    { name: 'Reward: Coins', component: RewardAnimation, key: 'reward-coins' },
-    { name: 'Reward: Pack', component: RewardAnimation, key: 'reward-pack' },
-    { name: 'Reward: Card', component: RewardAnimation, key: 'reward-card' },
-  ];
+    { labelKey: 'demo.animation.buttons.orb', component: EnergyOrbAnimation, key: 'orb' },
+    { labelKey: 'demo.animation.buttons.wave', component: EnergyWaveAnimation, key: 'wave' },
+    { labelKey: 'demo.animation.buttons.spellHuman', component: SpellCastAnimation, key: 'spell-human' },
+    { labelKey: 'demo.animation.buttons.spellAI', component: SpellCastAnimation, key: 'spell-ai' },
+    { labelKey: 'demo.animation.buttons.rewardCoins', component: RewardAnimation, key: 'reward-coins' },
+    { labelKey: 'demo.animation.buttons.rewardPack', component: RewardAnimation, key: 'reward-pack' },
+    { labelKey: 'demo.animation.buttons.rewardCard', component: RewardAnimation, key: 'reward-card' },
+  ] as const;
 
   const triggerAnimation = (key: string) => {
     setActiveAnimation(key);
@@ -67,7 +68,7 @@ export const EnergyAnimationDemo: React.FC = () => {
         return (
           <RewardAnimation
             type="coins"
-            message="You received 100 Nexus Coins!"
+            message={t('redeem.reward.coins', { amount: String(100) })}
             coins={100}
             onComplete={onAnimationComplete}
           />
@@ -76,7 +77,7 @@ export const EnergyAnimationDemo: React.FC = () => {
         return (
           <RewardAnimation
             type="pack"
-            message={`You received a ${STANDARD_PACK.name}!`}
+            message={t('redeem.reward.pack', { name: STANDARD_PACK.name })}
             pack={STANDARD_PACK as any}
             onComplete={onAnimationComplete}
           />
@@ -86,7 +87,7 @@ export const EnergyAnimationDemo: React.FC = () => {
         return (
           <RewardAnimation
             type="card"
-            message={`You received ${demoCard.name}!`}
+            message={t('redeem.reward.card', { name: demoCard.name })}
             card={demoCard as any}
             onComplete={onAnimationComplete}
           />
@@ -120,10 +121,10 @@ export const EnergyAnimationDemo: React.FC = () => {
             >
               <ArrowLeft size={24} color={Colors.text.primary} />
             </TouchableOpacity>
-            <Text style={styles.title}>Animation Demo</Text>
+            <Text style={styles.title}>{t('demo.animation.title')}</Text>
             <View style={styles.placeholder} />
           </View>
-          <Text style={styles.subtitle}>Tap buttons to see different energy and spell animations</Text>
+          <Text style={styles.subtitle}>{t('demo.animation.subtitle')}</Text>
         </View>
         
         <ScrollView contentContainerStyle={styles.buttonContainer}>
@@ -137,14 +138,14 @@ export const EnergyAnimationDemo: React.FC = () => {
               onPress={() => triggerAnimation(animation.key)}
               disabled={activeAnimation !== null}
             >
-              <Text style={styles.buttonText}>{animation.name}</Text>
+              <Text style={styles.buttonText}>{t(animation.labelKey)}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
         <View style={styles.gameArea}>
-          <Text style={styles.gameText}>Creature Nexus TCG</Text>
-          <Text style={styles.gameSubtext}>Animations appear over gameplay without disruption</Text>
+          <Text style={styles.gameText}>{t('game.title')}</Text>
+          <Text style={styles.gameSubtext}>{t('demo.animation.gameSubtitle')}</Text>
         </View>
 
         {renderAnimation()}

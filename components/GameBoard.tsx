@@ -112,7 +112,7 @@ export function GameBoard() {
     const allCards = CardLoader.loadCards();
     const aiDeck = allCards.slice(20, 40); // AI uses demo deck
     
-    initializeGame('Player', playerDeck, aiDeck);
+    initializeGame(t('player.you'), playerDeck, aiDeck);
     setShowDeckSelection(false);
   };
 
@@ -121,10 +121,10 @@ export function GameBoard() {
       startGameWithDeck(activeDeck.cards);
     } else {
       showErrorAlert(
-        'Invalid Deck', 
-        activeDeck 
-          ? 'Your active deck must have at least 20 cards.' 
-          : 'No active deck selected. Please create a deck first.'
+        t('decks.invalidDeckTitle'),
+        activeDeck
+          ? t('decks.invalidDeckMin', { min: '20' })
+          : t('decks.noActiveDeck')
       );
     }
   };
@@ -183,9 +183,9 @@ export function GameBoard() {
   if (showDeckSelection) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.deckSelectionTitle}>Choose Your Deck</Text>
+        <Text style={styles.deckSelectionTitle}>{t('decks.selection.title')}</Text>
         <Text style={styles.deckSelectionSubtitle}>
-          Select which deck to use for this battle
+          {t('decks.selection.subtitle')}
         </Text>
         
         <View style={styles.deckOptions}>
@@ -194,14 +194,14 @@ export function GameBoard() {
               style={[styles.deckOption, styles.activeDeckOption]}
               onPress={startWithActiveDeck}
             >
-              <Text style={styles.deckOptionTitle}>Use Active Deck</Text>
+              <Text style={styles.deckOptionTitle}>{t('decks.selection.useActive')}</Text>
               <Text style={styles.deckOptionName}>"{activeDeck.name}"</Text>
               <Text style={styles.deckOptionStats}>
-                {activeDeck.cards.length} cards
+                {t('decks.selection.cardCount', { count: String(activeDeck.cards.length) })}
               </Text>
               {activeDeck.cards.length < 20 && (
                 <Text style={styles.deckOptionWarning}>
-                  ⚠️ Needs at least 20 cards
+                  ⚠️ {t('decks.selection.needMin', { min: '20' })}
                 </Text>
               )}
             </TouchableOpacity>
@@ -211,18 +211,18 @@ export function GameBoard() {
             style={[styles.deckOption, styles.demoDeckOption]}
             onPress={startWithDemoDeck}
           >
-            <Text style={styles.deckOptionTitle}>Use Demo Deck</Text>
-            <Text style={styles.deckOptionName}>Balanced Starter Deck</Text>
-            <Text style={styles.deckOptionStats}>20 balanced cards</Text>
+            <Text style={styles.deckOptionTitle}>{t('decks.selection.useDemo')}</Text>
+            <Text style={styles.deckOptionName}>{t('decks.selection.demoName')}</Text>
+            <Text style={styles.deckOptionStats}>{t('decks.selection.demoStats')}</Text>
             <Text style={styles.deckOptionDescription}>
-              Perfect for learning and new players
+              {t('decks.selection.demoDesc')}
             </Text>
           </TouchableOpacity>
         </View>
         
         {!activeDeck && (
           <Text style={styles.noDeckMessage}>
-            💡 Create a deck in the Decks tab to use your own cards!
+            💡 {t('decks.selection.noDeckMessage')}
           </Text>
         )}
       </View>
@@ -286,14 +286,17 @@ export function GameBoard() {
     const card = currentPlayer.hand.find(c => c.id === cardId);
     
     if (!card) {
-      showErrorAlert('Card Not Found', 'The selected card could not be found in your hand.');
+      showErrorAlert(t('game.cardNotFoundTitle'), t('game.cardNotFoundBody'));
       return;
     }
     
     if (isSpellCard(card)) {
       // Handle spell casting
       if (currentPlayer.energy < card.energyCost) {
-        showWarningAlert('Insufficient Energy', `This spell requires ${card.energyCost} energy, but you only have ${currentPlayer.energy}.`);
+        showWarningAlert(
+          t('combat.notEnoughEnergy'),
+          t('combat.insufficientEnergySpell', { required: String(card.energyCost), current: String(currentPlayer.energy) })
+        );
         return;
       }
       
@@ -301,7 +304,7 @@ export function GameBoard() {
     } else {
       // Handle monster card playing
       if (currentPlayer.field.length >= 4) {
-        showWarningAlert('Field Full', 'You cannot have more than 4 creatures on the field at once.');
+        showWarningAlert(t('combat.fieldFullTitle'), t('combat.fieldFullBody'));
         return;
       }
       
@@ -318,20 +321,23 @@ export function GameBoard() {
     const attack = attackerCard?.attacks.find(a => a.name === attackName);
     
     if (!attack || currentPlayer.energy < attack.energy) {
-      showWarningAlert('Insufficient Energy', `This attack requires ${attack?.energy || 0} energy, but you only have ${currentPlayer.energy}.`);
+      showWarningAlert(
+        t('combat.notEnoughEnergy'),
+        t('combat.insufficientEnergyAttack', { required: String(attack?.energy || 0), current: String(currentPlayer.energy) })
+      );
       return;
     }
     
     const opponent = gameEngine.getOpponent();
     if (opponent.field.length === 0) {
       // No targets available
-      showWarningAlert('No Targets', 'There are no enemy creatures to attack');
+      showWarningAlert(t('combat.noTargetsTitle'), t('combat.noTargetsBody'));
       return;
     }
     
     // Select target
     setAttackMode({ cardId, attackName });
-    showWarningAlert(t('actions.selectTarget'), 'Tap an opponent creature to attack');
+    showWarningAlert(t('actions.selectTarget'), t('actions.selectTargetHint'));
   };
 
   const handleRetire = (cardId: string) => {
@@ -364,17 +370,12 @@ export function GameBoard() {
   };
 
   const getAIStatusMessage = (status: string) => {
-    switch (status) {
-      case 'thinking': return 'Thinking...';
-      case 'analyzing_hand': return 'Analyzing hand...';
-      case 'selecting_card_to_play': return 'Selecting card to play...';
-      case 'selecting_attacker': return 'Choosing attacker...';
-      case 'selecting_attack': return 'Choosing attack...';
-      case 'selecting_target': return 'Selecting target...';
-      case 'executing_action': return 'Executing action...';
-      case 'ending_turn': return 'Ending turn...';
-      default: return 'Processing...';
+    const key = `game.aiStatus.${status}`;
+    const translated = t(key);
+    if (translated !== key) {
+      return translated;
     }
+    return t('game.aiStatus.default');
   };
 
   // Always show current player at bottom, opponent at top regardless of whose turn it is
@@ -409,7 +410,7 @@ export function GameBoard() {
         
         <View style={styles.gameOverButtons}>
           <TouchableOpacity style={styles.gameOverButton} onPress={handlePlayAgain}>
-            <Text style={styles.gameOverButtonText}>Play Again</Text>
+            <Text style={styles.gameOverButtonText}>{t('game.playAgain')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -417,7 +418,7 @@ export function GameBoard() {
             onPress={handleReturnToMenu}
           >
             <Text style={[styles.gameOverButtonText, styles.gameOverButtonTextSecondary]}>
-              Return to Menu
+              {t('game.returnToMenu')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -488,7 +489,7 @@ export function GameBoard() {
             );
           })}
           {playerAtTop.field.length === 0 && (
-            <Text style={styles.emptyField}>No creatures on field</Text>
+            <Text style={styles.emptyField}>{t('game.noCreaturesOnField')}</Text>
           )}
         </ScrollView>
       </View>
@@ -498,9 +499,11 @@ export function GameBoard() {
         <View style={styles.gameInfoContent}>
           <View>
             <Text style={styles.turnInfo}>
-              Turn {gameState.turnNumber} - {isPlayerTurn ? 'Your Turn' : 'AI Turn'}
+              {t('game.turnLabel', { n: String(gameState.turnNumber), who: isPlayerTurn ? t('game.yourTurn') : t('game.aiTurn') })}
             </Text>
-            <Text style={styles.phaseInfo}>Phase: {t(`phases.${gameState.phase}`)}</Text>
+            <Text style={styles.phaseInfo}>
+              {t('game.phaseLabel', { phase: t(`phases.${gameState.phase}`) })}
+            </Text>
             {aiVisualState.isActive && (
               <Text style={styles.aiStatusText}>
                 🤖 {aiVisualState.message || getAIStatusMessage(aiVisualState.status)}
@@ -520,7 +523,7 @@ export function GameBoard() {
             <TouchableOpacity
               style={[styles.sizeToggle, { marginLeft: 8 }]}
               onPress={() => setRulesVisible(true)}
-              accessibilityLabel="Show game rules"
+              accessibilityLabel={t('decks.rulesA11y')}
             >
               <Text style={styles.sizeToggleText}>ℹ️</Text>
             </TouchableOpacity>
@@ -579,7 +582,7 @@ export function GameBoard() {
             </View>
           ))}
           {playerAtBottom.field.length === 0 && (
-            <Text style={styles.emptyField}>No creatures on field</Text>
+            <Text style={styles.emptyField}>{t('game.noCreaturesOnField')}</Text>
           )}
         </ScrollView>
       </View>
@@ -634,7 +637,11 @@ export function GameBoard() {
       {attackMode && (
         <View style={styles.attackModeIndicator}>
           <Text style={styles.attackModeText}>
-            Attack Mode: Select target for {attackMode.attackName}
+            {t('game.attackMode', { name: (() => {
+              const key = `attacks.${attackMode.attackName}`;
+              const label = t(key);
+              return label === key ? attackMode.attackName : label;
+            })() })}
           </Text>
         </View>
       )}
@@ -645,7 +652,7 @@ export function GameBoard() {
         <Sidebar
           visible={sidebarVisible}
           onClose={closeSidebar}
-          title="Action Log"
+          title={t('battle.actionLog')}
         >
           <ActionLog logs={actionLog} sidebarMode={true} />
         </Sidebar>
@@ -655,7 +662,7 @@ export function GameBoard() {
       <Sidebar
         visible={rulesVisible}
         onClose={() => setRulesVisible(false)}
-        title="Game Rules"
+        title={t('decks.rulesTitle')}
       >
         <RulesContent context="battle" />
       </Sidebar>

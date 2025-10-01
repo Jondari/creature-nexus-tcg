@@ -8,6 +8,8 @@ interface SettingsContextType {
   setCardSize: (size: CardSize) => void;
   showBattleLog: boolean;
   setShowBattleLog: (show: boolean) => void;
+  locale: string;
+  setLocale: (locale: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -18,11 +20,13 @@ const SETTINGS_STORAGE_KEY = '@creature_nexus_settings';
 interface Settings {
   cardSize: CardSize;
   showBattleLog: boolean;
+  locale?: string;
 }
 
 const defaultSettings: Settings = {
   cardSize: 'small', // Default to small for better UX
   showBattleLog: false, // Disabled by default
+  locale: 'en'
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -39,7 +43,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const savedSettings = await AsyncStorage.getItem(SETTINGS_STORAGE_KEY);
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
-        setSettings({ ...defaultSettings, ...parsed });
+        const merged = { ...defaultSettings, ...parsed } as Settings;
+        try {
+          const { i18n } = await import('@/utils/i18n');
+          await i18n.setLocale(merged.locale || 'en');
+        } catch {}
+        setSettings(merged);
       }
     } catch (error) {
       if (__DEV__) {
@@ -71,12 +80,24 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveSettings(newSettings);
   };
 
+  const setLocale = async (locale: string) => {
+    const newSettings = { ...settings, locale };
+    // Update i18n first to ensure next render reflects the new language immediately
+    try {
+      const { i18n } = await import('@/utils/i18n');
+      await i18n.setLocale(locale);
+    } catch {}
+    saveSettings(newSettings);
+  };
+
   return (
     <SettingsContext.Provider value={{
       cardSize: settings.cardSize,
       setCardSize,
       showBattleLog: settings.showBattleLog,
       setShowBattleLog,
+      locale: settings.locale || 'en',
+      setLocale,
       loading,
     }}>
       {children}

@@ -11,6 +11,7 @@ import { getInventoryPacks, removePackFromInventory, InventoryPack } from '@/uti
 import { Card } from '@/models/Card';
 import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { PackageOpen, Gift } from 'lucide-react-native';
+import { t } from '@/utils/i18n';
 import Colors from '@/constants/Colors';
 import CountdownTimer from '@/components/CountdownTimer';
 import PackOpeningAnimation from '@/components/Animation/PackOpeningAnimation';
@@ -30,13 +31,13 @@ const formatRelativeDate = (isoString: string): string => {
     const hrs = Math.floor(min / 60);
     const days = Math.floor(hrs / 24);
 
-    if (sec < 45) return 'just now';
-    if (sec < 90) return '1 minute ago';
-    if (min < 45) return `${min} minutes ago`;
-    if (min < 90) return '1 hour ago';
-    if (hrs < 24) return `${hrs} hours ago`;
-    if (hrs < 48) return 'yesterday';
-    if (days < 7) return `${days} days ago`;
+    if (sec < 45) return t('time.justNow');
+    if (sec < 90) return t('time.minuteAgo');
+    if (min < 45) return t('time.minutesAgo', { count: String(min) });
+    if (min < 90) return t('time.hourAgo');
+    if (hrs < 24) return t('time.hoursAgo', { count: String(hrs) });
+    if (hrs < 48) return t('time.yesterday');
+    if (days < 7) return t('time.daysAgo', { count: String(days) });
 
     // 7+ days: show a concise date
     return date.toLocaleDateString(undefined, {
@@ -272,7 +273,7 @@ export default function OpenPackScreen() {
   };
   
   if (loading) {
-    return <LoadingOverlay message="Loading your collection..." />;
+    return <LoadingOverlay message={t('home.loading')} />;
   }
   
   return (
@@ -289,8 +290,8 @@ export default function OpenPackScreen() {
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.title}>Creature Nexus</Text>
-              <Text style={styles.subtitle}>Open a new pack of cards</Text>
+              <Text style={styles.title}>{t('home.title')}</Text>
+              <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
             </View>
             <TouchableOpacity
               style={styles.giftButton}
@@ -329,25 +330,23 @@ export default function OpenPackScreen() {
                 end={{ x: 1, y: 1 }}
               >
                 <PackageOpen size={32} color={Colors.text.primary} />
-                <Text style={styles.packButtonText}>Open Pack</Text>
+                <Text style={styles.packButtonText}>{t('home.openPack')}</Text>
               </LinearGradient>
             </TouchableOpacity>
             
-            <Text style={styles.packInfo}>
-              Each pack contains 5 random creature cards
-            </Text>
+            <Text style={styles.packInfo}>{t('home.packContains')}</Text>
           </View>
         )}
         
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{cards.length}</Text>
-            <Text style={styles.statLabel}>Cards Collected</Text>
+            <Text style={styles.statLabel}>{t('home.cardsCollected')}</Text>
           </View>
           
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{Math.floor(cards.length / 5)}</Text>
-            <Text style={styles.statLabel}>Packs Opened</Text>
+            <Text style={styles.statLabel}>{t('home.packsOpened')}</Text>
           </View>
         </View>
 
@@ -355,14 +354,14 @@ export default function OpenPackScreen() {
         {__DEV__ && (
             <TouchableOpacity onPress={handleOpenPack} style={{ marginTop: 16, alignItems: 'center' }}>
               <Text style={{ color: 'orange', fontWeight: 'bold' }}>
-                ⚠ Force open pack (DEV only)
+                {t('home.forceOpenDev')}
               </Text>
             </TouchableOpacity>
         )}
 
 
         <View style={styles.infoContainer}>
-          <Text style={styles.infoTitle}>Card Rarities</Text>
+          <Text style={styles.infoTitle}>{t('home.cardRarities')}</Text>
           <View style={styles.rarityList}>
             {['common', 'rare', 'epic', 'legendary', 'mythic'].map((rarity) => (
               <View key={rarity} style={styles.rarityItem}>
@@ -372,16 +371,14 @@ export default function OpenPackScreen() {
                     { backgroundColor: Colors[rarity as keyof typeof Colors] as string }
                   ]}
                 />
-                <Text style={styles.rarityText}>
-                  {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
-                </Text>
+                <Text style={styles.rarityText}>{t(`rarities.${rarity}`)}</Text>
               </View>
             ))}
           </View>
         </View>
       </ScrollView>
       
-      {opening && <LoadingOverlay message="Opening pack..." />}
+      {opening && <LoadingOverlay message={t('store.opening')} />}
       
       {showPackResults && (
         <PackOpeningAnimation
@@ -391,10 +388,10 @@ export default function OpenPackScreen() {
       )}
 
       {/* Packs Sidebar */}
-      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} title="My Packs" width={380}>
+      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} title={t('home.myPacks')} width={380}>
         <ScrollView contentContainerStyle={styles.sidebarContent}>
           {inventoryPacks.length === 0 ? (
-            <Text style={styles.emptySidebarText}>No unopened packs yet</Text>
+            <Text style={styles.emptySidebarText}>{t('home.noUnopenedPacks')}</Text>
           ) : (
             inventoryPacks.map((inv) => {
               const pack = getPackById(inv.packId);
@@ -404,20 +401,20 @@ export default function OpenPackScreen() {
                     <Image source={pack.imageUrl as any} style={styles.packItemImage} resizeMode="contain" />
                   ) : (
                     <View style={[styles.packItemImage, { alignItems: 'center', justifyContent: 'center' }]}> 
-                      <Text style={{ color: Colors.text.secondary, fontSize: 12 }}>No Image</Text>
+                      <Text style={{ color: Colors.text.secondary, fontSize: 12 }}>{t('home.noImage')}</Text>
                     </View>
                   )}
                   <View style={styles.packItemInfo}>
                     <Text style={styles.packItemName}>{inv.packName}</Text>
                     <Text style={styles.packItemEarnedAt}>
-                      Earned {formatRelativeDate(inv.earnedAt)}
+                      {t('home.earned', { when: formatRelativeDate(inv.earnedAt) })}
                     </Text>
                     <TouchableOpacity
                       style={styles.openPackButton}
                       onPress={() => handleOpenInventoryPack(inv)}
                       disabled={opening}
                     >
-                      <Text style={styles.openPackButtonText}>{opening ? 'Opening…' : 'Open'}</Text>
+                      <Text style={styles.openPackButtonText}>{opening ? t('store.opening') : t('common.open')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

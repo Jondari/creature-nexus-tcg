@@ -16,7 +16,10 @@
     "web": "expo start --web",
     "release": "standard-version",
     "redeem-code": "node scripts/redeem-code.js",
-    "eas-build-post-install": "bash scripts/postinstall-eas.sh"
+    "eas-build-post-install": "bash scripts/postinstall-eas.sh",
+    "i18n:check": "node scripts/i18n-sync.js",
+    "i18n:sync": "node scripts/i18n-sync.js --write",
+    "i18n:prune": "node scripts/i18n-sync.js --write --prune"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.3",

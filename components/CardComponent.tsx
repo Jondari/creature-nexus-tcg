@@ -320,7 +320,11 @@ const CardComponent = React.memo(({
                         { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' },
                         attackAvailable && showActions && (size === 'small' ? styles.availableAttackTextSmall : styles.availableAttackText)
                       ]}>
-                        {attack.name || 'Basic Attack'}
+                        {(() => {
+                          const key = `attacks.${attack.name}`;
+                          const label = t(key);
+                          return label === key ? (attack.name || 'Basic Attack') : label;
+                        })()}
                       </Text>
                       <Text style={[
                         attackDamageStyle, 
@@ -343,7 +347,7 @@ const CardComponent = React.memo(({
                         size === 'small' ? styles.spellCostTextSmall : styles.spellCostText,
                         { color: colors.text }
                       ]}>
-                        Cost: {card.energyCost} Energy
+                        {t('cards.costEnergy', { value: String(card.energyCost) })}
                       </Text>
                       <Text style={[
                         size === 'small' ? styles.spellTypeTextSmall : styles.spellTypeText,
@@ -364,7 +368,7 @@ const CardComponent = React.memo(({
                 <View style={styles.cardBottomTags}>
                   {(
                     <View style={styles.retreatTag}>
-                      <Text style={bottomTextStyle}>retreat: ⚡</Text>
+                      <Text style={bottomTextStyle}>{t('cards.retreat')}</Text>
                     </View>
                   )}
                   <View style={styles.rarityTag}>
@@ -534,7 +538,11 @@ const CardComponent = React.memo(({
                       { color: colors.text },
                       attackAvailable && showActions && (size === 'small' ? styles.availableAttackTextSmall : styles.availableAttackText)
                     ]}>
-                      {attack.name || 'Basic Attack'}
+                      {(() => {
+                        const key = `attacks.${attack.name}`;
+                        const label = t(key);
+                        return label === key ? (attack.name || 'Basic Attack') : label;
+                      })()}
                     </Text>
                     <Text style={[
                       attackDamageStyle, 
@@ -557,7 +565,7 @@ const CardComponent = React.memo(({
                       size === 'small' ? styles.spellCostTextSmall : styles.spellCostText,
                       { color: colors.text }
                     ]}>
-                      Cost: {card.energyCost} Energy
+                      {t('cards.costEnergy', { value: String(card.energyCost) })}
                     </Text>
                     <Text style={[
                       size === 'small' ? styles.spellTypeTextSmall : styles.spellTypeText,
@@ -578,7 +586,7 @@ const CardComponent = React.memo(({
               <View style={styles.cardBottomTags}>
                 {(
                   <View style={styles.retreatTag}>
-                    <Text style={bottomTextStyle}>retreat: ⚡</Text>
+                    <Text style={bottomTextStyle}>{t('cards.retreat')}</Text>
                   </View>
                 )}
                 <View style={styles.rarityTag}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Image, StyleSheet, Animated, Dimensions, Platform, TouchableOpacity, Text } from 'react-native';
+import { t } from '@/utils/i18n';
 
 // Import monster images from different rarities
 const PC_MONSTERS = [
@@ -270,7 +271,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
             onPress={handleSkip}
             activeOpacity={0.8}
           >
-            <Text style={styles.skipButtonText}>Skip</Text>
+            <Text style={styles.skipButtonText}>{t('common.skip')}</Text>
           </TouchableOpacity>
         </Animated.View>
       )}

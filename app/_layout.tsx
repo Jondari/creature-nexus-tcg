@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Stack, usePathname } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider } from '@/context/AuthContext';
@@ -11,6 +11,7 @@ import { useFonts } from 'expo-font';
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
 import { Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { View, Text, StyleSheet, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '@/constants/Colors';
 import { SplashScreen } from 'expo-router';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -18,6 +19,7 @@ import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { useAudio, MusicType } from '@/hooks/useAudio';
 import { AudioPermissionBanner } from '@/components/AudioPermissionBanner';
+import { t } from '@/utils/i18n';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -40,6 +42,7 @@ export default function RootLayout() {
   const { playMusic } = useAudio();
   const pathname = usePathname();
 
+  const router = useRouter();
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
@@ -55,6 +58,15 @@ export default function RootLayout() {
       const isBattle = battleRoutes.some((r) => pathname?.startsWith(r));
 
       playMusic(isBattle ? MusicType.BATTLE : MusicType.GENERAL);
+      // First-run language selection
+      (async () => {
+        try {
+          const storedLocale = await AsyncStorage.getItem('@locale');
+          if (!storedLocale) {
+            router.replace('/language');
+          }
+        } catch {}
+      })();
     }
   }, [fontsLoaded, fontError, pathname, playMusic]);
 
@@ -118,9 +130,10 @@ export default function RootLayout() {
                 headerShown: false,
                 contentStyle: { backgroundColor: Colors.background.primary }
               }}>
+                <Stack.Screen name="language" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
+                <Stack.Screen name="+not-found" options={{ title: t('notFound.stackTitle') }} />
               </Stack>
               <StatusBar style="light" hidden={Platform.OS === 'android'} />
               

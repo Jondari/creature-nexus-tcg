@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Volume2, VolumeX, Music, Minus, Plus } from 'lucide-react-native';
 import Colors from '../constants/Colors';
+import { t } from '@/utils/i18n';
 import { useAudio } from '../hooks/useAudio';
 
 interface MusicControlsProps {
@@ -38,19 +39,19 @@ export const MusicControls: React.FC<MusicControlsProps> = ({ showCurrentTrack =
   };
 
   const getMusicTypeLabel = () => {
-    if (!currentMusicType) return 'No music';
-    return currentMusicType === 'battle' ? 'Battle Music' : 'Background Music';
+    if (!currentMusicType) return t('audio.noMusic');
+    return currentMusicType === 'battle' ? t('audio.battleMusic') : t('audio.backgroundMusic');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Audio Settings</Text>
+      <Text style={styles.title}>{t('audio.settingsTitle')}</Text>
       
       {/* Music Enable/Disable */}
       <View style={styles.settingRow}>
         <View style={styles.settingLabel}>
           <Music size={20} color={Colors.text.primary} />
-          <Text style={styles.labelText}>Background Music</Text>
+          <Text style={styles.labelText}>{t('audio.backgroundMusic')}</Text>
         </View>
         <Switch
           value={settings.musicEnabled}
@@ -72,7 +73,7 @@ export const MusicControls: React.FC<MusicControlsProps> = ({ showCurrentTrack =
             ) : (
               <Volume2 size={20} color={Colors.text.primary} />
             )}
-            <Text style={styles.labelText}>Music Volume</Text>
+            <Text style={styles.labelText}>{t('audio.musicVolume')}</Text>
           </View>
           <View style={styles.volumeContainer}>
             <TouchableOpacity 
@@ -104,7 +105,7 @@ export const MusicControls: React.FC<MusicControlsProps> = ({ showCurrentTrack =
       <View style={styles.settingRow}>
         <View style={styles.settingLabel}>
           <Volume2 size={20} color={Colors.text.primary} />
-          <Text style={styles.labelText}>Sound Effects</Text>
+          <Text style={styles.labelText}>{t('audio.soundEffects')}</Text>
         </View>
         <Switch
           value={settings.soundEffectsEnabled}
@@ -126,7 +127,7 @@ export const MusicControls: React.FC<MusicControlsProps> = ({ showCurrentTrack =
             ) : (
               <Volume2 size={20} color={Colors.text.primary} />
             )}
-            <Text style={styles.labelText}>Effects Volume</Text>
+            <Text style={styles.labelText}>{t('audio.effectsVolume')}</Text>
           </View>
           <View style={styles.volumeContainer}>
             <TouchableOpacity 
@@ -157,7 +158,7 @@ export const MusicControls: React.FC<MusicControlsProps> = ({ showCurrentTrack =
       {/* Current Track Info */}
       {showCurrentTrack && settings.musicEnabled && (
         <View style={styles.currentTrack}>
-          <Text style={styles.currentTrackLabel}>Now Playing:</Text>
+          <Text style={styles.currentTrackLabel}>{t('audio.nowPlaying')}</Text>
           <Text style={[
             styles.currentTrackText, 
             { color: isPlaying ? Colors.accent[500] : Colors.text.secondary }

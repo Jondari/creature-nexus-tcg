@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { GameState, Player, Card, GameAction, ActionLogEntry, DamageAnimation, AIVisualState, AIStatus } from '../types/game';
 import { GameEngine } from '../modules/game';
+import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
 import { initializeSounds } from '../utils/game/soundManager';
@@ -207,30 +208,60 @@ export function GameProvider({ children }: GameProviderProps) {
   const getActionDescription = (action: GameAction, gameEngine: GameEngine): string => {
     const players = gameEngine.getPlayers();
     const player = players.find(p => p.id === action.playerId);
-    
+    const displayAttackName = (name?: string) => {
+      if (!name) return '';
+      const key = `attacks.${name}`;
+      const label = t(key);
+      return label === key ? name : label;
+    };
+
+    const unknownCard = t('battle.detail.unknownCard');
+    const unknownTarget = t('battle.detail.unknownTarget');
+    const defaultAttack = t('battle.detail.defaultAttack');
+
     switch (action.type) {
-      case 'PLAY_CARD':
-        const card = player?.hand.find(c => c.id === action.cardId);
-        return card ? `Played ${card.name}` : 'Played a card';
-      case 'ATTACK':
+      case 'PLAY_CARD': {
+        const card = player?.hand.find(c => c.id === action.cardId) || player?.field.find(c => c.id === action.cardId);
+        return card
+          ? t('battle.detail.playCard', { name: card.name })
+          : t('battle.detail.playCardUnknown');
+      }
+      case 'CAST_SPELL': {
+        const spellCard = player?.hand.find(c => c.id === action.cardId);
+        return spellCard
+          ? t('battle.detail.castSpell', { name: spellCard.name })
+          : t('battle.detail.castSpellUnknown');
+      }
+      case 'ATTACK': {
         const attackerCard = player?.field.find(c => c.id === action.cardId);
+        const attackerName = attackerCard?.name || unknownCard;
+        const attackLabelRaw = action.attackName ? displayAttackName(action.attackName) : '';
+        const attackLabel = attackLabelRaw || defaultAttack;
+
         if (action.targetCardId) {
           const opponent = players.find(p => p.id !== action.playerId);
           const targetCard = opponent?.field.find(c => c.id === action.targetCardId);
-          return `${attackerCard?.name || 'Card'} attacked ${targetCard?.name || 'target'} with ${action.attackName}`;
-        } else {
-          return `${attackerCard?.name || 'Card'} attacked directly with ${action.attackName}`;
+          const targetName = targetCard?.name || unknownTarget;
+
+          return attackLabelRaw
+            ? t('battle.detail.attackCreature', { attacker: attackerName, target: targetName, attack: attackLabel })
+            : t('battle.detail.attackCreatureNoAttack', { attacker: attackerName, target: targetName });
         }
-      case 'RETIRE_CARD':
+
+        return attackLabelRaw
+          ? t('battle.detail.attackDirect', { attacker: attackerName, attack: attackLabel })
+          : t('battle.detail.attackDirectNoAttack', { attacker: attackerName });
+      }
+      case 'RETIRE_CARD': {
         const retiredCard = player?.field.find(c => c.id === action.cardId);
-        return `Retired ${retiredCard?.name || 'card'}`;
-      case 'CAST_SPELL':
-        const spellCard = player?.hand.find(c => c.id === action.cardId);
-        return spellCard ? `Cast ${spellCard.name}` : 'Cast a spell';
+        return retiredCard
+          ? t('battle.detail.retireCard', { name: retiredCard.name })
+          : t('battle.detail.retireCardUnknown');
+      }
       case 'END_TURN':
-        return 'Ended turn';
+        return t('battle.detail.endTurn');
       default:
-        return 'Unknown action';
+        return t('battle.detail.unknown');
     }
   };
 
@@ -239,7 +270,7 @@ export function GameProvider({ children }: GameProviderProps) {
     
     try {
       const player1 = PlayerUtils.createPlayer('player1', playerName, playerDeck, false);
-      const player2 = PlayerUtils.createPlayer('player2', 'AI Opponent', aiDeck, true);
+      const player2 = PlayerUtils.createPlayer('player2', t('player.ai'), aiDeck, true);
       
       const gameEngine = new GameEngine(player1, player2, playerDeck, aiDeck);
       
@@ -284,7 +315,7 @@ export function GameProvider({ children }: GameProviderProps) {
       const logEntry = createActionLogEntry(
         action,
         success,
-        player?.name || 'Unknown Player',
+        player?.name || t('battle.detail.unknownPlayer'),
         state.gameState.turnNumber,
         description
       );
@@ -332,7 +363,7 @@ export function GameProvider({ children }: GameProviderProps) {
     
     try {
       // Show AI is starting its turn
-      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'thinking', message: 'AI is planning their turn...' } });
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'thinking', message: t('game.aiAction.planning') } });
       await delay(1700); // 1200 + 500
       
       let actionsPerformed = 0;
@@ -347,20 +378,20 @@ export function GameProvider({ children }: GameProviderProps) {
         }
         
         // AI analyzing phase
-        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'analyzing_hand', message: 'Analyzing available options...' } });
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'analyzing_hand', message: t('game.aiAction.analyzing') } });
         await delay(1300); // 800 + 500
-        
+
         const aiDecision = AIEngine.makeDecision(currentState);
-        
+
         // Show what AI is doing based on action type
         await showAIActionVisuals(aiDecision.action, dispatch);
-        
+
         const players = state.gameEngine.getPlayers();
         const aiPlayer = players.find(p => p.id === currentPlayerInLoop.id);
-        const description = aiDecision.reasoning || getActionDescription(aiDecision.action, state.gameEngine);
-        
+        const description = getActionDescription(aiDecision.action, state.gameEngine);
+
         // Execute the action
-        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'executing_action', message: 'Executing action...' } });
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'executing_action', message: t('game.aiAction.executing') } });
 
         // Trigger damage animation for AI attacks (delay engine if lethal so animation can play)
         if (aiDecision.action.type === 'ATTACK' && aiDecision.action.targetCardId) {
@@ -420,7 +451,7 @@ export function GameProvider({ children }: GameProviderProps) {
         const logEntry = createActionLogEntry(
           aiDecision.action,
           success,
-          aiPlayer?.name || 'AI',
+          aiPlayer?.name || t('player.ai'),
           currentState.turnNumber,
           description
         );
@@ -562,7 +593,7 @@ const delay = (ms: number): Promise<void> => {
 const showAIActionVisuals = async (action: GameAction, dispatch: React.Dispatch<GameAction_Context>) => {
   switch (action.type) {
     case 'PLAY_CARD':
-      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_card_to_play', message: 'Selecting card to play...' } });
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_card_to_play', message: t('game.aiAction.selectingCardToPlay') } });
       if (action.cardId) {
         dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId } });
       }
@@ -570,27 +601,33 @@ const showAIActionVisuals = async (action: GameAction, dispatch: React.Dispatch<
       break;
       
     case 'ATTACK':
-      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_attacker', message: 'Choosing attacker...' } });
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_attacker', message: t('game.aiAction.choosingAttacker') } });
       if (action.cardId) {
         dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId } });
       }
       await delay(1500); // 1000 + 500
       
-      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_attack', message: `Preparing ${action.attackName}...` } });
+      {
+        const key = action.attackName ? `attacks.${action.attackName}` : '';
+        const translated = key ? t(key) : '';
+        const name = key && translated !== key ? translated : (action.attackName || '');
+        const attackName = name || t('game.aiAction.defaultAttackName');
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_attack', message: t('game.aiAction.preparingAttack', { name: attackName }) } });
+      }
       await delay(1300); // 800 + 500
       
       if (action.targetCardId) {
-        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_target', message: 'Selecting target...' } });
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_target', message: t('game.aiAction.selectingTarget') } });
         dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId, targetCardId: action.targetCardId } });
         await delay(1500); // 1000 + 500
       } else {
-        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_target', message: 'Attacking directly...' } });
+        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'attacking_directly', message: t('game.aiAction.attackingDirectly') } });
         await delay(1300); // 800 + 500
       }
       break;
       
     case 'RETIRE_CARD':
-      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_card_to_play', message: 'Selecting card to retire...' } });
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_card_to_retire', message: t('game.aiAction.selectingCardToRetire') } });
       if (action.cardId) {
         dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId } });
       }
@@ -598,7 +635,7 @@ const showAIActionVisuals = async (action: GameAction, dispatch: React.Dispatch<
       break;
       
     case 'END_TURN':
-      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'ending_turn', message: 'Ending turn...' } });
+      dispatch({ type: 'SET_AI_STATUS', payload: { status: 'ending_turn', message: t('game.aiAction.endingTurn') } });
       await delay(600);
       break;
       

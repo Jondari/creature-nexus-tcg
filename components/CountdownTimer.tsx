@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { formatTimeRemaining } from '../utils/cardUtils';
 import Colors from '../constants/Colors';
+import { t } from '@/utils/i18n';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 interface CountdownTimerProps {
@@ -66,7 +67,7 @@ export default function CountdownTimer({ timeRemaining, onComplete }: CountdownT
   
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Next Pack Available In:</Text>
+      <Text style={styles.title}>{t('home.nextPack.title')}</Text>
       <Text style={styles.timer}>{formatTimeRemaining(remainingTime)}</Text>
       
       <View style={styles.progressBarContainer}>
@@ -75,8 +76,8 @@ export default function CountdownTimer({ timeRemaining, onComplete }: CountdownT
       
       <Text style={styles.hint}>
         {remainingTime > 0 
-          ? "Come back later to open another pack!"
-          : "Your pack is ready to open!"}
+          ? t('home.nextPack.comeBack')
+          : t('home.nextPack.ready')}
       </Text>
     </View>
   );

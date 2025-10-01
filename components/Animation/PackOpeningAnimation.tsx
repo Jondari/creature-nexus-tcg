@@ -4,6 +4,7 @@ import { Card } from '../../models/Card';
 import { CardComponent } from '../CardComponent';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '../../constants/Colors';
+import { t } from '@/utils/i18n';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -90,13 +91,14 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
       >
         <Animated.View style={[styles.titleContainer, titleStyle]}>
           <Text style={styles.title}>
-            {totalPacks === 1 ? 'Pack Opened!' : `Pack ${currentPackIndex + 1} of ${totalPacks}`}
+            {totalPacks === 1 
+              ? t('packOpening.titleSingle')
+              : t('packOpening.titleMulti', { index: String(currentPackIndex + 1), total: String(totalPacks) })}
           </Text>
           <Text style={styles.subtitle}>
             {totalPacks === 1 
-              ? `You received ${cards.length} new cards`
-              : `You received ${currentPackCards.length} new cards`
-            }
+              ? t('packOpening.subtitleSingle', { count: String(cards.length) })
+              : t('packOpening.subtitleMulti', { count: String(currentPackCards.length) })}
           </Text>
         </Animated.View>
         
@@ -154,7 +156,9 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
               end={{ x: 1, y: 1 }}
             >
               <Text style={styles.continueButtonText}>
-                {totalPacks === 1 ? 'Continue' : (currentPackIndex < totalPacks - 1 ? 'Continue' : 'Complete')}
+                {totalPacks === 1 
+                  ? t('common.continue') 
+                  : (currentPackIndex < totalPacks - 1 ? t('common.continue') : t('common.complete'))}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -166,7 +170,7 @@ export default function PackOpeningAnimation({ cards, onComplete }: PackOpeningA
               onPress={onComplete}
               activeOpacity={0.8}
             >
-              <Text style={styles.skipButtonText}>Skip All</Text>
+              <Text style={styles.skipButtonText}>{t('common.skipAll')}</Text>
             </TouchableOpacity>
           )}
         </View>

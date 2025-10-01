@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react-native';
 import ChapterSelection from '@/components/ChapterSelection';
 import { useStoryMode } from '@/context/StoryModeContext';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { t } from '@/utils/i18n';
 import Colors from '@/constants/Colors';
 
 export default function StoryModeScreen() {
@@ -25,7 +26,7 @@ export default function StoryModeScreen() {
   };
 
   if (isLoading) {
-    return <LoadingOverlay message="Loading story mode..." />;
+    return <LoadingOverlay message={t('story.loading')} />;
   }
 
   return (

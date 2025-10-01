@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Lock, CheckCircle } from 'lucide-react-native';
 import { StoryChapter } from '@/data/storyMode';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 
 interface ChapterSelectionProps {
   chapters: StoryChapter[];
@@ -47,7 +48,7 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
         >
           <View style={styles.chapterHeader}>
             <View style={styles.chapterTitleRow}>
-              <Text style={styles.chapterNumber}>Chapter {chapter.id}</Text>
+              <Text style={styles.chapterNumber}>{t('story.chapter.label', { id: String(chapter.id) })}</Text>
               <View style={styles.chapterStatus}>
                 {isLocked ? (
                   <Lock size={16} color={Colors.neutral[400]} />
@@ -63,7 +64,7 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
                 styles.chapterTitle,
                 { color: isLocked ? Colors.neutral[400] : Colors.text.primary }
               ]}>
-                {chapter.name}
+                {t(chapter.name)}
               </Text>
             </View>
           </View>
@@ -72,14 +73,17 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
             styles.chapterDescription,
             { color: isLocked ? Colors.neutral[500] : Colors.text.secondary }
           ]}>
-            {chapter.description}
+            {t(chapter.description)}
           </Text>
 
           {!isLocked && (
             <View style={styles.progressSection}>
               <View style={styles.progressInfo}>
                 <Text style={styles.progressText}>
-                  {completedBattles}/{totalBattles} Battles Completed
+                  {t('story.chapter.progressFull', {
+                    completed: String(completedBattles),
+                    total: String(totalBattles)
+                  })}
                 </Text>
                 <Text style={styles.progressPercentage}>
                   {Math.round(progressPercentage)}%
@@ -102,7 +106,7 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
 
           {isLocked && (
             <View style={styles.lockedOverlay}>
-              <Text style={styles.lockedText}>Complete previous chapter to unlock</Text>
+              <Text style={styles.lockedText}>{t('story.chapter.locked')}</Text>
             </View>
           )}
         </LinearGradient>
@@ -113,8 +117,8 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
-        <Text style={styles.title}>Story Mode</Text>
-        <Text style={styles.subtitle}>Choose your adventure</Text>
+        <Text style={styles.title}>{t('story.menu.title')}</Text>
+        <Text style={styles.subtitle}>{t('story.menu.subtitle')}</Text>
       </View>
 
       <View style={styles.chaptersContainer}>
@@ -122,9 +126,7 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>
-          Journey through the elemental worlds and uncover the mysteries of the Nexus
-        </Text>
+        <Text style={styles.footerText}>{t('story.menu.footer')}</Text>
       </View>
     </ScrollView>
   );

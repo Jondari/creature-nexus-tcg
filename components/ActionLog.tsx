@@ -11,22 +11,31 @@ interface ActionLogProps {
 export function ActionLog({ logs, sidebarMode = false }: ActionLogProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
+  const resolveDescription = (raw?: string): string | undefined => {
+    if (!raw) return undefined;
+    const trimmed = raw.trim();
+    if (!trimmed) return undefined;
+    const translated = t(trimmed);
+    return translated !== trimmed ? translated : trimmed;
+  };
+
   const formatActionDescription = (entry: ActionLogEntry): string => {
     const { action } = entry;
+    const localDescription = resolveDescription(entry.description);
     
     switch (action.type) {
       case 'PLAY_CARD':
-        return entry.description || `${t('actions.play')} card`;
+        return localDescription || t('battle.log.playCard');
       case 'CAST_SPELL':
-        return entry.description || 'Cast spell';
+        return localDescription || t('battle.log.castSpell');
       case 'ATTACK':
-        return entry.description || `${t('actions.attack')} ${action.targetCardId ? 'creature' : 'directly'}`;
+        return localDescription || t(action.targetCardId ? 'battle.log.attackCreature' : 'battle.log.attackDirect');
       case 'RETIRE_CARD':
-        return entry.description || `${t('actions.retire')} card`;
+        return localDescription || t('battle.log.retireCard');
       case 'END_TURN':
-        return entry.description || t('actions.endTurn');
+        return localDescription || t('actions.endTurn');
       default:
-        return entry.description || 'Unknown action';
+        return localDescription || t('battle.log.unknown');
     }
   };
 
@@ -62,7 +71,7 @@ export function ActionLog({ logs, sidebarMode = false }: ActionLogProps) {
           style={styles.header}
           onPress={() => setIsCollapsed(!isCollapsed)}
         >
-          <Text style={styles.title}>Action Log</Text>
+      <Text style={styles.title}>{t('battle.actionLog')}</Text>
           <Text style={styles.toggleIcon}>{isCollapsed ? '▶' : '▼'}</Text>
         </TouchableOpacity>
       )}
@@ -74,7 +83,7 @@ export function ActionLog({ logs, sidebarMode = false }: ActionLogProps) {
         >
           {logs.length === 0 ? (
             <Text style={[styles.emptyText, sidebarMode && styles.sidebarEmptyText]}>
-              No actions yet...
+              {t('battle.log.noActions')}
             </Text>
           ) : (
             logs.map((entry) => (
@@ -95,7 +104,7 @@ export function ActionLog({ logs, sidebarMode = false }: ActionLogProps) {
                   {formatActionDescription(entry)}
                 </Text>
                 <Text style={[styles.turnInfo, sidebarMode && styles.sidebarTurnInfo]}>
-                  Turn {entry.turn}
+                  {t('battle.log.turn', { turn: String(entry.turn) })}
                 </Text>
               </View>
             ))

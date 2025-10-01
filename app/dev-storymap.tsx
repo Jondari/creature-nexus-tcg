@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import Colors from '@/constants/Colors';
 import StoryMap from '@/components/StoryMap';
 import { StoryChapter, StoryBattle } from '@/data/storyMode';
+import { t } from '@/utils/i18n';
 
 interface MapNode {
   id: string;
@@ -18,10 +19,10 @@ interface MapNode {
 
 export default function DevStoryMapScreen() {
   const router = useRouter();
-  const [nodes, setNodes] = useState<MapNode[]>([
+  const [nodes, setNodes] = useState<MapNode[]>(() => [
     {
       id: 'battle1',
-      name: 'First Battle',
+      name: t('devStoryMap.sample.firstBattle'),
       x: 50,
       y: 90,
       isBoss: false,
@@ -29,7 +30,7 @@ export default function DevStoryMapScreen() {
     },
     {
       id: 'battle2',
-      name: 'Second Battle',
+      name: t('devStoryMap.sample.secondBattle'),
       x: 30,
       y: 60,
       isBoss: false,
@@ -37,7 +38,7 @@ export default function DevStoryMapScreen() {
     },
     {
       id: 'battle3',
-      name: 'Boss Battle',
+      name: t('devStoryMap.sample.bossBattle'),
       x: 70,
       y: 30,
       isBoss: true,
@@ -51,7 +52,7 @@ export default function DevStoryMapScreen() {
     const newId = `battle${nodes.length + 1}`;
     const newNode: MapNode = {
       id: newId,
-      name: `Battle ${nodes.length + 1}`,
+      name: t('devStoryMap.autoBattleName', { index: String(nodes.length + 1) }),
       x: 50,
       y: 50,
       isBoss: false,
@@ -77,23 +78,25 @@ export default function DevStoryMapScreen() {
   };
 
   const generateNodes = () => {
-    const count = parseInt(nodeCount) || 3;
+    const count = Math.max(1, parseInt(nodeCount) || 3);
     const newNodes: MapNode[] = [];
-    
+
     for (let i = 1; i <= count; i++) {
       const isLast = i === count;
       const nextId = isLast ? [] : [`battle${i + 1}`];
-      
+
       newNodes.push({
         id: `battle${i}`,
-        name: isLast ? `Boss Battle` : `Battle ${i}`,
-        x: 20 + (i - 1) * (60 / (count - 1)),
-        y: 90 - (i - 1) * (60 / (count - 1)),
+        name: isLast
+          ? t('devStoryMap.autoBossName')
+          : t('devStoryMap.autoBattleName', { index: String(i) }),
+        x: count > 1 ? 20 + (i - 1) * (60 / (count - 1)) : 50,
+        y: count > 1 ? 90 - (i - 1) * (60 / (count - 1)) : 50,
         isBoss: isLast,
         connections: nextId
       });
     }
-    
+
     setNodes(newNodes);
   };
 
@@ -101,7 +104,7 @@ export default function DevStoryMapScreen() {
     const battles: StoryBattle[] = nodes.map((node, index) => ({
       id: node.id,
       name: node.name,
-      description: `Test battle: ${node.name}`,
+      description: t('devStoryMap.sample.battleDescription', { name: node.name }),
       x: node.x,
       y: node.y,
       connections: node.connections,
@@ -112,8 +115,8 @@ export default function DevStoryMapScreen() {
 
     return {
       id: 999,
-      name: 'Test Chapter',
-      description: 'A test chapter for the StoryMap visualizer',
+      name: t('devStoryMap.sample.chapterName'),
+      description: t('devStoryMap.sample.chapterDescription'),
       element: 'all',
       colorTheme: {
         primary: '#8B5CF6',
@@ -146,33 +149,33 @@ export default function DevStoryMapScreen() {
             <ArrowLeft size={24} color={Colors.text.primary} />
           </TouchableOpacity>
           <View style={styles.headerContent}>
-            <Text style={styles.title}>StoryMap Visualizer</Text>
-            <Text style={styles.subtitle}>Test and design story battle maps</Text>
+            <Text style={styles.title}>{t('profile.storyMapVisualizer')}</Text>
+            <Text style={styles.subtitle}>{t('devStoryMap.subtitle')}</Text>
           </View>
         </View>
 
         {!showPreview ? (
           <>
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Generate Nodes</Text>
+              <Text style={styles.cardTitle}>{t('devStoryMap.generateNodes')}</Text>
               <View style={styles.row}>
                 <TextInput
                   style={[styles.input, { flex: 1 }]}
-                  placeholder="Number of battles"
+                  placeholder={t('devStoryMap.numberOfBattles')}
                   placeholderTextColor={Colors.text.secondary}
                   value={nodeCount}
                   onChangeText={setNodeCount}
                   keyboardType="numeric"
                 />
                 <TouchableOpacity style={styles.generateButton} onPress={generateNodes}>
-                  <Text style={styles.generateButtonText}>Generate</Text>
+                  <Text style={styles.generateButtonText}>{t('devStoryMap.generate')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Battle Nodes ({nodes.length})</Text>
+                <Text style={styles.cardTitle}>{t('devStoryMap.battleNodes', { count: String(nodes.length) })}</Text>
                 <TouchableOpacity style={styles.addButton} onPress={addNode}>
                   <Plus size={20} color={Colors.text.primary} />
                 </TouchableOpacity>
@@ -181,7 +184,7 @@ export default function DevStoryMapScreen() {
               {nodes.map((node, index) => (
                 <View key={node.id} style={styles.nodeCard}>
                   <View style={styles.nodeHeader}>
-                    <Text style={styles.nodeTitle}>Node {index + 1}</Text>
+                    <Text style={styles.nodeTitle}>{t('devStoryMap.nodeLabel', { index: String(index + 1) })}</Text>
                     <TouchableOpacity onPress={() => removeNode(node.id)}>
                       <Trash2 size={16} color={Colors.error || '#ff4444'} />
                     </TouchableOpacity>
@@ -189,7 +192,7 @@ export default function DevStoryMapScreen() {
 
                   <TextInput
                     style={styles.input}
-                    placeholder="Battle ID"
+                    placeholder={t('devStoryMap.battleIdPlaceholder')}
                     placeholderTextColor={Colors.text.secondary}
                     value={node.id}
                     onChangeText={(value) => updateNode(node.id, 'id', value)}
@@ -197,7 +200,7 @@ export default function DevStoryMapScreen() {
 
                   <TextInput
                     style={styles.input}
-                    placeholder="Battle Name"
+                    placeholder={t('devStoryMap.battleNamePlaceholder')}
                     placeholderTextColor={Colors.text.secondary}
                     value={node.name}
                     onChangeText={(value) => updateNode(node.id, 'name', value)}
@@ -206,7 +209,7 @@ export default function DevStoryMapScreen() {
                   <View style={styles.row}>
                     <TextInput
                       style={[styles.input, { flex: 1, marginRight: 8 }]}
-                      placeholder="X Position (0-100)"
+                      placeholder={t('devStoryMap.xPositionPlaceholder')}
                       placeholderTextColor={Colors.text.secondary}
                       value={node.x.toString()}
                       onChangeText={(value) => updateNode(node.id, 'x', parseFloat(value) || 0)}
@@ -214,7 +217,7 @@ export default function DevStoryMapScreen() {
                     />
                     <TextInput
                       style={[styles.input, { flex: 1 }]}
-                      placeholder="Y Position (0-100)"
+                      placeholder={t('devStoryMap.yPositionPlaceholder')}
                       placeholderTextColor={Colors.text.secondary}
                       value={node.y.toString()}
                       onChangeText={(value) => updateNode(node.id, 'y', parseFloat(value) || 0)}
@@ -234,17 +237,17 @@ export default function DevStoryMapScreen() {
                         styles.bossButtonText,
                         node.isBoss && styles.bossButtonTextActive
                       ]}>
-                        {node.isBoss ? '👑 Boss' : 'Normal'}
+                        {node.isBoss ? t('devStoryMap.bossButtonBoss') : t('devStoryMap.bossButtonNormal')}
                       </Text>
                     </TouchableOpacity>
                   </View>
 
-                  <Text style={styles.connectionLabel}>Connections:</Text>
+                  <Text style={styles.connectionLabel}>{t('devStoryMap.connectionsLabel')}</Text>
                   {node.connections.map((connection, connIndex) => (
                     <View key={connIndex} style={styles.connectionRow}>
                       <TextInput
                         style={[styles.input, { flex: 1, marginBottom: 4, marginRight: 8 }]}
-                        placeholder="Battle ID"
+                        placeholder={t('devStoryMap.battleIdPlaceholder')}
                         placeholderTextColor={Colors.text.secondary}
                         value={connection}
                         onChangeText={(value) => {
@@ -274,7 +277,7 @@ export default function DevStoryMapScreen() {
                     }}
                   >
                     <Plus size={16} color={Colors.text.primary} />
-                    <Text style={styles.addConnectionText}>Add Connection</Text>
+                    <Text style={styles.addConnectionText}>{t('devStoryMap.addConnection')}</Text>
                   </TouchableOpacity>
                 </View>
               ))}
@@ -285,18 +288,18 @@ export default function DevStoryMapScreen() {
               onPress={() => setShowPreview(true)}
             >
               <Eye size={20} color={Colors.text.primary} />
-              <Text style={styles.previewButtonText}>Preview StoryMap</Text>
+              <Text style={styles.previewButtonText}>{t('devStoryMap.preview')}</Text>
             </TouchableOpacity>
           </>
         ) : (
           <View style={styles.previewContainer}>
             <View style={styles.previewHeader}>
-              <Text style={styles.previewTitle}>StoryMap Preview</Text>
+              <Text style={styles.previewTitle}>{t('devStoryMap.previewTitle')}</Text>
               <TouchableOpacity 
                 style={styles.backButton}
                 onPress={() => setShowPreview(false)}
               >
-                <Text style={styles.backButtonText}>Back to Editor</Text>
+                <Text style={styles.backButtonText}>{t('devStoryMap.backToEditor')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -304,7 +307,10 @@ export default function DevStoryMapScreen() {
               <StoryMap 
                 chapter={createPreviewChapter()}
                 onBattleSelect={(battle) => {
-                  Alert.alert('Battle Selected', `You selected: ${battle.name}`);
+                  Alert.alert(
+                    t('devStoryMap.battleSelectedTitle'),
+                    t('devStoryMap.battleSelectedMessage', { name: t(battle.name) })
+                  );
                 }}
               />
             </View>

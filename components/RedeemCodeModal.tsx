@@ -14,6 +14,7 @@ import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import { RewardAnimation } from '@/components/Animation/RewardAnimation';
 import { BoosterPack } from '@/models/BoosterPack';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 
 interface RedeemCodeModalProps {
   visible: boolean;
@@ -58,7 +59,10 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
         }
 
         if (queue.length === 0) {
-          showSuccessAlert('Code Redeemed!', result.message || 'Rewards added to your account');
+          showSuccessAlert(
+            t('redeem.codeRedeemedTitle'),
+            result.message || t('redeem.rewardsAdded')
+          );
           setCode('');
           onClose();
           onSuccess?.();
@@ -67,10 +71,16 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
           setCurrentAnim(queue[0]);
         }
       } else {
-        showErrorAlert('Redemption Failed', result.error || 'Invalid code');
+        showErrorAlert(
+          t('redeem.redemptionFailedTitle'),
+          result.error || t('redeem.invalidCode')
+        );
       }
     } catch (error) {
-      showErrorAlert('Error', 'Failed to redeem code. Please try again.');
+      showErrorAlert(
+        t('redeem.redemptionFailedTitle'),
+        t('redeem.failedGeneric')
+      );
     } finally {
       setIsRedeeming(false);
     }
@@ -102,16 +112,14 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modal}>
-          <Text style={styles.title}>Redeem Code</Text>
-          <Text style={styles.subtitle}>
-            Enter a code to claim rewards
-          </Text>
+          <Text style={styles.title}>{t('profile.redeemTitle')}</Text>
+          <Text style={styles.subtitle}>{t('profile.redeemDesc')}</Text>
           
           <TextInput
             style={styles.input}
             value={code}
             onChangeText={setCode}
-            placeholder="Enter code (e.g., WELCOME2024)"
+            placeholder={t('profile.redeemEnterCode')}
             placeholderTextColor={Colors.text?.secondary || '#666'}
             autoCapitalize="characters"
             autoCorrect={false}
@@ -125,7 +133,7 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
               onPress={handleClose}
               disabled={isRedeeming}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -139,7 +147,7 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
               {isRedeeming ? (
                 <ActivityIndicator color="#ffffff" size="small" />
               ) : (
-                <Text style={styles.redeemButtonText}>Redeem</Text>
+                <Text style={styles.redeemButtonText}>{t('profile.redeemButton')}</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -150,10 +158,10 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
             type={currentAnim.type}
             message={
               currentAnim.type === 'coins'
-                ? `You received ${currentAnim.payload.amount} Nexus Coins!`
+                ? t('redeem.reward.coins', { amount: String(currentAnim.payload.amount) })
                 : currentAnim.type === 'pack'
-                ? `You received a ${currentAnim.payload.pack.name}!`
-                : `You received ${currentAnim.payload.card.name}!`
+                ? t('redeem.reward.pack', { name: String(currentAnim.payload.pack.name) })
+                : t('redeem.reward.card', { name: String(currentAnim.payload.card.name) })
             }
             coins={currentAnim.type === 'coins' ? currentAnim.payload.amount : undefined}
             pack={currentAnim.type === 'pack' ? currentAnim.payload.pack : undefined}

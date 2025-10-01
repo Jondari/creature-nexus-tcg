@@ -5,6 +5,7 @@ import { CardRarity, RARITY_COLORS } from '../models/Card';
 import { CardGrouped } from '../utils/cardUtils';
 import { CardSize } from '../context/SettingsContext';
 import Colors from '../constants/Colors';
+import { t } from '@/utils/i18n';
 
 interface CardGridProps {
   // Pre-grouped items: one entry per model with a count
@@ -59,7 +60,7 @@ export default function CardGrid({ items, filter, onFilterChange, cardSize = 'sm
                 filter === option && styles.filterButtonTextActive
               ]}
             >
-              {option === 'all' ? 'All' : option.charAt(0).toUpperCase() + option.slice(1)}
+              {option === 'all' ? t('collection.filters.all') : t(`rarities.${option}`)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -76,8 +77,8 @@ export default function CardGrid({ items, filter, onFilterChange, cardSize = 'sm
       <View style={styles.contentSection}>
         {filteredItems.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No cards found</Text>
-            <Text style={styles.emptySubtext}>Open some packs to add cards to your collection</Text>
+            <Text style={styles.emptyText}>{t('collection.emptyTitle')}</Text>
+            <Text style={styles.emptySubtext}>{t('collection.emptySubtitle')}</Text>
           </View>
         ) : (
           <FlatList

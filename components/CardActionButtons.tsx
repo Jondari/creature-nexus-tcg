@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Play, X, Zap } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
+import { t } from '@/utils/i18n';
 import { Card } from '../types/game';
 import { isSpellCard } from '../models/cards-extended';
 
@@ -42,7 +43,7 @@ export function CardActionButtons({
   
   // Determine if card is a spell to show appropriate button text and icon
   const isSpell = card && isSpellCard(card);
-  const playButtonText = isSpell ? 'Cast' : 'Play';
+  const playButtonText = isSpell ? t('actions.cast') : t('actions.play');
   const PlayIcon = isSpell ? Zap : Play;
 
   return (
@@ -74,7 +75,7 @@ export function CardActionButtons({
             style={styles.buttonGradient}
           >
             <X size={iconSize} color={Colors.text.primary} />
-            <Text style={textStyle}>Retire</Text>
+            <Text style={textStyle}>{t('actions.retire')}</Text>
           </LinearGradient>
         </TouchableOpacity>
       )}
