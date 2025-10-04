@@ -114,6 +114,7 @@
     "rulesTitle": "Game Rules",
     "rulesA11y": "Show game rules",
     "nameRequired": "Deck name is required.",
+    "save": "Save",
     "confirmDelete": {
       "title": "Delete Deck",
       "message": "Are you sure you want to delete \"{{name}}\"?",

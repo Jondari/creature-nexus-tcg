@@ -162,7 +162,7 @@ export function DeckBuilder({
             <Text style={styles.deckButtonText}>{t('decks.currentDeckButton', { count: String(currentDeck.length) })}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-            <Text style={styles.saveText}>{t('common.ok')}</Text>
+            <Text style={styles.saveText}>{t('decks.save')}</Text>
           </TouchableOpacity>
         </View>
       </View>

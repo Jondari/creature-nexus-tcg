@@ -156,6 +156,7 @@
     "rulesTitle": "Règles du jeu",
     "rulesA11y": "Afficher les règles du jeu",
     "nameRequired": "Le nom du deck est requis.",
+    "save": "Sauvegarder",
     "confirmDelete": {
       "title": "Supprimer le deck",
       "message": "Voulez-vous vraiment supprimer \"{{name}}\" ?",
