@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.13.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.13.0...v0.13.1) (2025-10-04)
+
+
+### Bug Fixes
+
+* replace wrong label by the more accurate one ([62af7f4](https://github.com/Jondari/creature-nexus-tcg/commit/62af7f41584284a87d8050c91d313f7bd3707c10))
+
 ## [0.13.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.12.3...v0.13.0) (2025-10-01)
 
 
