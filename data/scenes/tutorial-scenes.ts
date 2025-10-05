@@ -17,9 +17,8 @@ export const SCENE_FIRST_LAUNCH: SceneSpec = {
   triggers: [
     { type: 'onFirstLaunch' }
   ],
-  backgroundImage: require('@/assets/images/scene/nexus_bg.png'),
+  backgroundImage: require('@/assets/images/scene/nexus_welcome_bg.png'),
   steps: [
-    { type: 'setBackground', uri: 'nexus_welcome_bg.png', transition: 'fade' },
     { type: 'showPortrait', side: 'right', uri: 'guide_portrait.png', animation: 'slideIn' },
     { type: 'say', speaker: 'Nexus Guide', text: 'Welcome to the Creature Nexus, summoner! I am your guide in this mystical realm.' },
     { type: 'say', speaker: 'Nexus Guide', text: 'Here, creatures from different elemental worlds converge. Your journey begins now!' },

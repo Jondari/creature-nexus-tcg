@@ -329,24 +329,6 @@ export default function OpenPackScreen() {
           <HelpCircle size={20} color={Colors.text.primary} />
         </TouchableOpacity>
       </View>
-      {/* A supprimer */}
-      <View style={{ position: 'absolute', top: 60, right: 12, zIndex: 1000, backgroundColor: "red" }}>
-        <TouchableOpacity
-          onPress={() => {
-            try {
-              sceneManager.startScene('tutorial_first_launch');
-            } catch (error) {
-              if (__DEV__) {
-                console.warn('[Tutorial] Failed to start scene tutorial_first_launch', error);
-              }
-            }
-          }}
-          style={styles.tutorialButton}
-        >
-          <HelpCircle size={20} color={Colors.text.primary} />
-        </TouchableOpacity>
-      </View>
-      {/* */}
       <LinearGradient
         colors={[Colors.primary[900], Colors.background.primary]}
         style={styles.background}

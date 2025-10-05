@@ -150,23 +150,25 @@ export default function ChapterMapScreen() {
       {/* Chapter Map */}
       <View style={styles.mapContainer}>
         {/* Tutorial shortcut for Chapter Map */}
-      <View style={{ position: 'absolute', top: -60, right: 20, zIndex: 1000 }}>
-        <TouchableOpacity
-          onPress={() => {
-            try {
-              sceneManager.startScene('tutorial_chapter_map');
-            } catch (error) {
-              if (__DEV__) {
-                console.warn('[Tutorial] Failed to start scene tutorial_chapter_map', error);
-              }
-            }
-          }}
-          style={styles.tutorialButton}
-        >
-          <HelpCircle size={20} color={Colors.text.primary} />
-        </TouchableOpacity>
-      </View>
-        <StoryMap 
+        {chapter?.id === 1 && (
+          <View style={{ position: 'absolute', top: -60, right: 20, zIndex: 1000 }}>
+            <TouchableOpacity
+              onPress={() => {
+                try {
+                  sceneManager.startScene('tutorial_chapter_map');
+                } catch (error) {
+                  if (__DEV__) {
+                    console.warn('[Tutorial] Failed to start scene tutorial_chapter_map', error);
+                  }
+                }
+              }}
+              style={styles.tutorialButton}
+            >
+              <HelpCircle size={20} color={Colors.text.primary} />
+            </TouchableOpacity>
+          </View>
+        )}
+        <StoryMap
           chapter={chapter}
           onBattleSelect={handleBattleSelect}
         />
