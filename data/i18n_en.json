@@ -872,5 +872,70 @@
       "retry": "Retry",
       "returnToMap": "Return to Map"
     }
+  },
+  "tutorial": {
+    "speakers": {
+      "nexusGuide": "Nexus Guide",
+      "collectionGuide": "Collection Guide",
+      "deckMaster": "Deck Master",
+      "nexusMerchant": "Nexus Merchant"
+    },
+    "firstLaunch": {
+      "welcome": "Welcome to the Creature Nexus, summoner! I am your guide in this mystical realm.",
+      "realmOverview": "Here, creatures from different elemental worlds converge. Your journey begins now!",
+      "choiceReady": "I'm ready!",
+      "choiceExplain": "Tell me more about this place",
+      "loreIntersection": "The Nexus is where four elemental realms intersect: Fire, Water, Earth, and Air.",
+      "loreBalance": "Ancient beings have disturbed the balance. Only by mastering creatures from all elements can you restore harmony.",
+      "storyIntro": "Let me show you around. We'll start with the Story Mode to learn the basics."
+    },
+    "storyIntro": {
+      "opening": "This is the Story Mode, where your adventure unfolds!",
+      "chapterNodes": "These are chapter nodes. Tap one to see the battles within.",
+      "realmOverview": "Each chapter takes you to a different elemental realm with unique challenges.",
+      "unlock": "Complete the battles in a chapter to unlock the next realm.",
+      "cta": "Ready to begin your first battle? Tap on Chapter 1!"
+    },
+    "chapterMapIntro": {
+      "welcome": "Welcome to Chapter 1: The Water Realm!",
+      "battleNodes": "These are battle nodes. Each represents a unique encounter.",
+      "statusLegend": "Completed battles glow gold, available ones adopt the chapter's colour, and inaccessible nodes appear dimmed.",
+      "progression": "You must complete battles in order to progress through the chapter.",
+      "cta": "Tap on the first battle to begin!"
+    },
+    "homeIntro": {
+      "opening": "This is your home base. From here you can access every feature of the Nexus.",
+      "dailyPack": "Use this button to open your daily pack when it's ready.",
+      "packInventory": "Any unopened packs will appear here.",
+      "openPacks": "Tap on packs to open them and discover new creatures!"
+    },
+    "collectionIntro": {
+      "welcome": "Welcome to your Collection! This is where all your creatures live.",
+      "cardGrid": "Here you can see all the creatures you've collected.",
+      "rarityInfo": "Cards are organized by rarity: Common, Rare, Epic, Legendary, and the ultra-rare Mythic!",
+      "strategyHint": "Each card shows its element, HP, and attacks. Study them to plan your strategies!"
+    },
+    "deckBuilderIntro": {
+      "opening": "Time to build your own deck! This is where strategy begins.",
+      "highlightEntry": "Tap here to open the Deck Editor.",
+      "promptOpen": "Go ahead and tap \"New Deck\" to open the editor - I'll wait!",
+      "tourIntro": "Great! Let me show you the key areas of the editor.",
+      "infoPanel": "Track your deck size and legality here.",
+      "filters": "Use these filters to focus on specific card rarities.",
+      "grid": "Tap cards in your collection to add them to the deck.",
+      "currentDeck": "Open your current deck to rename it or remove cards.",
+      "save": "When you're happy with the list, save it here.",
+      "limitReminder": "Remember: a deck must have between 20 and 60 cards with up to 3 copies of each creature.",
+      "encouragement": "Experiment with different combinations - there's no single perfect deck!"
+    },
+    "storeIntro": {
+      "welcome": "Welcome to my store, brave summoner!",
+      "coinBalance": "Here you can see your Nexus Coins.",
+      "packShop": "These are the packs available for purchase.",
+      "standardPacks": "Standard Packs contain creatures from all elements.",
+      "elementalPacks": "Elemental Packs guarantee creatures of a specific element.",
+      "premiumPacks": "Premium Packs guarantee rare creatures - perfect for serious collectors!",
+      "freePack": "Don't forget - you get a free pack every 12 hours!"
+    }
   }
 }

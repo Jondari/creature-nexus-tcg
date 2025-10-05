@@ -27,6 +27,7 @@ import type {
 } from '@/types/scenes';
 import { useAnchors } from '@/context/AnchorsContext';
 import sceneImageUtils from '@/utils/sceneImageManager';
+import { t } from '@/utils/i18n';
 
 // Image source helpers (module-scope, no React hooks)
 function toImageSource(u?: string | number | { uri: string; width?: number; height?: number }) {
@@ -50,6 +51,15 @@ async function resolveUri(u: string | number | { uri: string; width?: number; he
     }
   }
   return u as any;
+}
+
+function resolveSceneText(text?: string): string | undefined {
+  if (!text) return text;
+  if (text.startsWith('i18n:')) {
+    const key = text.slice(5).trim();
+    return key ? t(key) : '';
+  }
+  return text;
 }
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -230,9 +240,11 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
         break;
 
       case 'say': {
+        const resolvedText = resolveSceneText(cmd.text);
+        const resolvedSpeaker = resolveSceneText(cmd.speaker);
         setDialog({
-          speaker: cmd.speaker,
-          text: cmd.text,
+          speaker: resolvedSpeaker,
+          text: resolvedText,
           portrait: cmd.portrait,
           choices: null,
         });
@@ -242,9 +254,13 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
       }
 
       case 'choice': {
+        const resolvedChoices = cmd.choices.map(choice => ({
+          ...choice,
+          text: resolveSceneText(choice.text) ?? '',
+        }));
         setDialog(prev => ({
           ...prev,
-          choices: cmd.choices,
+          choices: resolvedChoices,
         }));
         setIsWaitingForInput(true);
         // Keep the panel visible even if no preceding "say" command ran
@@ -327,7 +343,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
           }
           const style = { ...DEFAULT_HIGHLIGHT_STYLE, ...cmd.style };
           const textPosition = cmd.textPosition || 'bottom';
-          setHighlight({ rect, text: cmd.text, style, maskInput: cmd.maskInput, textPosition });
+          setHighlight({ rect, text: resolveSceneText(cmd.text), style, maskInput: cmd.maskInput, textPosition });
           if (cmd.maskInput) {
             setMaskInput(true);
           } else {
@@ -358,7 +374,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
         
         setHighlight({
           rect,
-          text: cmd.text,
+          text: resolveSceneText(cmd.text),
           style: { ...DEFAULT_HIGHLIGHT_STYLE, backgroundColor: 'rgba(0,0,0,0.8)' },
           maskInput: false,
         });
