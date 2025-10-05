@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Image } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,7 +10,7 @@ import { FREE_DAILY_PACK, getPackById } from '@/data/boosterPacks';
 import { getInventoryPacks, removePackFromInventory, InventoryPack } from '@/utils/packInventory';
 import { Card } from '@/models/Card';
 import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
-import { PackageOpen, Gift } from 'lucide-react-native';
+import { PackageOpen, Gift, HelpCircle } from 'lucide-react-native';
 import { t } from '@/utils/i18n';
 import Colors from '@/constants/Colors';
 import CountdownTimer from '@/components/CountdownTimer';
@@ -19,6 +19,10 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 import { useFocusEffect } from '@react-navigation/native';
 import { NotificationService } from '@/services/notificationService';
 import { Sidebar } from '@/components/Sidebar';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
+import { useSceneTrigger, useSceneManager } from '@/context/SceneManagerContext';
+import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 // Helper: format a user-friendly relative time (e.g., "3 hours ago")
 const formatRelativeDate = (isoString: string): string => {
@@ -57,6 +61,8 @@ const sortInventoryPacks = (packs: InventoryPack[]): InventoryPack[] => {
 
 export default function OpenPackScreen() {
   const { user } = useAuth();
+  const sceneTrigger = useSceneTrigger();
+  const sceneManager = useSceneManager();
   const [cards, setCards] = useState<Array<Card | ExtendedCard>>([]);
   const [loading, setLoading] = useState(true);
   const [opening, setOpening] = useState(false);
@@ -66,7 +72,13 @@ export default function OpenPackScreen() {
   const [inventoryPacks, setInventoryPacks] = useState<InventoryPack[]>([]);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  
+  const giftRef = useRef<TouchableOpacity | null>(null);
+  const openPackRef = useRef<TouchableOpacity | null>(null);
+
+  // Register an anchor for the packs inventory (gift button)
+  useAnchorRegister(COMMON_ANCHORS.PACK_INVENTORY, giftRef);
+  useAnchorRegister(COMMON_ANCHORS.OPEN_PACK_BUTTON, openPackRef);
+
   useEffect(() => {
     if (user) {
       fetchUserData();
@@ -79,15 +91,37 @@ export default function OpenPackScreen() {
     NotificationService.setupNotificationHandlers();
   }, []);
 
+  useAnchorPolling(
+    [COMMON_ANCHORS.OPEN_PACK_BUTTON, COMMON_ANCHORS.PACK_INVENTORY],
+    () => {
+      sceneTrigger({ type: 'onEnterScreen', screen: 'home' });
+    }
+  );
+
   // Refresh data when the tab comes into focus (e.g., after purchasing from store)
   useFocusEffect(
     React.useCallback(() => {
+      // Trigger onFirstLaunch cleanly on the home screen,
+      // after a short delay to let the splash and layout finish.
+      const t = setTimeout(() => {
+        try {
+          const running = sceneManager.getCurrentScene?.();
+          const alreadyDone = sceneManager.isSceneCompleted?.('tutorial_first_launch');
+          if (!running && !alreadyDone) {
+            sceneTrigger({ type: 'onFirstLaunch' });
+          }
+        } catch (e) {
+          if (__DEV__) console.warn('[Home] onFirstLaunch trigger skipped:', e);
+        }
+      }, 450);
+
       const now = Date.now();
       // Only refetch if more than 5 seconds have passed since last fetch
       if (user && (now - lastFetchTime > 5000)) {
         fetchUserData();
       }
-    }, [user, lastFetchTime])
+      return () => clearTimeout(t);
+    }, [user, lastFetchTime, sceneManager, sceneTrigger])
   );
   
   const fetchUserData = async () => {
@@ -278,6 +312,41 @@ export default function OpenPackScreen() {
   
   return (
     <View style={styles.container}>
+      {/* Tutorial shortcut for the home screen. */}
+      <View style={{ position: 'absolute', top: 12, right: 22, zIndex: 1000 }}>
+        <TouchableOpacity
+          onPress={() => {
+            try {
+              sceneManager.startScene('tutorial_home_intro');
+            } catch (error) {
+              if (__DEV__) {
+                console.warn('[Tutorial] Failed to start scene tutorial_home_intro', error);
+              }
+            }
+          }}
+          style={styles.tutorialButton}
+        >
+          <HelpCircle size={20} color={Colors.text.primary} />
+        </TouchableOpacity>
+      </View>
+      {/* A supprimer */}
+      <View style={{ position: 'absolute', top: 60, right: 12, zIndex: 1000, backgroundColor: "red" }}>
+        <TouchableOpacity
+          onPress={() => {
+            try {
+              sceneManager.startScene('tutorial_first_launch');
+            } catch (error) {
+              if (__DEV__) {
+                console.warn('[Tutorial] Failed to start scene tutorial_first_launch', error);
+              }
+            }
+          }}
+          style={styles.tutorialButton}
+        >
+          <HelpCircle size={20} color={Colors.text.primary} />
+        </TouchableOpacity>
+      </View>
+      {/* */}
       <LinearGradient
         colors={[Colors.primary[900], Colors.background.primary]}
         style={styles.background}
@@ -297,6 +366,7 @@ export default function OpenPackScreen() {
               style={styles.giftButton}
               onPress={() => setSidebarVisible(true)}
               activeOpacity={0.8}
+              ref={giftRef as any}
             >
               <Gift size={22} color={Colors.text.primary} />
               {inventoryPacks.length > 0 && (
@@ -322,6 +392,7 @@ export default function OpenPackScreen() {
               onPress={handleOpenPack}
               disabled={opening || timeRemaining > 0}
               activeOpacity={0.8}
+              ref={openPackRef as any}
             >
               <LinearGradient
                 colors={[Colors.accent[700], Colors.accent[500]]}
@@ -430,6 +501,14 @@ export default function OpenPackScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  tutorialButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.background.card,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   background: {
     position: 'absolute',

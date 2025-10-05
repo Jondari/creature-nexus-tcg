@@ -2,16 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, HelpCircle } from 'lucide-react-native';
 import StoryMap from '@/components/StoryMap';
 import { useStoryMode } from '@/context/StoryModeContext';
 import { StoryChapter, StoryBattle } from '@/data/storyMode';
 import { showAlert, showErrorAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
+import { useSceneManager, useSceneTrigger } from '@/context/SceneManagerContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
+import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 export default function ChapterMapScreen() {
   const router = useRouter();
+  const sceneManager = useSceneManager();
+  const sceneTrigger = useSceneTrigger();
   const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
   const { chapters } = useStoryMode();
   const [chapter, setChapter] = useState<StoryChapter | null>(null);
@@ -94,6 +99,12 @@ export default function ChapterMapScreen() {
     router.push('/(tabs)/story-mode');
   };
 
+  useAnchorPolling([COMMON_ANCHORS.BATTLE_NODE], () => {
+    if (chapter) {
+      sceneTrigger({ type: 'onEnterScreen', screen: 'chapter-map' });
+    }
+  });
+
   if (!chapter) {
     return (
       <View style={styles.container}>
@@ -138,6 +149,23 @@ export default function ChapterMapScreen() {
 
       {/* Chapter Map */}
       <View style={styles.mapContainer}>
+        {/* Tutorial shortcut for Chapter Map */}
+      <View style={{ position: 'absolute', top: -60, right: 20, zIndex: 1000 }}>
+        <TouchableOpacity
+          onPress={() => {
+            try {
+              sceneManager.startScene('tutorial_chapter_map');
+            } catch (error) {
+              if (__DEV__) {
+                console.warn('[Tutorial] Failed to start scene tutorial_chapter_map', error);
+              }
+            }
+          }}
+          style={styles.tutorialButton}
+        >
+          <HelpCircle size={20} color={Colors.text.primary} />
+        </TouchableOpacity>
+      </View>
         <StoryMap 
           chapter={chapter}
           onBattleSelect={handleBattleSelect}
@@ -172,6 +200,14 @@ export default function ChapterMapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  tutorialButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.background.card,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   background: {
     position: 'absolute',

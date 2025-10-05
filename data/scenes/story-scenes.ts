@@ -9,6 +9,7 @@ import type { SceneSpec } from '@/types/scenes';
 
 // Main Story Arc - Chapter 1: The Water Realm
 export const SCENE_CHAPTER_1_INTRO: SceneSpec = {
+  /*
   id: 'story_chapter_1_intro',
   version: 1,
   title: 'The Nexus Awakens',
@@ -69,10 +70,13 @@ export const SCENE_CHAPTER_1_INTRO: SceneSpec = {
     { type: 'end' }
   ],
   priority: 50
+
+   */
 };
 
 // Pre-Battle Scene - First Water Realm Battle
 export const SCENE_FIRST_WATER_BATTLE: SceneSpec = {
+  /*
   id: 'story_water_battle_1_pre',
   version: 1,
   title: 'Corrupted Waters',
@@ -125,10 +129,12 @@ export const SCENE_FIRST_WATER_BATTLE: SceneSpec = {
     { type: 'triggerBattle', chapterId: 1, battleId: 'water_1' }
   ],
   priority: 45
+   */
 };
 
 // Post-Battle Scene - After first victory
 export const SCENE_FIRST_WATER_VICTORY: SceneSpec = {
+  /*
   id: 'story_water_battle_1_post',
   version: 1,
   title: 'Purification',
@@ -179,10 +185,12 @@ export const SCENE_FIRST_WATER_VICTORY: SceneSpec = {
     { type: 'end' }
   ],
   priority: 45
+   */
 };
 
 // Mid-Chapter Story Scene
 export const SCENE_WATER_TEMPLE_APPROACH: SceneSpec = {
+  /*
   id: 'story_water_temple_approach',
   version: 1,
   title: 'The Temple of Tides',
@@ -232,10 +240,12 @@ export const SCENE_WATER_TEMPLE_APPROACH: SceneSpec = {
     { type: 'end' }
   ],
   priority: 40
+   */
 };
 
 // Chapter Boss Introduction
 export const SCENE_SELEL_ENCOUNTER: SceneSpec = {
+  /*
   id: 'story_selel_encounter',
   version: 1,
   title: 'The Guardian of Tides',
@@ -289,10 +299,12 @@ export const SCENE_SELEL_ENCOUNTER: SceneSpec = {
     { type: 'triggerBattle', chapterId: 1, battleId: 'selel_boss' }
   ],
   priority: 35
+   */
 };
 
 // Chapter Completion
 export const SCENE_CHAPTER_1_COMPLETION: SceneSpec = {
+  /*
   id: 'story_chapter_1_completion',
   version: 1,
   title: 'Water Realm Restored',
@@ -366,6 +378,7 @@ export const SCENE_CHAPTER_1_COMPLETION: SceneSpec = {
     { type: 'end' }
   ],
   priority: 30
+   */
 };
 
 // Export all story scenes

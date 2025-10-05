@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatList } from 'react-native';
 import { Card, CardRarity } from '../models/Card';
 import { ExtendedCard } from '@/models/cards-extended';
@@ -9,6 +9,8 @@ import { groupByModel, CardGrouped } from '../utils/cardUtils';
 import { showErrorAlert } from '@/utils/alerts';
 import { t } from '@/utils/i18n';
 import Colors from '../constants/Colors';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
 
 interface DeckBuilderProps {
   availableCards: Array<Card | ExtendedCard>;
@@ -34,6 +36,11 @@ export function DeckBuilder({
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [rulesVisible, setRulesVisible] = useState(false);
+  const gridAnchorRef = useRef<View | null>(null);
+  const deckInfoRef = useRef<View | null>(null);
+  const filterSectionRef = useRef<View | null>(null);
+  const currentDeckButtonRef = useRef<TouchableOpacity | null>(null);
+  const saveButtonRef = useRef<TouchableOpacity | null>(null);
 
   // Group available cards and current deck by model (memoized)
   const groupedAvailable: CardGrouped[] = useMemo(() => groupByModel(availableCards), [availableCards]);
@@ -44,6 +51,12 @@ export function DeckBuilder({
     if (filter === 'all') return groupedAvailable;
     return groupedAvailable.filter((g) => g.rarity === filter);
   }, [groupedAvailable, filter]);
+
+  useAnchorRegister(COMMON_ANCHORS.DECK_EDITOR_GRID, gridAnchorRef, [filter, filteredGroups.length, currentDeck.length]);
+  useAnchorRegister(COMMON_ANCHORS.DECK_EDITOR_INFO, deckInfoRef, [currentDeck.length]);
+  useAnchorRegister(COMMON_ANCHORS.DECK_EDITOR_FILTERS, filterSectionRef, [filter]);
+  useAnchorRegister(COMMON_ANCHORS.DECK_EDITOR_CURRENT_DECK_BUTTON, currentDeckButtonRef, [sidebarVisible]);
+  useAnchorRegister(COMMON_ANCHORS.DECK_EDITOR_SAVE_BUTTON, saveButtonRef, [currentDeck.length]);
 
 
   // Render item for FlatList
@@ -158,17 +171,18 @@ export function DeckBuilder({
           <TouchableOpacity
             onPress={() => setSidebarVisible(true)}
             style={styles.deckButton}
+            ref={currentDeckButtonRef as any}
           >
             <Text style={styles.deckButtonText}>{t('decks.currentDeckButton', { count: String(currentDeck.length) })}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+          <TouchableOpacity onPress={handleSave} style={styles.saveButton} ref={saveButtonRef as any}>
             <Text style={styles.saveText}>{t('decks.save')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Deck Info */}
-      <View style={styles.deckInfo}>
+      <View style={styles.deckInfo} ref={deckInfoRef as any}>
         <Text style={styles.deckSize}>{t('decks.deckSize', { count: String(currentDeck.length), max: String(DECK_SIZE_MAX) })}</Text>
         <Text style={styles.deckStatus}>
           {currentDeck.length < DECK_SIZE_MIN 
@@ -198,7 +212,7 @@ export function DeckBuilder({
         </View>
 
         {/* Filter Section */}
-        <View style={styles.filterSection}>
+        <View style={styles.filterSection} ref={filterSectionRef as any}>
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false}
@@ -219,7 +233,7 @@ export function DeckBuilder({
         </View>
 
         {/* Cards Grid - Using collection-style layout */}
-        <View style={styles.cardsSection}>
+        <View style={styles.cardsSection} ref={gridAnchorRef as any}>
           <FlatList
             key={`deckbuilder-flatlist-${filter}`}
             data={filteredGroups}

@@ -5,10 +5,15 @@ import { ArrowLeft } from 'lucide-react-native';
 import { GameProvider, useGame } from '@/context/GameContext';
 import { GameBoard } from '@/components/GameBoard';
 import Colors from '@/constants/Colors';
+import { useSceneTrigger } from '@/context/SceneManagerContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
+import { useAnchorPolling } from '@/hooks/useAnchorPolling';
+import { ANCHOR_POLL_LONG_ATTEMPTS } from '@/constants/tutorial';
 
 function QuickBattleContent() {
   const router = useRouter();
   const { gameState } = useGame();
+  const sceneTrigger = useSceneTrigger();
 
   const handleBackPress = () => {
     router.push('/(tabs)/battle');
@@ -16,6 +21,14 @@ function QuickBattleContent() {
 
   // Only show back button when no game is active (deck selection screen)
   const showBackButton = !gameState || gameState.isGameOver;
+
+  useAnchorPolling(
+    [COMMON_ANCHORS.FIELD_AREA, COMMON_ANCHORS.END_TURN_BUTTON],
+    () => {
+      sceneTrigger({ type: 'onEnterScreen', screen: 'battle' });
+    },
+    { maxAttempts: ANCHOR_POLL_LONG_ATTEMPTS }
+  );
 
   return (
     <View style={styles.container}>

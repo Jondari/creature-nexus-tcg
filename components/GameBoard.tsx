@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Platform } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
@@ -18,6 +18,10 @@ import { t } from '../utils/i18n';
 import { CardLoader } from '../utils/game/cardLoader';
 import { isSpellCard } from '../models/cards-extended';
 import Colors from '../constants/Colors';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
+import { useSceneEvents } from '@/context/SceneManagerContext';
+import { useSceneManager } from '@/context/SceneManagerContext';
 
 export function GameBoard() {
   const { 
@@ -40,6 +44,7 @@ export function GameBoard() {
   } = useGame();
   const { activeDeck } = useDecks();
   const { cardSize, setCardSize, showBattleLog } = useSettings();
+  const sceneManager = useSceneManager();
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
@@ -55,6 +60,22 @@ export function GameBoard() {
   const translateX = React.useRef(new Animated.Value(isMobile ? screenWidth : 0)).current;
   // Blocks interactions while we delay lethal attacks for the hit animation
   const [resolvingAttack, setResolvingAttack] = useState(false);
+  const publishEvent = useSceneEvents();
+
+  // Anchor refs for tutorial highlights
+  const bottomFieldRef = useRef<View | null>(null);
+  const bottomHandRef = useRef<View | null>(null);
+  const bottomStatsRef = useRef<View | null>(null);
+  const topStatsRef = useRef<View | null>(null);
+  const endTurnBtnRef = useRef<TouchableOpacity | null>(null);
+
+  // Register anchors (measured by AnchorsContext)
+  useAnchorRegister(COMMON_ANCHORS.FIELD_AREA, bottomFieldRef);
+  useAnchorRegister(COMMON_ANCHORS.HAND_AREA, bottomHandRef);
+  useAnchorRegister(COMMON_ANCHORS.ENERGY_DISPLAY, bottomStatsRef);
+  useAnchorRegister(COMMON_ANCHORS.PLAYER_HP, bottomStatsRef);
+  useAnchorRegister(COMMON_ANCHORS.ENEMY_HP, topStatsRef);
+  useAnchorRegister(COMMON_ANCHORS.END_TURN_BUTTON, endTurnBtnRef as any);
 
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
@@ -270,11 +291,13 @@ export function GameBoard() {
         setTimeout(() => {
           // Resolve attack in engine (engine will handle auto-end turn logic)
           attack(attacker!.id!, attackMode.attackName, card.id!);
+          publishEvent({ type: 'attack_used' });
           setResolvingAttack(false);
         }, KILL_ANIM_MS);
       } else {
         // Non-lethal: resolve immediately (engine will handle auto-end turn logic)
         attack(attacker!.id!, attackMode.attackName, card.id!);
+        publishEvent({ type: 'attack_used' });
       }
     } else {
       setSelectedCard(card.id === selectedCard ? null : card.id!);
@@ -301,6 +324,7 @@ export function GameBoard() {
       }
       
       castSpell(cardId);
+      publishEvent({ type: 'card_played' });
     } else {
       // Handle monster card playing
       if (currentPlayer.field.length >= 4) {
@@ -309,6 +333,7 @@ export function GameBoard() {
       }
       
       playCard(cardId);
+      publishEvent({ type: 'card_played' });
     }
     
     setSelectedCard(null);
@@ -350,6 +375,7 @@ export function GameBoard() {
     endTurn();
     setSelectedCard(null);
     setAttackMode(null);
+    publishEvent({ type: 'turn_ended' });
     // AI turn will be automatically triggered by useEffect
   };
 
@@ -430,7 +456,7 @@ export function GameBoard() {
     <View style={styles.mainContainer}>
       <ScrollView style={styles.gameContainer}>
       {/* Top Player Info */}
-      <View style={styles.playerInfo}>
+      <View style={styles.playerInfo} ref={topStatsRef as any}>
         <Text style={styles.playerName}>{playerAtTop.name}</Text>
         <View style={styles.stats}>
           <Text style={styles.stat}>{t('player.energy')}: {playerAtTop.energy}</Text>
@@ -440,7 +466,7 @@ export function GameBoard() {
       </View>
 
       {/* Top Player Field */}
-      <View style={styles.field}>
+      <View style={styles.field} ref={bottomFieldRef as any}>
         <Text style={styles.fieldLabel}>{playerAtTop.name} {t('player.field')}</Text>
         <ScrollView horizontal style={styles.cardRow}>
           {playerAtTop.field.map((card) => {
@@ -553,7 +579,9 @@ export function GameBoard() {
                 selected={selectedCard === card.id}
                 onPress={() => {
                   // Toggle selection and drop any previous attack preview to avoid stale damage badges
-                  setSelectedCard(card.id === selectedCard ? null : card.id!);
+      const willSelect = card.id !== selectedCard;
+      setSelectedCard(willSelect ? card.id! : null);
+      if (willSelect) publishEvent({ type: 'creature_selected' });
                   setAttackMode(null);
                 }}
                 onAttack={(attackName) => handleAttack(card.id!, attackName)}
@@ -588,7 +616,7 @@ export function GameBoard() {
       </View>
 
       {/* Bottom Player Info */}
-      <View style={styles.playerInfo}>
+      <View style={styles.playerInfo} ref={bottomStatsRef as any}>
         <Text style={styles.playerName}>{playerAtBottom.name}</Text>
         <View style={styles.stats}>
           <Text style={styles.stat}>{t('player.energy')}: {playerAtBottom.energy}</Text>
@@ -598,7 +626,7 @@ export function GameBoard() {
       </View>
 
       {/* Bottom Player Hand */}
-      <View style={styles.hand}>
+      <View style={styles.hand} ref={bottomHandRef as any}>
         <Text style={styles.fieldLabel}>{t('player.hand')}</Text>
         <ScrollView horizontal style={styles.cardRow}>
           {playerAtBottom.hand.map((card) => (
@@ -629,7 +657,7 @@ export function GameBoard() {
 
       {/* End Turn Button */}
       {currentPlayer.id === playerAtBottom.id && isPlayerTurn && (
-        <TouchableOpacity style={styles.endTurnButton} onPress={handleEndTurn}>
+        <TouchableOpacity ref={endTurnBtnRef as any} style={styles.endTurnButton} onPress={handleEndTurn}>
           <Text style={styles.endTurnText}>{t('actions.endTurn')}</Text>
         </TouchableOpacity>
       )}

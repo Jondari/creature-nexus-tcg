@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useMemo, useRef } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Lock, CheckCircle } from 'lucide-react-native';
 import { StoryChapter } from '@/data/storyMode';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
 
 interface ChapterSelectionProps {
   chapters: StoryChapter[];
@@ -23,6 +25,15 @@ const getElementIcon = (element: string): string => {
 };
 
 export default function ChapterSelection({ chapters, onChapterSelect }: ChapterSelectionProps) {
+  const firstHighlightChapterId = useMemo(() => {
+    if (!chapters || chapters.length === 0) return undefined;
+    const unlocked = chapters.find(ch => ch.isUnlocked);
+    return (unlocked ?? chapters[0])?.id;
+  }, [chapters]);
+
+  const chapterAnchorRef = useRef<TouchableOpacity | null>(null);
+  useAnchorRegister(COMMON_ANCHORS.CHAPTER_NODE, chapterAnchorRef, [firstHighlightChapterId]);
+
   const renderChapterCard = (chapter: StoryChapter) => {
     const isLocked = !chapter.isUnlocked;
     const completedBattles = chapter.battles.filter(b => b.isCompleted).length;
@@ -36,6 +47,7 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
         onPress={() => !isLocked && onChapterSelect(chapter)}
         disabled={isLocked}
         activeOpacity={0.8}
+        ref={chapter.id === firstHighlightChapterId ? chapterAnchorRef : undefined}
       >
         <LinearGradient
           colors={isLocked 

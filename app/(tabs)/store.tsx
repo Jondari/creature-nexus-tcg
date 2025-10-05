@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Platform, Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Coins, ShoppingCart, Star, Zap } from 'lucide-react-native';
+import { Coins, ShoppingCart, Star, Zap, HelpCircle } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { t } from '@/utils/i18n';
@@ -16,12 +16,19 @@ import { generatePackCards } from '@/utils/boosterUtils';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { BillingService } from '@/services/billingService';
+import { useSceneTrigger, useSceneManager } from '@/context/SceneManagerContext';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
+import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 const { width } = Dimensions.get('window');
 const isWideScreen = width >= 768; // Tablet/desktop breakpoint
 
 export default function StoreScreen() {
   const { user } = useAuth();
+  const sceneManager = useSceneManager();
+  const coinRef = useRef<View | null>(null);
+  const packGridRef = useRef<View | null>(null);
   const [loading, setLoading] = useState(true);
   const [userCurrency, setUserCurrency] = useState<UserCurrency>({ nexusCoins: 0 });
   const [selectedCategory, setSelectedCategory] = useState<'standard' | 'elemental' | 'premium'>('standard');
@@ -30,6 +37,11 @@ export default function StoreScreen() {
   const [currentPackName, setCurrentPackName] = useState<string>('');
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [realPrices, setRealPrices] = useState<Record<string, string>>({});
+  const sceneTrigger = useSceneTrigger();
+
+  // Register anchors for tutorial highlights in Store
+  useAnchorRegister(COMMON_ANCHORS.COIN_BALANCE, coinRef);
+  useAnchorRegister(COMMON_ANCHORS.PACK_SHOP, packGridRef);
 
   useEffect(() => {
     if (user) {
@@ -37,6 +49,13 @@ export default function StoreScreen() {
       fetchRealPrices(); // Load real prices from RevenueCat
     }
   }, [user]);
+
+  useAnchorPolling([
+    COMMON_ANCHORS.COIN_BALANCE,
+    COMMON_ANCHORS.PACK_SHOP,
+  ], () => {
+    sceneTrigger({ type: 'onEnterScreen', screen: 'store' });
+  });
 
   // Refresh currency when the tab comes into focus (e.g., after using dev tools to add coins)
   useFocusEffect(
@@ -457,10 +476,27 @@ export default function StoreScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Tutorial shortcut for Store */}
+      <View style={{ position: 'absolute', top: 14, left: 320, zIndex: 1000 }}>
+        <TouchableOpacity
+          onPress={() => {
+            try {
+              sceneManager.startScene('tutorial_store_intro');
+            } catch (error) {
+              if (__DEV__) {
+                console.warn('[Tutorial] Failed to start scene tutorial_store_intro', error);
+              }
+            }
+          }}
+          style={styles.tutorialButton}
+        >
+          <HelpCircle size={20} color={Colors.text.primary} />
+        </TouchableOpacity>
+      </View>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{t('store.title')}</Text>
-        <View style={styles.currencyDisplay}>
+        <View style={styles.currencyDisplay} ref={coinRef as any}>
           <Coins size={20} color="#ffd700" />
           <Text style={styles.currencyAmount}>{userCurrency.nexusCoins}</Text>
         </View>
@@ -475,7 +511,7 @@ export default function StoreScreen() {
 
       {/* Pack Grid */}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.packsGrid}>
+        <View style={styles.packsGrid} ref={packGridRef as any}>
           {PACK_CATEGORIES[selectedCategory].map(renderPackCard)}
         </View>
       </ScrollView>
@@ -682,5 +718,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: Colors.text.primary,
     textAlign: 'center',
+  },
+  tutorialButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.background.card,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

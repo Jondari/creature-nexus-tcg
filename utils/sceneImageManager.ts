@@ -10,7 +10,7 @@ import { Image } from 'react-native';
 // Image asset registry
 interface ImageAsset {
   id: string;
-  uri: string;
+  uri: string | number | { uri: string; width?: number; height?: number };
   type: 'background' | 'portrait' | 'overlay' | 'ui';
   preloaded: boolean;
   dimensions?: { width: number; height: number };
@@ -128,7 +128,7 @@ class SceneImageManager {
   /**
    * Get asset URI, preloading if necessary
    */
-  async getAssetUri(assetId: string): Promise<string | null> {
+  async getAssetUri(assetId: string): Promise<string | number | { uri: string; width?: number; height?: number } | null> {
     const asset = this.assets.get(assetId);
     if (!asset) {
       console.warn(`[SceneImageManager] Asset not found: ${assetId}`);
@@ -136,9 +136,15 @@ class SceneImageManager {
     }
 
     if (!asset.preloaded) {
+      if (this.debugMode) {
+        console.log(`[SceneImageManager] getAssetUri: asset not preloaded, preloading ${assetId}`);
+      }
       await this.preloadAsset(assetId);
     }
 
+    if (this.debugMode) {
+      console.log(`[SceneImageManager] getAssetUri: returning for ${assetId}:`, asset.uri);
+    }
     return asset.uri;
   }
 
@@ -164,7 +170,7 @@ class SceneImageManager {
   private async performPreload(asset: ImageAsset): Promise<void> {
     return new Promise((resolve, reject) => {
       // Handle different URI types
-      if (asset.uri.startsWith('http')) {
+      if (typeof asset.uri === 'string' && asset.uri.startsWith('http')) {
         // Remote image
         Image.prefetch(asset.uri)
           .then(() => {
@@ -281,20 +287,38 @@ const TUTORIAL_ASSETS: SceneAssetCollection = {
   preloaded: false,
   assets: [
     {
+      id: 'nexus_bg',
+      uri: require('@/assets/images/scene/nexus_bg.png'),
+      type: 'background',
+      preloaded: false,
+    },
+    {
       id: 'guide_portrait',
-      uri: require('@/assets/images/portraits/guide.png'),
+      uri: require('@/assets/images/scene/guide_portrait.png'),
+      type: 'portrait',
+      preloaded: false,
+    },
+    {
+      id: 'merchant_portrait',
+      uri: require('@/assets/images/scene/merchant_portrait.png'),
+      type: 'portrait',
+      preloaded: false,
+    },
+    {
+      id: 'strategist_portrait',
+      uri: require('@/assets/images/scene/strategist_portrait.png'),
       type: 'portrait',
       preloaded: false,
     },
     {
       id: 'nexus_welcome_bg',
-      uri: require('@/assets/images/backgrounds/nexus_welcome.png'),
+      uri: require('@/assets/images/scene/nexus_welcome_bg.png'),
       type: 'background',
       preloaded: false,
     },
     {
       id: 'battle_interface_bg',
-      uri: require('@/assets/images/backgrounds/battle_tutorial.png'),
+      uri: require('@/assets/images/scene/battle_tutorial.png'),
       type: 'background',
       preloaded: false,
     },
@@ -309,16 +333,17 @@ const CHAPTER_1_ASSETS: SceneAssetCollection = {
   assets: [
     {
       id: 'archivist_portrait',
-      uri: require('@/assets/images/portraits/archivist.png'),
+      uri: 'archivist_portrait.png',
       type: 'portrait',
       preloaded: false,
     },
     {
       id: 'selel_portrait',
-      uri: require('@/assets/images/portraits/selel.png'),
+      uri: 'selel_portrait.png',
       type: 'portrait',
       preloaded: false,
     },
+    /*
     {
       id: 'water_realm_bg',
       uri: require('@/assets/images/backgrounds/water_realm.png'),
@@ -331,18 +356,21 @@ const CHAPTER_1_ASSETS: SceneAssetCollection = {
       type: 'background',
       preloaded: false,
     },
+    */
     {
       id: 'corrupted_nixeth',
-      uri: require('@/assets/images/portraits/nixeth_corrupted.png'),
+      uri: 'corrupted_nixeth.png',
       type: 'portrait',
       preloaded: false,
     },
+    /*
     {
       id: 'nixeth_pure',
       uri: require('@/assets/images/portraits/nixeth_pure.png'),
       type: 'portrait',
       preloaded: false,
     },
+    */
   ],
 };
 
@@ -352,21 +380,23 @@ const UI_EFFECTS_ASSETS: SceneAssetCollection = {
   name: 'UI and Effects',
   preloaded: false,
   assets: [
+    /*
     {
       id: 'water_essence',
       uri: require('@/assets/images/effects/water_essence.png'),
       type: 'overlay',
       preloaded: false,
     },
+    */
     {
       id: 'victory_bg',
-      uri: require('@/assets/images/backgrounds/victory.png'),
+      uri: require('@/assets/images/scene/victory_bg.png'),
       type: 'background',
       preloaded: false,
     },
     {
       id: 'defeat_bg',
-      uri: require('@/assets/images/backgrounds/defeat.png'),
+      uri: 'defeat_bg.png',
       type: 'background',
       preloaded: false,
     },
@@ -412,7 +442,7 @@ export const sceneImageUtils = {
   /**
    * Get asset URI with automatic preloading
    */
-  getAssetUri: async (assetId: string): Promise<string | null> => {
+  getAssetUri: async (assetId: string): Promise<string | number | { uri: string; width?: number; height?: number } | null> => {
     return sceneImageManager.getAssetUri(assetId);
   },
 

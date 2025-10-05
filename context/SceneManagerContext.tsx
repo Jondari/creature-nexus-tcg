@@ -14,6 +14,7 @@ import type {
   TutorialProgress,
   SceneState,
   SceneEvent,
+  SceneUserEvent,
 } from '@/types/scenes';
 import SceneRunner from '@/components/SceneRunner';
 
@@ -27,12 +28,14 @@ const SceneManagerContext = createContext<SceneManagerAPI | null>(null);
 interface SceneManagerProviderProps {
   children: React.ReactNode;
   userId?: string;
+  ready?: boolean;
   debugMode?: boolean;
 }
 
 export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
   children,
   userId,
+  ready = true,
   debugMode = false,
 }) => {
   // State
@@ -50,11 +53,8 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
   
   // Loading state
   const [isLoaded, setIsLoaded] = useState(false);
-
-  // Load tutorial progress on mount
-  useEffect(() => {
-    loadTutorialProgress();
-  }, [userId]);
+  // Queue triggers fired before load completes
+  const pendingTriggersRef = useRef<SceneTrigger[]>([]);
 
   // Persistence functions
   const saveTutorialProgress = useCallback(async (): Promise<void> => {
@@ -70,26 +70,40 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
     }
   }, [tutorialProgress, userId, debugMode]);
 
-  const loadTutorialProgress = useCallback(async (): Promise<void> => {
-    try {
-      const key = userId ? `${TUTORIAL_PROGRESS_KEY}_${userId}` : TUTORIAL_PROGRESS_KEY;
-      const stored = await AsyncStorage.getItem(key);
-      
-      if (stored) {
-        const progress = JSON.parse(stored) as TutorialProgress;
-        setTutorialProgress(progress);
-        
-        if (debugMode) {
-          console.log('[SceneManager] Loaded tutorial progress:', progress);
+  // Load tutorial progress on mount (only once auth is ready)
+  useEffect(() => {
+    if (!ready) {
+      setIsLoaded(false);
+      return;
+    }
+    let isActive = true;
+    const load = async () => {
+      try {
+        const key = userId ? `${TUTORIAL_PROGRESS_KEY}_${userId}` : TUTORIAL_PROGRESS_KEY;
+        const stored = await AsyncStorage.getItem(key);
+
+        if (stored && isActive) {
+          const progress = JSON.parse(stored) as TutorialProgress;
+          setTutorialProgress(progress);
+
+          if (debugMode) {
+            console.log('[SceneManager] Loaded tutorial progress:', progress);
+          }
+        }
+      } catch (error) {
+        console.error('[SceneManager] Error loading tutorial progress:', error);
+      } finally {
+        if (isActive) {
+          setIsLoaded(true);
         }
       }
-      
-      setIsLoaded(true);
-    } catch (error) {
-      console.error('[SceneManager] Error loading tutorial progress:', error);
-      setIsLoaded(true);
-    }
-  }, [userId, debugMode]);
+    };
+
+    load();
+    return () => {
+      isActive = false;
+    };
+  }, [userId, ready, debugMode]);
 
   // Auto-save progress when it changes
   useEffect(() => {
@@ -113,6 +127,8 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
     eventListeners.current.add(listener);
     return () => eventListeners.current.delete(listener);
   }, []);
+
+  
 
   // Scene management
   const registerScene = useCallback((scene: SceneSpec) => {
@@ -186,6 +202,26 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
       };
     });
   }, [emitEvent]);
+
+  // Public: ingest gameplay events and map them to tutorial flags/progress
+  const publishUserEvent = useCallback((event: SceneUserEvent) => {
+    switch (event.type) {
+      case 'card_played':
+        setFlag('card_played', true);
+        break;
+      case 'creature_selected':
+        setFlag('creature_selected', true);
+        break;
+      case 'attack_used':
+        setProgress('attacks_used', (getProgress('attacks_used') || 0) + 1);
+        break;
+      case 'turn_ended':
+        setFlag('turn_ended', true);
+        break;
+      default:
+        if (debugMode) console.log('[SceneManager] Unknown user event', event);
+    }
+  }, [setFlag, setProgress, getProgress, debugMode]);
 
   // Scene completion tracking
   const markSceneCompleted = useCallback((sceneId: string) => {
@@ -274,7 +310,17 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
 
   // Scene triggering
   const checkTriggers = useCallback(async (trigger: SceneTrigger): Promise<void> => {
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      if (debugMode) console.log('[SceneManager] checkTriggers queued; not loaded yet', trigger);
+      pendingTriggersRef.current.push(trigger);
+      return;
+    }
+
+    // Do not start a new scene if one is currently running (prevent preemption)
+    if (currentScene) {
+      if (debugMode) console.log('[SceneManager] A scene is already running; ignoring trigger', trigger);
+      return;
+    }
 
     const eligibleScenes = Array.from(registeredScenes.values())
       .filter(scene => {
@@ -291,16 +337,30 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
       })
       .sort((a, b) => (b.priority || 0) - (a.priority || 0)); // Higher priority first
 
+    if (debugMode) {
+      console.log('[SceneManager] checkTriggers eligible scenes:', eligibleScenes.map(s => s.id));
+    }
     if (eligibleScenes.length > 0) {
       const sceneToStart = eligibleScenes[0];
-      
       if (debugMode) {
         console.log(`[SceneManager] Triggering scene: ${sceneToStart.id} for trigger:`, trigger);
       }
-      
       await startScene(sceneToStart.id);
     }
-  }, [isLoaded, registeredScenes, isSceneCompleted, matchesTrigger, evaluateSceneConditions, debugMode]);
+  }, [isLoaded, currentScene, registeredScenes, isSceneCompleted, matchesTrigger, evaluateSceneConditions, debugMode]);
+
+  // Process any queued triggers once loading completes
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (pendingTriggersRef.current.length > 0) {
+      const queued = [...pendingTriggersRef.current];
+      pendingTriggersRef.current = [];
+      queued.forEach((t) => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        checkTriggers(t);
+      });
+    }
+  }, [isLoaded, checkTriggers]);
 
   // Scene execution
   const startScene = useCallback(async (sceneId: string): Promise<boolean> => {
@@ -311,7 +371,30 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
     }
 
     if (currentScene) {
-      console.warn(`[SceneManager] Scene ${currentScene.scene.id} already running, stopping it`);
+      // If it's the same scene, ignore
+      if (currentScene.scene.id === sceneId) {
+        if (debugMode) {
+          console.log(`[SceneManager] Scene ${sceneId} already running; ignoring duplicate start`);
+        }
+        return true;
+      }
+      // Prevent preemption unless incoming has strictly higher priority
+      const incomingPriority = scene.priority ?? 0;
+      const currentPriority = currentScene.scene.priority ?? 0;
+      if (incomingPriority <= currentPriority) {
+        if (debugMode) {
+          console.log('[SceneManager] Incoming scene has lower or equal priority; ignoring start', {
+            incoming: scene.id,
+            incomingPriority,
+            current: currentScene.scene.id,
+            currentPriority,
+          });
+        }
+        return false;
+      }
+      if (debugMode) {
+        console.warn(`[SceneManager] Preempting scene ${currentScene.scene.id} with higher priority scene ${scene.id}`);
+      }
       stopCurrentScene();
     }
 
@@ -437,7 +520,9 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
     
     // Persistence
     saveTutorialProgress,
-    loadTutorialProgress,
+    
+    // Domain events
+    publishUserEvent,
   };
 
   return (
@@ -485,6 +570,14 @@ export const useSceneTrigger = () => {
   
   return useCallback((trigger: SceneTrigger) => {
     sceneManager.checkTriggers(trigger);
+  }, [sceneManager]);
+};
+
+// Decoupled publish hook for gameplay to emit tutorial-relevant events
+export const useSceneEvents = () => {
+  const sceneManager = useSceneManager();
+  return useCallback((event: SceneUserEvent) => {
+    sceneManager.publishUserEvent?.(event);
   }, [sceneManager]);
 };
 

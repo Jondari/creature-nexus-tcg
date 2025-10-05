@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Platform } from 'react-native';
 import {
   View,
   Text,
@@ -25,6 +26,31 @@ import type {
   SceneRunnerProps,
 } from '@/types/scenes';
 import { useAnchors } from '@/context/AnchorsContext';
+import sceneImageUtils from '@/utils/sceneImageManager';
+
+// Image source helpers (module-scope, no React hooks)
+function toImageSource(u?: string | number | { uri: string; width?: number; height?: number }) {
+  if (!u) return undefined as unknown as any;
+  if (typeof u === 'number') return u;
+  if (typeof u === 'string') return { uri: u } as any;
+  return u as any;
+}
+
+async function resolveUri(u: string | number | { uri: string; width?: number; height?: number }) {
+  if (typeof u === 'string') {
+    const isHttp = /^https?:\/\//i.test(u);
+    if (!isHttp && u.toLowerCase().endsWith('.png')) {
+      const id = u.replace(/\.png$/i, '');
+      try {
+        const resolved = await sceneImageUtils.getAssetUri(id);
+        if (resolved) return resolved as any;
+      } catch (e) {
+        if (__DEV__) console.warn('[SceneRunner] resolveUri error', u, e);
+      }
+    }
+  }
+  return u as any;
+}
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -56,15 +82,20 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
   // UI state
   const [dialog, setDialog] = useState<SceneState['dialog']>(null);
   const [highlight, setHighlight] = useState<SceneState['highlight']>(null);
+  const [highlightTextHeight, setHighlightTextHeight] = useState(0);
   const [maskInput, setMaskInput] = useState(false);
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
-  
+
+  useEffect(() => {
+    setHighlightTextHeight(0);
+  }, [highlight?.text, highlight?.rect, highlight?.textPosition]);
+
   // Visual state
-  const [background, setBackground] = useState<string | undefined>(scene.backgroundImage);
-  const [portraits, setPortraits] = useState<{ left?: string; right?: string }>({});
+  const [background, setBackground] = useState<string | number | { uri: string; width?: number; height?: number } | undefined>(scene.backgroundImage);
+  const [portraits, setPortraits] = useState<{ left?: string | number | { uri: string; width?: number; height?: number }; right?: string | number | { uri: string; width?: number; height?: number } }>({});
   const [overlays, setOverlays] = useState<Array<{
     id: string;
-    uri: string;
+    uri: string | number | { uri: string; width?: number; height?: number };
     x: number;
     y: number;
     width?: number;
@@ -74,6 +105,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
   // Animation values
   const dialogOpacity = useRef(new Animated.Value(0)).current;
   const highlightPulse = useRef(new Animated.Value(1)).current;
+  const highlightRetryRef = useRef<Record<string, number>>({});
   const portraitLeft = useRef(new Animated.Value(-200)).current;
   const portraitRight = useRef(new Animated.Value(200)).current;
   const backgroundOpacity = useRef(new Animated.Value(1)).current;
@@ -88,6 +120,19 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
     });
     setLabels(labelsMap);
   }, [scene]);
+
+  // Sync external state from SceneManager into local SceneRunner state
+  useEffect(() => {
+    if (initialState?.flags) {
+      setFlags(initialState.flags);
+    }
+  }, [initialState?.flags]);
+
+  useEffect(() => {
+    if (initialState?.progress) {
+      setProgress(initialState.progress);
+    }
+  }, [initialState?.progress]);
 
   // Navigation helpers
   const gotoLabel = useCallback((name: string) => {
@@ -202,6 +247,8 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
           choices: cmd.choices,
         }));
         setIsWaitingForInput(true);
+        // Keep the panel visible even if no preceding "say" command ran
+        showDialog();
         break;
       }
 
@@ -260,25 +307,35 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
       case 'highlight': {
         try {
           const rect = await anchors.getRect(cmd.anchorId);
+          if (!rect) {
+            const key = `${scene.id}:${cmd.anchorId}:${pc}`;
+            const attempts = (highlightRetryRef.current[key] || 0) + 1;
+            highlightRetryRef.current[key] = attempts;
+            // Retry up to ~6s (30 * 200ms)
+            if (attempts <= 30) {
+              if (__DEV__) console.log(`[SceneRunner] Waiting for anchor ${cmd.anchorId} (attempt ${attempts})`);
+              setTimeout(() => {
+                // re-run same step
+                setPc((prev) => prev);
+              }, 200);
+              break;
+            } else {
+              if (__DEV__) console.warn(`[SceneRunner] Anchor not found after retries: ${cmd.anchorId}. Skipping highlight.`);
+              setPc(pc + 1);
+              break;
+            }
+          }
           const style = { ...DEFAULT_HIGHLIGHT_STYLE, ...cmd.style };
-          
-          setHighlight({
-            rect,
-            text: cmd.text,
-            style,
-            maskInput: cmd.maskInput,
-          });
-          
+          const textPosition = cmd.textPosition || 'bottom';
+          setHighlight({ rect, text: cmd.text, style, maskInput: cmd.maskInput, textPosition });
           if (cmd.maskInput) {
             setMaskInput(true);
+          } else {
+            setMaskInput(false);
           }
-          
-          if (style.pulsate) {
-            startHighlightPulse();
-          }
-          
-          setIsWaitingForInput(true);
+          if (style.pulsate) startHighlightPulse();
           onSceneAction?.('anchor_highlighted', { anchorId: cmd.anchorId, sceneId: scene.id });
+          setIsWaitingForInput(true);
         } catch (error) {
           console.warn(`[SceneRunner] Failed to highlight anchor ${cmd.anchorId}:`, error);
           setPc(pc + 1);
@@ -321,7 +378,11 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
             duration: 300,
             useNativeDriver: true,
           }).start(() => {
-            setBackground(cmd.uri);
+            if (__DEV__) console.log('[SceneRunner] setBackground requested (fade):', cmd.uri);
+            resolveUri(cmd.uri).then((r) => {
+              if (__DEV__) console.log('[SceneRunner] setBackground resolved (fade):', r);
+              setBackground(r);
+            });
             Animated.timing(backgroundOpacity, {
               toValue: 1,
               duration: 300,
@@ -329,14 +390,23 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
             }).start();
           });
         } else {
-          setBackground(cmd.uri);
+          (async () => {
+            if (__DEV__) console.log('[SceneRunner] setBackground requested (no fade):', cmd.uri);
+            const r = await resolveUri(cmd.uri);
+            if (__DEV__) console.log('[SceneRunner] setBackground resolved (no fade):', r);
+            setBackground(r);
+          })();
         }
         setPc(pc + 1);
         break;
       }
 
       case 'showPortrait': {
-        setPortraits(prev => ({ ...prev, [cmd.side]: cmd.uri }));
+        (async () => {
+          const r = await resolveUri(cmd.uri);
+          if (__DEV__) console.log('[SceneRunner] showPortrait', cmd.side, 'uri:', cmd.uri, 'resolved:', r);
+          setPortraits(prev => ({ ...prev, [cmd.side]: r }));
+        })();
         animatePortrait(cmd.side, true);
         setPc(pc + 1);
         break;
@@ -353,14 +423,18 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
 
       case 'imageOverlay': {
         const overlayId = `overlay_${Date.now()}`;
-        setOverlays(prev => [...prev, {
-          id: overlayId,
-          uri: cmd.uri,
-          x: cmd.x,
-          y: cmd.y,
-          width: cmd.width,
-          height: cmd.height,
-        }]);
+        (async () => {
+          const r = await resolveUri(cmd.uri);
+          if (__DEV__) console.log('[SceneRunner] imageOverlay uri:', cmd.uri, 'resolved:', r);
+          setOverlays(prev => [...prev, {
+            id: overlayId,
+            uri: r,
+            x: cmd.x,
+            y: cmd.y,
+            width: cmd.width,
+            height: cmd.height,
+          }]);
+        })();
         
         if (cmd.duration) {
           setTimeout(() => {
@@ -372,10 +446,34 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
         break;
       }
 
+      // Audio stubs
+      case 'playSound': {
+        if (__DEV__) console.log('[SceneRunner] playSound (stub):', cmd.uri, 'loop:', cmd.loop);
+        setPc(pc + 1);
+        break;
+      }
+      case 'playMusic': {
+        if (__DEV__) console.log('[SceneRunner] playMusic (stub):', cmd.uri, 'loop:', cmd.loop, 'fadeIn:', cmd.fadeIn);
+        setPc(pc + 1);
+        break;
+      }
+      case 'stopMusic': {
+        if (__DEV__) console.log('[SceneRunner] stopMusic (stub):', 'fadeOut:', cmd.fadeOut);
+        setPc(pc + 1);
+        break;
+      }
+
       case 'triggerBattle':
       case 'navigateTo': {
         onSceneAction?.('scene_action', { type: cmd.type, data: cmd });
         onFinish();
+        break;
+      }
+
+      case 'triggerReward': {
+        // Stub: emit action so host app can show reward UI, then continue
+        onSceneAction?.('scene_action', { type: cmd.type, data: cmd });
+        setPc(pc + 1);
         break;
       }
 
@@ -392,7 +490,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
     }
   }, [
     scene, pc, anchors, getFlag, setFlagValue, getProgressValue, setProgressValue,
-    gotoLabel, showDialog, animatePortrait, startHighlightPulse, onSceneAction, onFinish
+    gotoLabel, showDialog, animatePortrait, onSceneAction, onFinish
   ]);
 
   // Execute current command
@@ -410,7 +508,12 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
 
   // Handle user interactions
   const onDialogTap = useCallback(() => {
+    // Safety check: ignore full-screen taps while choices are visible
+    if (dialog?.choices && dialog.choices.length > 0) {
+      return;
+    }
     if (dialog && !dialog.choices) {
+      if (__DEV__) console.log('[SceneRunner] onDialogTap advancing');
       hideDialog();
       setDialog(null);
       setIsWaitingForInput(false);
@@ -420,6 +523,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
   }, [dialog, hideDialog, pc, onSceneAction]);
 
   const onChoiceSelect = useCallback((choiceId: string, choice: any) => {
+    if (__DEV__) console.log('[SceneRunner] onChoiceSelect', choiceId, choice);
     hideDialog();
     setDialog(null);
     setIsWaitingForInput(false);
@@ -456,7 +560,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       if (isWaitingForInput) {
         // Allow skipping current step
-        if (dialog) {
+        if (dialog && !dialog.choices) {
           onDialogTap();
         } else if (highlight) {
           onHighlightTap();
@@ -470,17 +574,27 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
   }, [isWaitingForInput, dialog, highlight, onDialogTap, onHighlightTap]);
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+    <View
+      style={[
+        StyleSheet.absoluteFill,
+        {
+          zIndex: 100000,
+          elevation: 100000,
+          // On web, use "fixed" to avoid creating extra scrollable space
+          position: Platform.OS === 'web' ? 'fixed' as any : 'absolute' as any,
+        },
+      ]}
+      pointerEvents="box-none"
+    >
       {/* Background */}
       {background && (
-        <Animated.Image
-          source={{ uri: background }}
-          style={[
-            StyleSheet.absoluteFill,
-            { opacity: backgroundOpacity }
-          ]}
-          resizeMode="cover"
-        />
+        <View style={styles.backgroundContainer} pointerEvents="none">
+          <Animated.Image
+            source={toImageSource(background)}
+            style={[StyleSheet.absoluteFill, { opacity: backgroundOpacity, width: '100%', height: '100%' }]}
+            resizeMode="cover"
+          />
+        </View>
       )}
 
       {/* Input mask */}
@@ -494,7 +608,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
       {/* Portraits */}
       {portraits.left && (
         <Animated.Image
-          source={{ uri: portraits.left }}
+          source={toImageSource(portraits.left)}
           style={[
             styles.portraitLeft,
             { transform: [{ translateX: portraitLeft }] }
@@ -505,7 +619,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
       
       {portraits.right && (
         <Animated.Image
-          source={{ uri: portraits.right }}
+          source={toImageSource(portraits.right)}
           style={[
             styles.portraitRight,
             { transform: [{ translateX: portraitRight }] }
@@ -518,7 +632,7 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
       {overlays.map((overlay) => (
         <Image
           key={overlay.id}
-          source={{ uri: overlay.uri }}
+          source={toImageSource(overlay.uri)}
           style={{
             position: 'absolute',
             left: overlay.x,
@@ -556,28 +670,45 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
                 shadowOpacity: highlight.style?.shadowOpacity || DEFAULT_HIGHLIGHT_STYLE.shadowOpacity,
                 shadowRadius: 10,
                 elevation: 10,
+              },
+              highlight.style?.pulsate && {
+                transform: [{ scale: highlightPulse }]
               }
-            ].filter(Boolean),
-            highlight.style?.pulsate && {
-              transform: [{ scale: highlightPulse }]
-            }
-          ]}
-          pointerEvents="none"
-        />
-        
-        {highlight.text && (
-          <View style={[
-            styles.highlightText,
-            {
-              top: highlight.rect.y + highlight.rect.height + 12,
-              left: Math.max(12, Math.min(highlight.rect.x, screenWidth - 200)),
-            }
-          ]}>
-            <Text style={styles.highlightTextContent}>
-              {highlight.text}
-            </Text>
-          </View>
-        )}
+            ]}
+            pointerEvents="none"
+          />
+
+          {highlight.text && highlight.rect && (
+            <View style={[
+              styles.highlightText,
+              {
+                top: (() => {
+                  const measured = highlightTextHeight || 0;
+                  if (highlight.textPosition === 'top') {
+                    return Math.max(12, (highlight.rect?.y || 0) - measured - 12);
+                  }
+                  const bottomCandidate = (highlight.rect?.y || 0) + (highlight.rect?.height || 0) + 12;
+                  return Math.min(
+                    screenHeight - measured - 12,
+                    bottomCandidate
+                  );
+                })(),
+                left: Math.max(12, Math.min(highlight.rect.x, screenWidth - 200)),
+              }
+            ]}
+            onLayout={({ nativeEvent }) => {
+              const h = nativeEvent.layout.height;
+              if (Math.abs(h - highlightTextHeight) > 0.5) {
+                setHighlightTextHeight(h);
+              }
+            }}
+          >
+              <Text style={styles.highlightTextContent}>
+                {highlight.text}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       )}
 
       {/* Dialog overlay */}
@@ -586,21 +717,15 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
           style={[styles.dialogOverlay, { opacity: dialogOpacity }]}
           pointerEvents="auto"
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={dialog.choices ? undefined : onDialogTap}
-            style={styles.dialogTouchArea}
-          >
-            <View style={styles.dialogBox}>
-              {dialog.speaker && (
-                <Text style={styles.speakerName}>{dialog.speaker}</Text>
-              )}
-              
-              {dialog.text && (
-                <Text style={styles.dialogText}>{dialog.text}</Text>
-              )}
-              
-              {dialog.choices && (
+          {dialog.choices ? (
+            <View style={styles.dialogTouchArea}>
+              <View style={styles.dialogBox}>
+                {dialog.speaker && (
+                  <Text style={styles.speakerName}>{dialog.speaker}</Text>
+                )}
+                {dialog.text && (
+                  <Text style={styles.dialogText}>{dialog.text}</Text>
+                )}
                 <View style={styles.choicesContainer}>
                   {dialog.choices.map((choice) => (
                     <TouchableOpacity
@@ -612,9 +737,24 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
                     </TouchableOpacity>
                   ))}
                 </View>
-              )}
+              </View>
             </View>
-          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={onDialogTap}
+            style={styles.dialogTouchArea}
+          >
+              <View style={styles.dialogBox}>
+                {dialog.speaker && (
+                  <Text style={styles.speakerName}>{dialog.speaker}</Text>
+                )}
+                {dialog.text && (
+                  <Text style={styles.dialogText}>{dialog.text}</Text>
+                )}
+              </View>
+            </TouchableOpacity>
+          )}
         </Animated.View>
       )}
     </View>
@@ -622,12 +762,18 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
 };
 
 const styles = StyleSheet.create({
+  backgroundContainer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
   portraitLeft: {
     position: 'absolute',
     left: 20,
     bottom: 100,
     width: 180,
     height: 240,
+    // Sits below the dialog box (100001) but above the background
+    zIndex: 100000,
   },
   
   portraitRight: {
@@ -636,6 +782,8 @@ const styles = StyleSheet.create({
     bottom: 100,
     width: 180,
     height: 240,
+    // Sits below the dialog box (100001) but above the background
+    zIndex: 100000,
   },
   
   highlightText: {
@@ -655,10 +803,12 @@ const styles = StyleSheet.create({
   
   dialogOverlay: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    maxHeight: screenHeight * 0.4,
+    bottom: 0,
+    justifyContent: 'flex-end',
+    zIndex: 100001,
   },
   
   dialogTouchArea: {

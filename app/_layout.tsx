@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { DeckProvider } from '@/context/DeckContext';
 import { SettingsProvider } from '@/context/SettingsContext';
 import GlobalAlertProvider from '@/components/GlobalAlertProvider';
 import { StoryModeProvider } from '@/context/StoryModeContext';
+import { AnchorsProvider } from '@/context/AnchorsContext';
+import { SceneManagerProvider } from '@/context/SceneManagerContext';
+import ScenesRegistry from '@/components/ScenesRegistry';
 import { useFonts } from 'expo-font';
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
 import { Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
@@ -65,7 +68,11 @@ export default function RootLayout() {
           if (!storedLocale) {
             router.replace('/language');
           }
-        } catch {}
+        } catch (error) {
+          if (__DEV__) {
+            console.warn('Failed to check stored locale during first launch tutorial redirect:', error);
+          }
+        }
       })();
     }
   }, [fontsLoaded, fontError, pathname, playMusic]);
@@ -121,36 +128,52 @@ export default function RootLayout() {
     <GlobalAlertProvider>
       <SettingsProvider>
         <AuthProvider>
-          <DeckProvider>
-            <StoryModeProvider>
-              {/* Audio Permission Banner */}
-              <AudioPermissionBanner />
-              
-              <Stack screenOptions={{ 
-                headerShown: false,
-                contentStyle: { backgroundColor: Colors.background.primary }
-              }}>
-                <Stack.Screen name="language" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" options={{ title: t('notFound.stackTitle') }} />
-              </Stack>
-              <StatusBar style="light" hidden={Platform.OS === 'android'} />
-              
-              {/* Animated Splash Screen */}
-              {showAnimatedSplash && (
-                <AnimatedSplashScreen
-                  duration={2500} // 2.5 seconds
-                  onComplete={() => setShowAnimatedSplash(false)}
-                />
-              )}
-            </StoryModeProvider>
-          </DeckProvider>
+          {/* Inject scenes + anchors using the signed-in user id */}
+          <SceneLayer>
+            <DeckProvider>
+              <StoryModeProvider>
+                {/* Audio Permission Banner */}
+                <AudioPermissionBanner />
+
+                <Stack screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: Colors.background.primary }
+                }}>
+                  <Stack.Screen name="language" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="+not-found" options={{ title: t('notFound.stackTitle') }} />
+                </Stack>
+                <StatusBar style="light" hidden={Platform.OS === 'android'} />
+
+                {/* Animated Splash Screen */}
+                {showAnimatedSplash && (
+                  <AnimatedSplashScreen
+                    duration={2500} // 2.5 seconds
+                    onComplete={() => setShowAnimatedSplash(false)}
+                  />
+                )}
+              </StoryModeProvider>
+            </DeckProvider>
+          </SceneLayer>
         </AuthProvider>
       </SettingsProvider>
     </GlobalAlertProvider>
   );
 }
+
+// Scenes + Anchors wrapper that binds to current user
+const SceneLayer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+  return (
+    <AnchorsProvider>
+      <SceneManagerProvider userId={user?.uid} ready={!loading} debugMode={true}>
+        <ScenesRegistry />
+        {children}
+      </SceneManagerProvider>
+    </AnchorsProvider>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

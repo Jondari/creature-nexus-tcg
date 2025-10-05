@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { HelpCircle } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 import { useDecks } from '@/context/DeckContext';
@@ -11,16 +12,30 @@ import { DeckBuilder } from '@/components/DeckBuilder';
 import { showSuccessAlert, showErrorAlert, showConfirmAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
+import { useSceneTrigger, useSceneManager } from '@/context/SceneManagerContext';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 export default function DecksScreen() {
   const { user } = useAuth();
+  const sceneManager = useSceneManager();
+  const { setFlag } = sceneManager;
   const { savedDecks, activeDeck, saveDeck, deleteDeck, setActiveDeck } = useDecks();
   const [userCards, setUserCards] = useState<Array<Card | ExtendedCard>>([]);
   const [loading, setLoading] = useState(true);
   const [showDeckBuilder, setShowDeckBuilder] = useState(false);
   const [editingDeck, setEditingDeck] = useState<any>(null);
   const [lastFetchTime, setLastFetchTime] = useState(0);
+  const sceneTrigger = useSceneTrigger();
+  const createButtonRef = useRef<TouchableOpacity | null>(null);
+
+  useAnchorRegister(COMMON_ANCHORS.DECK_BUILDER_ENTRY, createButtonRef);
+
+  useEffect(() => {
+    setFlag('deck_builder_open', showDeckBuilder);
+  }, [showDeckBuilder, setFlag]);
 
   useEffect(() => {
     if (user) {
@@ -29,6 +44,10 @@ export default function DecksScreen() {
   }, [user]);
 
   // Refresh data when the tab comes into focus (e.g., after purchasing from store)
+  useAnchorPolling([COMMON_ANCHORS.DECK_BUILDER_ENTRY], () => {
+    sceneTrigger({ type: 'onEnterScreen', screen: 'decks' });
+  });
+
   useFocusEffect(
     React.useCallback(() => {
       const now = Date.now();
@@ -143,9 +162,30 @@ export default function DecksScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Tutorial shortcut for Deck Builder */}
+      <View style={{ position: 'absolute', top: 12, right: 22, zIndex: 1000 }}>
+        <TouchableOpacity
+          onPress={() => {
+            try {
+              sceneManager.startScene('tutorial_deck_builder');
+            } catch (error) {
+              if (__DEV__) {
+                console.warn('[Tutorial] Failed to start scene tutorial_deck_builder', error);
+              }
+            }
+          }}
+          style={styles.tutorialButton}
+        >
+          <HelpCircle size={20} color={Colors.text.primary} />
+        </TouchableOpacity>
+      </View>
       <View style={styles.header}>
         <Text style={styles.title}>{t('decks.title')}</Text>
-        <TouchableOpacity style={styles.createButton} onPress={handleCreateDeck}>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={handleCreateDeck}
+          ref={createButtonRef as any}
+        >
           <Text style={styles.createButtonText}>{t('decks.newDeck')}</Text>
         </TouchableOpacity>
       </View>
@@ -231,6 +271,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.primary,
+  },
+  tutorialButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.background.card,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     flexDirection: 'row',

@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useContext, useRef, useCallback, useEffect } from 'react';
-import { findNodeHandle, UIManager } from 'react-native';
+import { findNodeHandle, UIManager, Platform } from 'react-native';
 import type { AnchorRect, AnchorMeasureFn, AnchorsAPI } from '@/types/scenes';
 
 // Create the context
@@ -86,24 +86,47 @@ export const useAnchorRegister = (id: string, ref: React.RefObject<any>, depende
   const anchors = useAnchors();
 
   useEffect(() => {
-    if (!ref.current) return;
-
+    // Always register the anchor, even if ref.current is not yet set.
+    // The measure function will return null until the node is available and laid out.
     const measureFn: AnchorMeasureFn = () => {
       return new Promise((resolve) => {
-        const node = findNodeHandle(ref.current);
-        if (!node) {
+        const current: any = ref.current;
+        if (!current) {
           resolve(null);
           return;
         }
 
-        // Use UIManager.measure for React Native
+        if (Platform.OS === 'web') {
+          try {
+            // Prefer DOM API when available (react-native-web)
+            if (typeof current.getBoundingClientRect === 'function') {
+              const r = current.getBoundingClientRect();
+              // Scene overlay uses position: fixed on web, so viewport coords are correct
+              resolve({ x: r.left, y: r.top, width: r.width, height: r.height });
+              return;
+            }
+            // Fallback: try component.measure if exposed
+            if (typeof current.measure === 'function') {
+              current.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
+                resolve({ x: pageX ?? x, y: pageY ?? y, width, height });
+              });
+              return;
+            }
+          } catch (e) {
+            if (__DEV__) console.warn('[Anchors] Web measure failed for', id, e);
+          }
+          resolve(null);
+          return;
+        }
+
+        // Native platforms
+        const node = findNodeHandle(current);
+        if (!node) {
+          resolve(null);
+          return;
+        }
         UIManager.measure(node, (x, y, width, height, pageX, pageY) => {
-          resolve({
-            x: pageX,
-            y: pageY,
-            width,
-            height,
-          });
+          resolve({ x: pageX, y: pageY, width, height });
         });
       });
     };
@@ -137,11 +160,10 @@ export const useMultipleAnchors = (anchorRefs: Record<string, React.RefObject<an
     const registeredIds: string[] = [];
 
     Object.entries(anchorRefs).forEach(([id, ref]) => {
-      if (!ref.current) return;
-
       const measureFn: AnchorMeasureFn = () => {
         return new Promise((resolve) => {
-          const node = findNodeHandle(ref.current);
+          const current = ref.current;
+          const node = current ? findNodeHandle(current) : null;
           if (!node) {
             resolve(null);
             return;

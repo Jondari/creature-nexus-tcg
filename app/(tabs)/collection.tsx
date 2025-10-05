@@ -1,5 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { HelpCircle } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSettings } from '@/context/SettingsContext';
 import { useAuth } from '@/context/AuthContext';
@@ -9,12 +10,18 @@ import { Card, CardRarity } from '@/models/Card';
 import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { groupByModel, CardGrouped } from '@/utils/cardUtils';
 import Colors from '@/constants/Colors';
+import { useSceneManager } from '@/context/SceneManagerContext';
 import CardGrid from '@/components/CardGrid';
 import { t } from '@/utils/i18n';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { useSceneTrigger } from '@/context/SceneManagerContext';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
+import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 export default function CollectionScreen() {
   const { user } = useAuth();
+  const sceneManager = useSceneManager();
   const { cardSize, setCardSize } = useSettings();
   // Keep raw instances for accurate totals
   const [allCards, setAllCards] = useState<Array<Card | ExtendedCard>>([]);
@@ -23,6 +30,15 @@ export default function CollectionScreen() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<CardRarity | 'all'>('all');
   const [lastFetchTime, setLastFetchTime] = useState(0);
+  const gridRef = useRef<View | null>(null);
+  const sceneTrigger = useSceneTrigger();
+
+  // Register anchor for the collection grid area
+  useAnchorRegister(COMMON_ANCHORS.CARD_GRID, gridRef);
+
+  useAnchorPolling([COMMON_ANCHORS.CARD_GRID], () => {
+    sceneTrigger({ type: 'onEnterScreen', screen: 'collection' });
+  });
   
   useEffect(() => {
     if (user) {
@@ -87,6 +103,23 @@ export default function CollectionScreen() {
   
   return (
     <View style={styles.container}>
+      {/* Tutorial shortcut for Collection */}
+      <View style={{ position: 'absolute', top: 12, right: 22, zIndex: 1000 }}>
+        <TouchableOpacity
+          onPress={() => {
+            try {
+              sceneManager.startScene('tutorial_collection_intro');
+            } catch (error) {
+              if (__DEV__) {
+                console.warn('[Tutorial] Failed to start scene tutorial_collection_intro', error);
+              }
+            }
+          }}
+          style={styles.tutorialButton}
+        >
+          <HelpCircle size={20} color={Colors.text.primary} />
+        </TouchableOpacity>
+      </View>
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <View>
@@ -108,12 +141,14 @@ export default function CollectionScreen() {
       </View>
       
       {/* Pass grouped items so the grid only renders unique models with x{count} */}
-      <CardGrid
-        items={groupedCards}
-        filter={filter}
-        onFilterChange={handleFilterChange}
-        cardSize={cardSize}
-      />
+      <View ref={gridRef as any}>
+        <CardGrid
+          items={groupedCards}
+          filter={filter}
+          onFilterChange={handleFilterChange}
+          cardSize={cardSize}
+        />
+      </View>
     </View>
   );
 }
@@ -122,6 +157,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.primary,
+  },
+  tutorialButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.background.card,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     paddingTop: 60,

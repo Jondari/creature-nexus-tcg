@@ -72,7 +72,10 @@ export async function initI18n(): Promise<string> {
     const target = stored || 'en';
     await i18n.setLocale(target);
     return target;
-  } catch {
+  } catch (error) {
+    if (__DEV__) {
+      console.warn('Failed to initialize locale from storage, falling back to en:', error);
+    }
     await i18n.setLocale('en');
     return 'en';
   }

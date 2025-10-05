@@ -17,7 +17,7 @@ export const SCENE_FIRST_LAUNCH: SceneSpec = {
   triggers: [
     { type: 'onFirstLaunch' }
   ],
-  backgroundImage: require('@/assets/images/nexus_bg.png'),
+  backgroundImage: require('@/assets/images/scene/nexus_bg.png'),
   steps: [
     { type: 'setBackground', uri: 'nexus_welcome_bg.png', transition: 'fade' },
     { type: 'showPortrait', side: 'right', uri: 'guide_portrait.png', animation: 'slideIn' },
@@ -57,9 +57,9 @@ export const SCENE_STORY_MODE_INTRO: SceneSpec = {
   steps: [
     { type: 'showPortrait', side: 'left', uri: 'guide_portrait.png', animation: 'slideIn' },
     { type: 'say', speaker: 'Nexus Guide', text: 'This is the Story Mode, where your adventure unfolds!' },
-    { type: 'highlight', anchorId: 'chapterNode', text: 'These are chapter nodes. Tap one to see the battles within.', maskInput: true },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.CHAPTER_NODE, text: 'These are chapter nodes. Tap one to see the battles within.', maskInput: true, textPosition: "top" },
     { type: 'say', speaker: 'Nexus Guide', text: 'Each chapter takes you to a different elemental realm with unique challenges.' },
-    { type: 'highlight', anchorId: 'nextChapterBtn', text: 'Complete battles to unlock new chapters.', maskInput: true },
+    { type: 'say', speaker: 'Nexus Guide', text: 'Complete the battles in a chapter to unlock the next realm.' },
     { type: 'say', speaker: 'Nexus Guide', text: 'Ready to begin your first battle? Tap on Chapter 1!' },
     { type: 'setFlag', key: 'tutorial_story_intro_completed', value: true },
     { type: 'hidePortrait', side: 'left', animation: 'slideOut' },
@@ -83,10 +83,10 @@ export const SCENE_CHAPTER_MAP_INTRO: SceneSpec = {
   steps: [
     { type: 'showPortrait', side: 'right', uri: 'guide_portrait.png', animation: 'slideIn' },
     { type: 'say', speaker: 'Nexus Guide', text: 'Welcome to Chapter 1: The Water Realm!' },
-    { type: 'highlight', anchorId: 'battleNode', text: 'These are battle nodes. Each represents a unique encounter.', maskInput: true },
-    { type: 'say', speaker: 'Nexus Guide', text: 'Green nodes are completed, blue nodes are available, and gray nodes are locked.' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.BATTLE_NODE, text: 'These are battle nodes. Each represents a unique encounter.', maskInput: true },
+    { type: 'say', speaker: 'Nexus Guide', text: 'Completed battles glow gold, available ones adopt the chapter\'s colour, and inaccessible nodes appear dimmed.' },
     { type: 'say', speaker: 'Nexus Guide', text: 'You must complete battles in order to progress through the chapter.' },
-    { type: 'highlight', anchorId: 'battleNode', text: 'Tap on the first battle to begin!', maskInput: false },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.BATTLE_NODE, text: 'Tap on the first battle to begin!', maskInput: false },
     { type: 'setFlag', key: 'tutorial_chapter_map_completed', value: true },
     { type: 'hidePortrait', side: 'right', animation: 'slideOut' },
     { type: 'end' }
@@ -95,6 +95,7 @@ export const SCENE_CHAPTER_MAP_INTRO: SceneSpec = {
 };
 
 // Battle Screen Tutorial - Comprehensive battle mechanics
+/*
 export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
   id: 'tutorial_battle_basics',
   version: 1,
@@ -173,8 +174,10 @@ export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
   ],
   priority: 80
 };
+*/
 
 // First Victory Celebration
+/*
 export const SCENE_FIRST_VICTORY: SceneSpec = {
   id: 'tutorial_first_victory',
   version: 1,
@@ -201,6 +204,35 @@ export const SCENE_FIRST_VICTORY: SceneSpec = {
   ],
   priority: 75
 };
+*/
+
+// Home Screen Overview
+export const SCENE_HOME_INTRO: SceneSpec = {
+  id: 'tutorial_home_intro',
+  version: 1,
+  title: 'Welcome Home',
+  description: 'Highlights key elements on the home screen',
+  triggers: [
+    { type: 'onEnterScreen', screen: 'home' }
+  ],
+  conditions: {
+    flags: {
+      'tutorial_home_completed': false,
+      'tutorial_first_launch_completed': true,
+    }
+  },
+  steps: [
+    { type: 'showPortrait', side: 'left', uri: 'guide_portrait.png', animation: 'slideIn' },
+    { type: 'say', speaker: 'Nexus Guide', text: 'This is your home base. From here you can access every feature of the Nexus.' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.OPEN_PACK_BUTTON, text: 'Use this button to open your daily pack when it\'s ready.', maskInput: true },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.PACK_INVENTORY, text: 'Any unopened packs will appear here.', maskInput: true },
+    { type: 'say', speaker: 'Nexus Guide', text: 'Tap on packs to open them and discover new creatures!' },
+    { type: 'setFlag', key: 'tutorial_home_completed', value: true },
+    { type: 'hidePortrait', side: 'left', animation: 'slideOut' },
+    { type: 'end' }
+  ],
+  priority: 72
+};
 
 // Collection Tutorial
 export const SCENE_COLLECTION_INTRO: SceneSpec = {
@@ -220,8 +252,6 @@ export const SCENE_COLLECTION_INTRO: SceneSpec = {
     { type: 'highlight', anchorId: COMMON_ANCHORS.CARD_GRID, text: 'Here you can see all the creatures you\'ve collected.', maskInput: true },
     { type: 'say', speaker: 'Collection Guide', text: 'Cards are organized by rarity: Common, Rare, Epic, Legendary, and the ultra-rare Mythic!' },
     { type: 'say', speaker: 'Collection Guide', text: 'Each card shows its element, HP, and attacks. Study them to plan your strategies!' },
-    { type: 'highlight', anchorId: COMMON_ANCHORS.PACK_INVENTORY, text: 'Any unopened packs will appear here.', maskInput: true },
-    { type: 'say', speaker: 'Collection Guide', text: 'Tap on packs to open them and discover new creatures!' },
     { type: 'setFlag', key: 'tutorial_collection_completed', value: true },
     { type: 'hidePortrait', side: 'left', animation: 'slideOut' },
     { type: 'end' }
@@ -244,10 +274,27 @@ export const SCENE_DECK_BUILDER_INTRO: SceneSpec = {
   steps: [
     { type: 'showPortrait', side: 'right', uri: 'guide_portrait.png', animation: 'slideIn' },
     { type: 'say', speaker: 'Deck Master', text: 'Time to build your own deck! This is where strategy begins.' },
-    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_BUILDER, text: 'A deck must contain exactly 30 cards.', maskInput: true },
-    { type: 'say', speaker: 'Deck Master', text: 'You can include up to 3 copies of each creature in your deck.' },
-    { type: 'say', speaker: 'Deck Master', text: 'Consider your strategy: Do you want fast, aggressive creatures or powerful late-game beasts?' },
-    { type: 'say', speaker: 'Deck Master', text: 'Mixing elements can be powerful, but focusing on one element ensures consistency.' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_BUILDER_ENTRY, text: 'Tap here to open the Deck Editor.', maskInput: true, textPosition: 'top' },
+    { type: 'maskInput', enabled: false },
+    { type: 'label', name: 'wait_for_deck_builder' },
+    { type: 'wait', ms: 400 },
+    { type: 'if', flag: 'deck_builder_open', then: 'deck_builder_opened', else: 'prompt_open_deck_builder' },
+
+    { type: 'label', name: 'prompt_open_deck_builder' },
+    { type: 'say', speaker: 'Deck Master', text: 'Go ahead and tap “New Deck” to open the editor – I\'ll wait!' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_BUILDER_ENTRY, text: 'Tap here to open the Deck Editor.', maskInput: true, textPosition: 'top' },
+    { type: 'maskInput', enabled: false },
+    { type: 'wait', ms: 600 },
+    { type: 'goto', label: 'wait_for_deck_builder' },
+
+    { type: 'label', name: 'deck_builder_opened' },
+    { type: 'say', speaker: 'Deck Master', text: 'Great! Let me show you the key areas of the editor.' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_EDITOR_INFO, text: 'Track your deck size and legality here.', maskInput: true },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_EDITOR_FILTERS, text: 'Use these filters to focus on specific card rarities.', maskInput: true },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_EDITOR_GRID, text: 'Tap cards in your collection to add them to the deck.', maskInput: true },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_EDITOR_CURRENT_DECK_BUTTON, text: 'Open your current deck to rename it or remove cards.', maskInput: true, textPosition: 'bottom' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_EDITOR_SAVE_BUTTON, text: 'When you\'re happy with the list, save it here.', maskInput: true, textPosition: 'bottom' },
+    { type: 'say', speaker: 'Deck Master', text: 'Remember: a deck must have between 20 and 60 cards with up to 3 copies of each creature.' },
     { type: 'say', speaker: 'Deck Master', text: 'Experiment with different combinations - there\'s no single perfect deck!' },
     { type: 'setFlag', key: 'tutorial_deck_builder_completed', value: true },
     { type: 'hidePortrait', side: 'right', animation: 'slideOut' },
@@ -285,6 +332,7 @@ export const SCENE_STORE_INTRO: SceneSpec = {
 };
 
 // Advanced Battle Mechanics (triggered after several battles)
+/*
 export const SCENE_ADVANCED_BATTLE: SceneSpec = {
   id: 'tutorial_advanced_battle',
   version: 1,
@@ -311,16 +359,18 @@ export const SCENE_ADVANCED_BATTLE: SceneSpec = {
   ],
   priority: 55
 };
+*/
 
 // Export all tutorial scenes
 export const ALL_TUTORIAL_SCENES: SceneSpec[] = [
   SCENE_FIRST_LAUNCH,
   SCENE_STORY_MODE_INTRO,
   SCENE_CHAPTER_MAP_INTRO,
-  SCENE_BATTLE_TUTORIAL,
-  SCENE_FIRST_VICTORY,
+  //SCENE_BATTLE_TUTORIAL,
+  //SCENE_FIRST_VICTORY,
+  SCENE_HOME_INTRO,
   SCENE_COLLECTION_INTRO,
   SCENE_DECK_BUILDER_INTRO,
   SCENE_STORE_INTRO,
-  SCENE_ADVANCED_BATTLE,
+  //SCENE_ADVANCED_BATTLE,
 ];

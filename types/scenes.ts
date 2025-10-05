@@ -8,7 +8,7 @@
 // Scene trigger conditions
 export type SceneTrigger =
   | { type: 'onFirstLaunch' }
-  | { type: 'onEnterScreen'; screen: 'battle' | 'story-mode' | 'chapter-map' | 'collection' | 'decks' | 'store' }
+  | { type: 'onEnterScreen'; screen: 'home' | 'battle' | 'story-mode' | 'chapter-map' | 'collection' | 'decks' | 'store' }
   | { type: 'onBattleStart'; chapterId?: number; battleId?: string }
   | { type: 'onBattleEnd'; result: 'win' | 'lose' | 'any' }
   | { type: 'onBattleAction'; action: 'cardPlayed' | 'attackUsed' | 'cardRetired' | 'turnEnded' }
@@ -31,7 +31,7 @@ export type SceneCommand =
   | { type: 'wait'; ms: number }
   
   // UI interaction and highlights
-  | { type: 'highlight'; anchorId: string; text?: string; maskInput?: boolean; style?: HighlightStyle }
+  | { type: 'highlight'; anchorId: string; text?: string; maskInput?: boolean; style?: HighlightStyle; textPosition?: 'top' | 'bottom' }
   | { type: 'maskInput'; enabled: boolean }
   | { type: 'showHint'; text: string; anchorId?: string; duration?: number }
   
@@ -41,10 +41,10 @@ export type SceneCommand =
   | { type: 'checkProgress'; key: string; min?: number; max?: number; then?: string; else?: string }
   
   // Visual novel features
-  | { type: 'setBackground'; uri: string; transition?: 'fade' | 'slide' | 'none' }
-  | { type: 'showPortrait'; side: 'left' | 'right'; uri: string; animation?: 'slideIn' | 'fadeIn' | 'none' }
+  | { type: 'setBackground'; uri: string | number; transition?: 'fade' | 'slide' | 'none' }
+  | { type: 'showPortrait'; side: 'left' | 'right'; uri: string | number; animation?: 'slideIn' | 'fadeIn' | 'none' }
   | { type: 'hidePortrait'; side: 'left' | 'right'; animation?: 'slideOut' | 'fadeOut' | 'none' }
-  | { type: 'imageOverlay'; uri: string; x: number; y: number; width?: number; height?: number; duration?: number }
+  | { type: 'imageOverlay'; uri: string | number; x: number; y: number; width?: number; height?: number; duration?: number }
   | { type: 'playSound'; uri: string; loop?: boolean }
   | { type: 'playMusic'; uri: string; loop?: boolean; fadeIn?: boolean }
   | { type: 'stopMusic'; fadeOut?: boolean }
@@ -76,7 +76,7 @@ export interface SceneSpec {
   steps: SceneCommand[];
   
   // Visual novel assets
-  backgroundImage?: string;
+  backgroundImage?: string | number;
   music?: string;
   
   // Metadata
@@ -149,14 +149,15 @@ export interface SceneState {
     text?: string;
     style?: HighlightStyle;
     maskInput?: boolean;
+    textPosition?: 'top' | 'bottom';
   } | null;
   
   visuals: {
-    background?: string;
-    portraits: { left?: string; right?: string };
+    background?: string | number;
+    portraits: { left?: string | number; right?: string | number };
     overlays: Array<{
       id: string;
-      uri: string;
+      uri: string | number;
       x: number;
       y: number;
       width?: number;
@@ -203,7 +204,9 @@ export interface SceneManagerAPI {
   
   // Persistence
   saveTutorialProgress: () => Promise<void>;
-  loadTutorialProgress: () => Promise<void>;
+
+  // Domain events publish API (decoupled surface for gameplay)
+  publishUserEvent?: (event: SceneUserEvent) => void;
 }
 
 // Scene runner component props
@@ -224,6 +227,13 @@ export type SceneEvent =
   | { type: 'choice_selected'; choiceId: string; sceneId: string }
   | { type: 'anchor_highlighted'; anchorId: string; sceneId: string }
   | { type: 'user_input'; inputType: 'tap' | 'choice' | 'skip'; data?: any };
+
+// Domain-level user events that gameplay can publish without depending on scenes
+export type SceneUserEvent =
+  | { type: 'card_played' }
+  | { type: 'creature_selected' }
+  | { type: 'attack_used' }
+  | { type: 'turn_ended' };
 
 // Scene debugging interface (dev mode)
 export interface SceneDebugger {
@@ -276,6 +286,7 @@ export interface SceneAnalytics {
 // Export commonly used constant types
 export const SCENE_TRIGGERS = {
   FIRST_LAUNCH: 'onFirstLaunch' as const,
+  ENTER_HOME: { type: 'onEnterScreen' as const, screen: 'home' as const },
   ENTER_BATTLE: { type: 'onEnterScreen' as const, screen: 'battle' as const },
   ENTER_STORY: { type: 'onEnterScreen' as const, screen: 'story-mode' as const },
   BATTLE_WIN: { type: 'onBattleEnd' as const, result: 'win' as const },
@@ -284,6 +295,10 @@ export const SCENE_TRIGGERS = {
 } as const;
 
 export const COMMON_ANCHORS = {
+  // Home screen anchors
+  OPEN_PACK_BUTTON: 'openPackBtn',
+  PACK_INVENTORY: 'packInventory',
+
   // Battle screen anchors
   HAND_AREA: 'handArea',
   FIELD_AREA: 'fieldArea',
@@ -299,9 +314,15 @@ export const COMMON_ANCHORS = {
   
   // Collection anchors
   CARD_GRID: 'cardGrid',
-  PACK_INVENTORY: 'packInventory',
-  DECK_BUILDER: 'deckBuilder',
   
+  // Decks & deck builder anchors
+  DECK_BUILDER_ENTRY: 'deckBuilderEntry',
+  DECK_EDITOR_INFO: 'deckEditorInfo',
+  DECK_EDITOR_FILTERS: 'deckEditorFilters',
+  DECK_EDITOR_GRID: 'deckEditorGrid',
+  DECK_EDITOR_CURRENT_DECK_BUTTON: 'deckEditorCurrentDeckBtn',
+  DECK_EDITOR_SAVE_BUTTON: 'deckEditorSaveBtn',
+
   // Store anchors
   PACK_SHOP: 'packShop',
   COIN_BALANCE: 'coinBalance',

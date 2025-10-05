@@ -5,6 +5,8 @@ import Svg, { Path, Circle, Defs, RadialGradient, Stop, Line } from 'react-nativ
 import { StoryBattle, StoryChapter } from '@/data/storyMode';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
+import { useAnchorRegister } from '@/context/AnchorsContext';
+import { COMMON_ANCHORS } from '@/types/scenes';
 
 interface StoryMapProps {
   chapter: StoryChapter;
@@ -29,6 +31,15 @@ export default function StoryMap({ chapter, onBattleSelect }: StoryMapProps) {
 
   const pulseAnimation = useRef(new Animated.Value(0)).current;
   const loopRef = useRef<Animated.CompositeAnimation | null>(null);
+
+  const firstAccessibleBattleId = useMemo(() => {
+    if (!chapter || !chapter.battles) return undefined;
+    const accessible = chapter.battles.find(b => b.isAccessible);
+    return (accessible ?? chapter.battles[0])?.id;
+  }, [chapter]);
+
+  const battleAnchorRef = useRef<TouchableOpacity | null>(null);
+  useAnchorRegister(COMMON_ANCHORS.BATTLE_NODE, battleAnchorRef, [chapter.id, firstAccessibleBattleId]);
 
   useEffect(() => {
     // Start pulsing animation for accessible battles
@@ -145,6 +156,7 @@ export default function StoryMap({ chapter, onBattleSelect }: StoryMapProps) {
             onPress={() => battle.isAccessible && onBattleSelect(battle)}
             disabled={!battle.isAccessible}
             style={styles.nodeButton}
+            ref={battle.id === firstAccessibleBattleId ? battleAnchorRef : undefined}
           >
             {battle.isBoss ? (
               <Animated.View

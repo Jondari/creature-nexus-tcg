@@ -47,7 +47,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
           const { i18n } = await import('@/utils/i18n');
           await i18n.setLocale(merged.locale || 'en');
-        } catch {}
+        } catch (error) {
+          if (__DEV__) {
+            console.warn('Failed to apply stored locale during settings load:', error);
+          }
+        }
         setSettings(merged);
       }
     } catch (error) {
@@ -86,7 +90,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const { i18n } = await import('@/utils/i18n');
       await i18n.setLocale(locale);
-    } catch {}
+    } catch (error) {
+      if (__DEV__) {
+        console.warn('Failed to switch locale in settings context:', error);
+      }
+    }
     saveSettings(newSettings);
   };
 
