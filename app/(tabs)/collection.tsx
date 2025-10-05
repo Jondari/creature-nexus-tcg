@@ -60,12 +60,12 @@ export default function CollectionScreen() {
   const fetchUserCards = async () => {
     try {
       setLoading(true);
-      
+
       if (!user) return;
-      
+
       const userDocRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
-      
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
         // Store only well-formed card objects; drop any invalid entries (e.g., string IDs)
@@ -141,7 +141,7 @@ export default function CollectionScreen() {
       </View>
       
       {/* Pass grouped items so the grid only renders unique models with x{count} */}
-      <View ref={gridRef as any}>
+      <View ref={gridRef as any} style={styles.gridWrapper}>
         <CardGrid
           items={groupedCards}
           filter={filter}
@@ -157,6 +157,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.primary,
+  },
+  gridWrapper: {
+    flex: 1,
   },
   tutorialButton: {
     width: 36,

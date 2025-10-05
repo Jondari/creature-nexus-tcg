@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.14.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.13.1...v0.14.0) (2025-10-05)
+
+
+### Features
+
+* Add i18n support and enhance scene robustness ([f095644](https://github.com/Jondari/creature-nexus-tcg/commit/f095644ddd591d46b604b4fbe9ed73d7ec7ef80a))
+* Add interactive tutorial system with scene DSL ([12a2094](https://github.com/Jondari/creature-nexus-tcg/commit/12a20948c73455d2ad442e96941600b5c35762a9))
+
+### Bug Fixes
+
+* restore collection grid height on Android so cards render correctly
+
 ### [0.13.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.13.0...v0.13.1) (2025-10-04)
 
 
