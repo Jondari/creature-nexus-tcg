@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.14.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.14.0...v0.14.1) (2025-10-06)
+
+
+### Bug Fixes
+
+* clear story cache on user switch ([202e12f](https://github.com/Jondari/creature-nexus-tcg/commit/202e12fbc393e54c34c250d9b749bd8378a7d4b6))
+
 ## [0.14.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.13.1...v0.14.0) (2025-10-05)
 
 
