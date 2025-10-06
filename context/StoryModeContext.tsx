@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/config/firebase';
@@ -133,7 +133,21 @@ export function StoryModeProvider({ children }: { children: ReactNode }) {
   const [chapters, setChapters] = useState<StoryChapter[]>([...STORY_CHAPTERS]);
   const [currentChapter, setCurrentChapter] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const lastAppliedRef = React.useRef<number>(0);
+  const lastAppliedRef = useRef<number>(0);
+  const lastUserRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const currentUid = user?.uid ?? null;
+    if (lastUserRef.current && lastUserRef.current !== currentUid) {
+      AsyncStorage.removeItem('creature_nexus_story_progress_light').catch(error => {
+        if (__DEV__) {
+          console.warn('Failed to clear story progress cache on user switch:', error);
+        }
+      });
+      lastAppliedRef.current = 0;
+    }
+    lastUserRef.current = currentUid;
+  }, [user?.uid]);
 
   useEffect(() => {
     loadProgress();
