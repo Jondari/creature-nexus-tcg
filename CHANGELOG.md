@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.16.0...v0.17.0) (2025-10-17)
+
+
+### Features
+
+* move end turn control into status bar ([18feb5d](https://github.com/Jondari/creature-nexus-tcg/commit/18feb5d755c4e08e45cbc6f34612d2c53aa9dd8c))
+
 ## [0.16.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.15.0...v0.16.0) (2025-10-17)
 
 
