@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.15.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.14.1...v0.15.0) (2025-10-17)
+
+
+### Features
+
+* add tutorial battle mode ([150d788](https://github.com/Jondari/creature-nexus-tcg/commit/150d788b161928fc4ce47006f6e591c6a7020a97))
+
 ### [0.14.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.14.0...v0.14.1) (2025-10-06)
 
 
