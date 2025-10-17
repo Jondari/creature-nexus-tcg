@@ -243,6 +243,18 @@
     "cardIllustrationsTest": "Card Illustrations Test",
     "storyMapVisualizer": "Story Map Visualizer",
     "addCoinsDev": "Add Nexus Coins (Dev)",
+    "battlefieldThemeLab": "Battlefield Theme Lab",
+    "battlefieldThemeLabSubtitle": "Preview arena styles, animations, and layout variations.",
+    "availableThemes": "Available Themes",
+    "themePreviewTitle": "Visual Preview",
+    "themeConfigTitle": "Theme Configuration",
+    "themeId": "Theme ID",
+    "fieldBorder": "Field Border",
+    "fieldBackground": "Field Background",
+    "cardSpacing": "Card Spacing",
+    "particleEffects": "Particle Effects",
+    "autoValue": "auto",
+    "noneValue": "None",
     "gameSettings": "Game Settings",
     "cardSize": "Card Size",
     "cardSizeDesc": "Choose how cards are displayed throughout the game",
@@ -540,6 +552,9 @@
     "noTargetsBody": "There are no enemy creatures to attack."
   },
   "battle": {
+    "previewFieldLabel": "Preview Field",
+    "previewOpponentField": "Opponent Preview Field",
+    "noCreaturesPreview": "No sample creatures available",
     "actionLog": "Action Log",
     "log": {
       "playCard": "Played a card",

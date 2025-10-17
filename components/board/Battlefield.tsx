@@ -5,6 +5,7 @@ import { CardComponent } from '../CardComponent';
 import Colors from '@/constants/Colors';
 import { Card, DamageAnimation } from '@/types/game';
 import { BattlefieldTheme } from '@/types/battlefield';
+import { BattlefieldParticles } from './BattlefieldParticles';
 
 interface AttackModeState {
   cardId: string;
@@ -157,9 +158,9 @@ export function Battlefield({
           )}
         </ScrollView>
 
-        {theme.particleEffects && (
+        {theme.particleEffects && theme.particleEffects.length > 0 && (
           <View style={styles.particleContainer}>
-            {/* Reserved for theme-specific particle effects */}
+            <BattlefieldParticles effects={theme.particleEffects} />
           </View>
         )}
       </View>

@@ -340,6 +340,14 @@ export default function ProfileScreen() {
               <TestTube size={20} color={'#9333ea'} />
               <Text style={[styles.linkText, { color: '#9333ea' }]}>{t('profile.storyMapVisualizer')}</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={() => router.push('/battlefield-theme-test' as any)}
+            >
+              <TestTube size={20} color={Colors.accent[500]} />
+              <Text style={[styles.linkText, { color: Colors.accent[500] }]}>{t('profile.battlefieldThemeLab')}</Text>
+            </TouchableOpacity>
             
             <TouchableOpacity 
               style={styles.linkButton}
