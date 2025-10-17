@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import Colors from '@/constants/Colors';
 
 interface StatusBarProps {
@@ -14,6 +14,10 @@ interface StatusBarProps {
   onToggleBattleLog?: () => void;
   containerRef?: React.Ref<View>;
   rulesAccessibilityLabel?: string;
+  showEndTurnButton?: boolean;
+  endTurnLabel?: string;
+  onEndTurn?: () => void;
+  endTurnButtonRef?: React.Ref<TouchableOpacity>;
 }
 
 export function StatusBar({
@@ -28,16 +32,40 @@ export function StatusBar({
   onToggleBattleLog,
   containerRef,
   rulesAccessibilityLabel,
+  showEndTurnButton = false,
+  endTurnLabel,
+  onEndTurn,
+  endTurnButtonRef,
 }: StatusBarProps) {
+  const { width } = useWindowDimensions();
+  const isCompactLayout = width <= 768;
+
   return (
-    <View ref={containerRef} style={styles.container}>
+    <View
+      ref={containerRef}
+      style={[styles.container, isCompactLayout && styles.containerCompact]}
+    >
       <View style={styles.infoColumn}>
         <Text style={styles.turnInfo}>{turnLabel}</Text>
         <Text style={styles.phaseInfo}>{phaseLabel}</Text>
         {aiStatus ? <Text style={styles.aiStatusText}>{aiStatus}</Text> : null}
       </View>
 
-      <View style={styles.controlsRow}>
+      <View
+        style={[styles.controlsRow, isCompactLayout && styles.controlsRowCompact]}
+      >
+        {showEndTurnButton && (
+          <TouchableOpacity
+            ref={endTurnButtonRef}
+            style={styles.endTurnButton}
+            onPress={onEndTurn}
+            disabled={!onEndTurn}
+            accessibilityLabel={endTurnLabel}
+          >
+            <Text style={styles.endTurnButtonText}>{endTurnLabel ?? 'End Turn'}</Text>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity style={styles.iconButton} onPress={onToggleCardSize}>
           <Text style={styles.iconButtonText}>{cardSize === 'small' ? '⊞' : '⊟'}</Text>
         </TouchableOpacity>
@@ -73,6 +101,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  containerCompact: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    gap: 12,
+  },
   infoColumn: {
     flexShrink: 1,
   },
@@ -96,6 +129,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flexWrap: 'wrap',
+  },
+  controlsRowCompact: {
+    justifyContent: 'flex-start',
   },
   iconButton: {
     width: 40,
@@ -123,5 +160,18 @@ const styles = StyleSheet.create({
   },
   logButtonTextActive: {
     color: Colors.text.primary,
+  },
+  endTurnButton: {
+    backgroundColor: Colors.accent[600],
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  endTurnButtonText: {
+    color: Colors.text.primary,
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

@@ -549,6 +549,10 @@ export function GameBoard() {
         isBattleLogOpen={sidebarVisible}
         onToggleBattleLog={toggleSidebar}
         rulesAccessibilityLabel={t('decks.rulesA11y')}
+        showEndTurnButton={currentPlayer.id === playerAtBottom.id && isPlayerTurn}
+        endTurnLabel={t('actions.endTurn')}
+        onEndTurn={handleEndTurn}
+        endTurnButtonRef={endTurnBtnRef as any}
       />
         
 
@@ -646,13 +650,6 @@ export function GameBoard() {
       </View>
 
       {/* Action buttons removed - now handled by CardActionButtons overlay */}
-
-      {/* End Turn Button */}
-      {currentPlayer.id === playerAtBottom.id && isPlayerTurn && (
-        <TouchableOpacity ref={endTurnBtnRef as any} style={styles.endTurnButton} onPress={handleEndTurn}>
-          <Text style={styles.endTurnText}>{t('actions.endTurn')}</Text>
-        </TouchableOpacity>
-      )}
 
       {attackMode && (
         <View style={styles.attackModeIndicator}>
@@ -766,19 +763,6 @@ const styles = StyleSheet.create({
   hand: {
     margin: 8,
     marginBottom: 16,
-  },
-  endTurnButton: {
-    backgroundColor: Colors.accent[600],
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  endTurnText: {
-    color: Colors.text.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   attackModeIndicator: {
     backgroundColor: '#FFC107',
