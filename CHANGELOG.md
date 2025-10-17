@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.18.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.17.0...v0.18.0) (2025-10-17)
+
+
+### Features
+
+* add particle engine and theme lab ([212cd8b](https://github.com/Jondari/creature-nexus-tcg/commit/212cd8b664cab5642d82f84d26e181f9558703cd))
+
 ## [0.17.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.16.0...v0.17.0) (2025-10-17)
 
 
