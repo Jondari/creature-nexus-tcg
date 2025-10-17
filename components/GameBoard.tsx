@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Platform } from 'react-native';
-import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
@@ -8,6 +7,9 @@ import { useDecks } from '../context/DeckContext';
 import { useSettings } from '../context/SettingsContext';
 import { CardComponent } from './CardComponent';
 import { CardActionButtons } from './CardActionButtons';
+import { Battlefield } from './board/Battlefield';
+import { PlayerInfo } from './board/PlayerInfo';
+import { StatusBar } from './board/StatusBar';
 import { ActionLog } from './ActionLog';
 import { Sidebar } from './Sidebar';
 import { EnergyWaveAnimation } from './Animation/EnergyWaveAnimation';
@@ -22,6 +24,7 @@ import { useAnchorRegister } from '@/context/AnchorsContext';
 import { COMMON_ANCHORS } from '@/types/scenes';
 import { useSceneEvents } from '@/context/SceneManagerContext';
 import { useSceneManager } from '@/context/SceneManagerContext';
+import { BATTLEFIELD_THEMES, BattlefieldTheme } from '@/types/battlefield';
 
 export function GameBoard() {
   const { 
@@ -50,14 +53,7 @@ export function GameBoard() {
   const [attackMode, setAttackMode] = useState<{ cardId: string; attackName: string } | null>(null);
   const [rulesVisible, setRulesVisible] = useState(false);
   const [showDeckSelection, setShowDeckSelection] = useState(false);
-  
-  
-  // Gesture and animation state
-  const screenWidth = Dimensions.get('window').width;
-  const isMobile = screenWidth <= 768;
-  const isWeb = Platform.OS === 'web';
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const translateX = React.useRef(new Animated.Value(isMobile ? screenWidth : 0)).current;
   // Blocks interactions while we delay lethal attacks for the hit animation
   const [resolvingAttack, setResolvingAttack] = useState(false);
   const publishEvent = useSceneEvents();
@@ -114,6 +110,21 @@ export function GameBoard() {
     air: 'earth',
     earth: 'water',
   };
+
+  const DEFAULT_BATTLEFIELD_THEME_BY_POSITION: Record<'top' | 'bottom', string> = {
+    top: 'default',
+    bottom: 'default',
+  };
+
+  const getPlayerTheme = useCallback(
+    (position: 'top' | 'bottom'): BattlefieldTheme => {
+      const themeId = DEFAULT_BATTLEFIELD_THEME_BY_POSITION[position] ?? 'default';
+      return (
+        BATTLEFIELD_THEMES.find((theme) => theme.id === themeId) ?? BATTLEFIELD_THEMES[0]
+      );
+    },
+    []
+  );
 
   // Clear any stale attack preview when switching the selected attacker
   useEffect(() => {
@@ -434,6 +445,17 @@ export function GameBoard() {
   const playerAtBottom = gameEngine.getPlayers()[0]; // Player 1 (human)
   const playerAtTop = gameEngine.getPlayers()[1]; // Player 2 (opponent)
 
+  const turnLabelText = t('game.turnLabel', {
+    n: String(gameState.turnNumber),
+    who: isPlayerTurn ? t('game.yourTurn') : t('game.aiTurn'),
+  });
+
+  const phaseLabelText = t('game.phaseLabel', { phase: t(`phases.${gameState.phase}`) });
+
+  const aiStatusText = aiVisualState.isActive
+    ? `🤖 ${aiVisualState.message || getAIStatusMessage(aiVisualState.status)}`
+    : null;
+
   if (gameState.isGameOver) {
     const handlePlayAgain = () => {
       // Get the current player names and decks to restart with same setup
@@ -482,174 +504,118 @@ export function GameBoard() {
     <View style={styles.mainContainer}>
       <ScrollView style={styles.gameContainer}>
       {/* Top Player Info */}
-      <View style={styles.playerInfo} ref={topStatsRef as any}>
-        <Text style={styles.playerName}>{playerAtTop.name}</Text>
-        <View style={styles.stats}>
-          <Text style={styles.stat}>{t('player.energy')}: {playerAtTop.energy}</Text>
-          <Text style={styles.stat}>{t('player.points')}: {playerAtTop.points}</Text>
-          <Text style={styles.stat}>{t('player.hand')}: {playerAtTop.hand.length}</Text>
-        </View>
-      </View>
+      <PlayerInfo
+        name={playerAtTop.name}
+        stats={[
+          { label: t('player.energy'), value: playerAtTop.energy },
+          { label: t('player.points'), value: playerAtTop.points },
+          { label: t('player.hand'), value: playerAtTop.hand.length },
+        ]}
+        containerRef={topStatsRef as any}
+      />
 
       {/* Top Player Field */}
-      <View style={styles.field} ref={topFieldRef as any}>
-        <Text style={styles.fieldLabel}>{playerAtTop.name} {t('player.field')}</Text>
-        <ScrollView horizontal style={styles.cardRow}>
-          {playerAtTop.field.map((card) => {
-            // Only compute preview when it's the player's turn and an attack is selected
-            const preview = (isPlayerTurn && attackMode)
-                ? (() => {
-                  const attacker = playerAtBottom.field.find(c => c.id === attackMode.cardId);
-                  return attacker ? getPreviewDamage(attacker, attackMode.attackName, card) : null;
-                })()
-                : null;
-
-            // Choose badge styles responsively based on card size ("small" vs "normal")
-            const isSmall = cardSize === 'small';
-            const previewBadgeStyle = [
-              styles.previewBadgeBase,
-              isSmall ? styles.previewBadgeSmall : styles.previewBadgeNormal,
-            ];
-            const previewTextStyle = [
-              styles.previewTextBase,
-              isSmall ? styles.previewTextSmall : styles.previewTextNormal,
-              preview?.affinity > 0 && { color: '#4ECDC4' },   // positive bonus
-              preview?.affinity < 0 && { color: '#FF6B6B' },   // negative bonus
-            ];
-
-            return (
-                <View key={card.id} style={{ marginRight: 12, position: 'relative' }}>
-                  <CardComponent
-                      card={card}
-                      onPress={() => handleCardPress(card)}
-                      disabled={!isPlayerTurn || !attackMode || resolvingAttack}
-                      aiHighlight={getCardHighlightType(card.id!)}
-                      damageAnimation={getDamageAnimationForCard(card.id!)}
-                      size={cardSize}
-                  />
-
-                  {/* Damage + affinity preview badge */}
-                  {attackMode && isPlayerTurn && preview && (
-                      <View style={previewBadgeStyle}>
-                        <Text style={previewTextStyle}>
-                          {preview.total}
-                          {preview.affinity ? ` (${preview.affinity > 0 ? '+' : ''}${preview.affinity})` : ''}
-                        </Text>
-                      </View>
-                  )}
-                </View>
-            );
-          })}
-          {playerAtTop.field.length === 0 && (
-            <Text style={styles.emptyField}>{t('game.noCreaturesOnField')}</Text>
-          )}
-        </ScrollView>
-      </View>
+      <Battlefield
+        label={`${playerAtTop.name} ${t('player.field')}`}
+        cards={playerAtTop.field}
+        theme={getPlayerTheme('top')}
+        position="top"
+        containerRef={topFieldRef as any}
+        cardSize={cardSize}
+        selectedCardId={selectedCard}
+        disabled={!isPlayerTurn || !attackMode || resolvingAttack}
+        attackMode={attackMode}
+        previewDamage={(card) => {
+          if (!isPlayerTurn || !attackMode) return null;
+          const attacker = playerAtBottom.field.find((c) => c.id === attackMode.cardId);
+          return attacker ? getPreviewDamage(attacker, attackMode.attackName, card) : null;
+        }}
+        aiHighlight={getCardHighlightType}
+        damageAnimation={getDamageAnimationForCard}
+        emptyLabel={t('game.noCreaturesOnField')}
+        onCardPress={handleCardPress}
+      />
 
       {/* Game Info */}
-      <View style={styles.gameInfo}>
-        <View style={styles.gameInfoContent} ref={turnStatusRef as any}>
-          <View>
-            <Text style={styles.turnInfo}>
-              {t('game.turnLabel', { n: String(gameState.turnNumber), who: isPlayerTurn ? t('game.yourTurn') : t('game.aiTurn') })}
-            </Text>
-            <Text style={styles.phaseInfo}>
-              {t('game.phaseLabel', { phase: t(`phases.${gameState.phase}`) })}
-            </Text>
-            {aiVisualState.isActive && (
-              <Text style={styles.aiStatusText}>
-                🤖 {aiVisualState.message || getAIStatusMessage(aiVisualState.status)}
-              </Text>
-            )}
-          </View>
-          <View style={styles.controlsBar}>
-            <TouchableOpacity 
-              style={styles.sizeToggle}
-              onPress={() => setCardSize(cardSize === 'small' ? 'normal' : 'small')}
-            >
-              <Text style={styles.sizeToggleText}>
-                {cardSize === 'small' ? '⊞' : '⊟'}
-              </Text>
-            </TouchableOpacity>
-            {/* Rules button */}
-            <TouchableOpacity
-              style={[styles.sizeToggle, { marginLeft: 8 }]}
-              onPress={() => setRulesVisible(true)}
-              accessibilityLabel={t('decks.rulesA11y')}
-            >
-              <Text style={styles.sizeToggleText}>ℹ️</Text>
-            </TouchableOpacity>
-            
-            {showBattleLog && (
-              <TouchableOpacity 
-                style={[styles.sizeToggle, styles.logToggle, sidebarVisible && styles.logToggleActive]}
-                onPress={toggleSidebar}
-              >
-                <Text style={[styles.sizeToggleText, sidebarVisible && styles.logToggleTextActive]}>
-                  📋
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </View>
+      <StatusBar
+        containerRef={turnStatusRef as any}
+        turnLabel={turnLabelText}
+        phaseLabel={phaseLabelText}
+        aiStatus={aiStatusText}
+        cardSize={cardSize}
+        onToggleCardSize={() => setCardSize(cardSize === 'small' ? 'normal' : 'small')}
+        onShowRules={() => setRulesVisible(true)}
+        showBattleLog={showBattleLog}
+        isBattleLogOpen={sidebarVisible}
+        onToggleBattleLog={toggleSidebar}
+        rulesAccessibilityLabel={t('decks.rulesA11y')}
+      />
+        
 
       {/* Bottom Player Field */}
-      <View style={styles.field} ref={bottomFieldRef as any}>
-        <Text style={styles.fieldLabel}>{playerAtBottom.name} {t('player.field')}</Text>
-        <ScrollView horizontal style={styles.cardRow}>
-          {playerAtBottom.field.map((card) => (
-            <View key={card.id} style={{ marginRight: 12, position: 'relative' }}>
-              <CardComponent
-                card={card}
-                selected={selectedCard === card.id}
-                onPress={() => {
-                  // Toggle selection and drop any previous attack preview to avoid stale damage badges
-      const willSelect = card.id !== selectedCard;
-      setSelectedCard(willSelect ? card.id! : null);
-      if (willSelect) publishEvent({ type: 'creature_selected' });
-                  setAttackMode(null);
-                }}
-                onAttack={(attackName) => handleAttack(card.id!, attackName)}
-                showActions={
-                  currentPlayer.id === playerAtBottom.id &&
-                  isPlayerTurn &&
-                  selectedCard === card.id &&
-                  !gameState.attackedThisTurn.has(card.id!)
-                }
-                disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn || resolvingAttack}
-                aiHighlight={getCardHighlightType(card.id!)}
-                damageAnimation={getDamageAnimationForCard(card.id!)}
-                size={cardSize}
-                playerEnergy={playerAtBottom.energy}
-                currentTurn={gameState.turnNumber}
-                isFirstPlayer={playerAtBottom.id === gameState.players[0].id}
-              />
-              
-              {/* Card Action Buttons */}
-              <CardActionButtons
-                visible={selectedCard === card.id && currentPlayer.id === playerAtBottom.id && isPlayerTurn && !gameState.attackedThisTurn.has(card.id!)}
-                showRetire={true}
-                onRetire={() => handleRetire(card.id!)}
-                cardSize={cardSize}
-              />
-            </View>
-          ))}
-          {playerAtBottom.field.length === 0 && (
-            <Text style={styles.emptyField}>{t('game.noCreaturesOnField')}</Text>
-          )}
-        </ScrollView>
-      </View>
+      <Battlefield
+        label={`${playerAtBottom.name} ${t('player.field')}`}
+        cards={playerAtBottom.field}
+        theme={getPlayerTheme('bottom')}
+        position="bottom"
+        containerRef={bottomFieldRef as any}
+        cardSize={cardSize}
+        selectedCardId={selectedCard}
+        disabled={!isPlayerTurn || resolvingAttack}
+        aiHighlight={getCardHighlightType}
+        damageAnimation={getDamageAnimationForCard}
+        playerEnergy={playerAtBottom.energy}
+        currentTurn={gameState.turnNumber}
+        isFirstPlayer={playerAtBottom.id === gameState.players[0].id}
+        emptyLabel={t('game.noCreaturesOnField')}
+        onCardPress={(card) => {
+          const willSelect = card.id !== selectedCard;
+          setSelectedCard(willSelect ? card.id : null);
+          if (willSelect) publishEvent({ type: 'creature_selected' });
+          setAttackMode(null);
+        }}
+        onAttack={handleAttack}
+        cardComponentProps={(card) => ({
+          showActions:
+            currentPlayer.id === playerAtBottom.id &&
+            isPlayerTurn &&
+            selectedCard === card.id &&
+            !gameState.attackedThisTurn.has(card.id),
+          disabled:
+            currentPlayer.id !== playerAtBottom.id || !isPlayerTurn || resolvingAttack,
+        })}
+        renderCardActions={(card) => {
+          const visible =
+            selectedCard === card.id &&
+            currentPlayer.id === playerAtBottom.id &&
+            isPlayerTurn &&
+            !gameState.attackedThisTurn.has(card.id);
+
+          if (!visible) {
+            return null;
+          }
+
+          return (
+            <CardActionButtons
+              visible={true}
+              showRetire={true}
+              onRetire={() => handleRetire(card.id)}
+              cardSize={cardSize}
+            />
+          );
+        }}
+      />
 
       {/* Bottom Player Info */}
-      <View style={styles.playerInfo} ref={bottomStatsRef as any}>
-        <Text style={styles.playerName}>{playerAtBottom.name}</Text>
-        <View style={styles.stats}>
-          <Text style={styles.stat}>{t('player.energy')}: {playerAtBottom.energy}</Text>
-          <Text style={styles.stat}>{t('player.points')}: {playerAtBottom.points}</Text>
-          <Text style={styles.stat}>{t('player.hand')}: {playerAtBottom.hand.length}</Text>
-        </View>
-      </View>
+      <PlayerInfo
+        name={playerAtBottom.name}
+        stats={[
+          { label: t('player.energy'), value: playerAtBottom.energy },
+          { label: t('player.points'), value: playerAtBottom.points },
+          { label: t('player.hand'), value: playerAtBottom.hand.length },
+        ]}
+        containerRef={bottomStatsRef as any}
+      />
 
       {/* Bottom Player Hand */}
       <View style={styles.hand} ref={bottomHandRef as any}>
@@ -778,30 +744,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.text.secondary,
   },
-  playerInfo: {
-    backgroundColor: Colors.background.card,
-    padding: 12,
-    margin: 8,
-    borderRadius: 8,
-    boxShadow: '0px 1px 2.22px 0px rgba(0, 0, 0, 0.22)',
-    elevation: 3,
-  },
-  playerName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: Colors.text.primary,
-  },
-  stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  stat: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: Colors.text.secondary,
-  },
   field: {
     margin: 8,
   },
@@ -824,76 +766,6 @@ const styles = StyleSheet.create({
   hand: {
     margin: 8,
     marginBottom: 16,
-  },
-  gameInfo: {
-    backgroundColor: Colors.background.card,
-    padding: 12,
-    margin: 8,
-    borderRadius: 8,
-  },
-  gameInfoContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  controlsBar: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  sizeToggle: {
-    backgroundColor: Colors.background.primary,
-    borderRadius: 8,
-    padding: 8,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexShrink: 0,
-  },
-  logToggle: {
-    backgroundColor: Colors.background.primary,
-  },
-  logToggleActive: {
-    backgroundColor: Colors.accent[500],
-  },
-  logToggleTextActive: {
-    color: Colors.text.primary,
-  },
-  sizeToggleText: {
-    fontSize: 18,
-    color: Colors.text.primary,
-    fontWeight: 'bold',
-  },
-  turnInfo: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.text.primary,
-  },
-  phaseInfo: {
-    fontSize: 12,
-    color: Colors.text.secondary,
-    marginTop: 4,
-  },
-  aiStatusText: {
-    fontSize: 14,
-    color: '#4CAF50',
-    marginTop: 4,
-    fontWeight: '600',
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 16,
-  },
-  actionButton: {
-    backgroundColor: Colors.primary[600],
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  actionText: {
-    color: Colors.text.primary,
-    fontWeight: 'bold',
   },
   endTurnButton: {
     backgroundColor: Colors.accent[600],
@@ -1015,44 +887,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 24,
     fontStyle: 'italic',
-  },
-  // Base styles shared by all sizes
-  previewBadgeBase: {
-    position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    // iOS shadow
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    shadowOffset: { width: 0, height: 2 },
-    // Android elevation
-    elevation: 3,
-  },
-  previewBadgeSmall: {
-    top: 6,
-    right: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  previewBadgeNormal: {
-    top: 10,
-    right: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  previewTextBase: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    letterSpacing: 0.2,
-  },
-  previewTextSmall: {
-    fontSize: 12,
-  },
-  previewTextNormal: {
-    fontSize: 16,
   },
 });
