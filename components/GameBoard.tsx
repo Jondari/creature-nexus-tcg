@@ -61,21 +61,47 @@ export function GameBoard() {
   // Blocks interactions while we delay lethal attacks for the hit animation
   const [resolvingAttack, setResolvingAttack] = useState(false);
   const publishEvent = useSceneEvents();
+  const wasAITurnRef = useRef<boolean | null>(null);
 
   // Anchor refs for tutorial highlights
+  const topFieldRef = useRef<View | null>(null);
   const bottomFieldRef = useRef<View | null>(null);
   const bottomHandRef = useRef<View | null>(null);
   const bottomStatsRef = useRef<View | null>(null);
   const topStatsRef = useRef<View | null>(null);
   const endTurnBtnRef = useRef<TouchableOpacity | null>(null);
+  const turnStatusRef = useRef<View | null>(null);
 
   // Register anchors (measured by AnchorsContext)
+  useAnchorRegister(COMMON_ANCHORS.ENEMY_FIELD, topFieldRef);
   useAnchorRegister(COMMON_ANCHORS.FIELD_AREA, bottomFieldRef);
   useAnchorRegister(COMMON_ANCHORS.HAND_AREA, bottomHandRef);
   useAnchorRegister(COMMON_ANCHORS.ENERGY_DISPLAY, bottomStatsRef);
   useAnchorRegister(COMMON_ANCHORS.PLAYER_HP, bottomStatsRef);
   useAnchorRegister(COMMON_ANCHORS.ENEMY_HP, topStatsRef);
   useAnchorRegister(COMMON_ANCHORS.END_TURN_BUTTON, endTurnBtnRef as any);
+  useAnchorRegister(COMMON_ANCHORS.TURN_STATUS, turnStatusRef);
+
+  useEffect(() => {
+    if (!gameState || !gameEngine) return;
+
+    const currentPlayer = gameEngine.getCurrentPlayer();
+    const isAITurn = currentPlayer.isAI;
+    const previous = wasAITurnRef.current;
+
+    if (previous === null) {
+      wasAITurnRef.current = isAITurn;
+      return;
+    }
+
+    if (!previous && isAITurn) {
+      sceneManager.setFlag('ai_turn_completed', false);
+    } else if (previous && !isAITurn) {
+      sceneManager.setFlag('ai_turn_completed', true);
+    }
+
+    wasAITurnRef.current = isAITurn;
+  }, [gameState?.currentPlayerIndex, gameState?.phase, gameState?.turnNumber, gameEngine, sceneManager]);
 
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
@@ -466,7 +492,7 @@ export function GameBoard() {
       </View>
 
       {/* Top Player Field */}
-      <View style={styles.field} ref={bottomFieldRef as any}>
+      <View style={styles.field} ref={topFieldRef as any}>
         <Text style={styles.fieldLabel}>{playerAtTop.name} {t('player.field')}</Text>
         <ScrollView horizontal style={styles.cardRow}>
           {playerAtTop.field.map((card) => {
@@ -522,7 +548,7 @@ export function GameBoard() {
 
       {/* Game Info */}
       <View style={styles.gameInfo}>
-        <View style={styles.gameInfoContent}>
+        <View style={styles.gameInfoContent} ref={turnStatusRef as any}>
           <View>
             <Text style={styles.turnInfo}>
               {t('game.turnLabel', { n: String(gameState.turnNumber), who: isPlayerTurn ? t('game.yourTurn') : t('game.aiTurn') })}
@@ -569,7 +595,7 @@ export function GameBoard() {
       </View>
 
       {/* Bottom Player Field */}
-      <View style={styles.field}>
+      <View style={styles.field} ref={bottomFieldRef as any}>
         <Text style={styles.fieldLabel}>{playerAtBottom.name} {t('player.field')}</Text>
         <ScrollView horizontal style={styles.cardRow}>
           {playerAtBottom.field.map((card) => (
@@ -822,6 +848,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   logToggle: {
     backgroundColor: Colors.background.primary,

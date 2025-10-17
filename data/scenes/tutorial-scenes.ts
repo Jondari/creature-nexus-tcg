@@ -94,86 +94,94 @@ export const SCENE_CHAPTER_MAP_INTRO: SceneSpec = {
 };
 
 // Battle Screen Tutorial - Comprehensive battle mechanics
-/*
 export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
   id: 'tutorial_battle_basics',
-  version: 1,
+  version: 2,
   title: 'Battle Basics',
   description: 'Complete tutorial for battle mechanics',
   triggers: [
-    { type: 'onEnterScreen', screen: 'battle' }
+    { type: 'onEnterScreen', screen: 'battle-tutorial' }
   ],
-  conditions: {
-    flags: { 'tutorial_battle_completed': false }
-  },
+  priority: 95,
   steps: [
-    { type: 'showPortrait', side: 'left', uri: 'guide_portrait.png', animation: 'slideIn' },
-    { type: 'say', speaker: 'Battle Guide', text: 'Welcome to your first battle! Let me show you the basics.' },
-    
-    // UI Overview
-    { type: 'highlight', anchorId: COMMON_ANCHORS.PLAYER_HP, text: 'This is your health. Don\'t let it reach zero!', maskInput: true },
-    { type: 'highlight', anchorId: COMMON_ANCHORS.ENEMY_HP, text: 'This is your opponent\'s health. Reduce it to zero to win!', maskInput: true },
-    { type: 'highlight', anchorId: COMMON_ANCHORS.ENERGY_DISPLAY, text: 'This shows your energy. You gain 1 energy each turn.', maskInput: true },
-    
-    // Hand and Cards
-    { type: 'highlight', anchorId: COMMON_ANCHORS.HAND_AREA, text: 'These are your cards. Each creature has HP and attacks.', maskInput: true },
-    { type: 'say', speaker: 'Battle Guide', text: 'Cards cost energy to play. Look at the energy cost in the top-right corner.' },
-    
-    // Playing Cards
-    { type: 'say', speaker: 'Battle Guide', text: 'Try playing a card now. Tap on any card in your hand.' },
+    { type: 'showPortrait', side: 'left', uri: 'strategist_portrait.png', animation: 'slideIn' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.welcome' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.PLAYER_HP, text: 'i18n:tutorial.battleIntro.playerStatusBar', maskInput: true, textPosition: "top" },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.ENEMY_HP, text: 'i18n:tutorial.battleIntro.enemyStatusBar', maskInput: true },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.ENERGY_DISPLAY, text: 'i18n:tutorial.battleIntro.energy', maskInput: true, textPosition: "top" },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.HAND_AREA, text: 'i18n:tutorial.battleIntro.hand', maskInput: true },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.cardsCost' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.playPrompt' },
     { type: 'maskInput', enabled: false },
-    // Wait for player to play a card (this would be handled by game state)
     { type: 'if', flag: 'card_played', then: 'after_card_played', else: 'wait_for_card' },
-    
     { type: 'label', name: 'wait_for_card' },
     { type: 'wait', ms: 2000 },
     { type: 'if', flag: 'card_played', then: 'after_card_played', else: 'prompt_card_play' },
-    
     { type: 'label', name: 'prompt_card_play' },
-    { type: 'say', speaker: 'Battle Guide', text: 'Go ahead, tap on any card to play it!' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.playReminder' },
     { type: 'goto', label: 'wait_for_card' },
-    
     { type: 'label', name: 'after_card_played' },
-    { type: 'say', speaker: 'Battle Guide', text: 'Excellent! Your creature is now on the battlefield.' },
-    { type: 'highlight', anchorId: COMMON_ANCHORS.FIELD_AREA, text: 'This is the battlefield where your active creatures reside.', maskInput: true },
-    
-    // Attacking
-    { type: 'say', speaker: 'Battle Guide', text: 'Now you can attack! Tap on your creature to see its attacks.' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.cardPlaced' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.playMore' },
+    { type: 'checkProgress', key: 'cards_in_play', min: 4, then: 'after_four_cards', else: 'wait_for_more_cards' },
+    { type: 'label', name: 'wait_for_more_cards' },
+    { type: 'wait', ms: 2000 },
+    { type: 'checkProgress', key: 'cards_in_play', min: 4, then: 'after_four_cards', else: 'prompt_more_cards' },
+    { type: 'label', name: 'prompt_more_cards' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.playMoreReminder' },
+    { type: 'goto', label: 'wait_for_more_cards' },
+    { type: 'label', name: 'after_four_cards' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.FIELD_AREA, text: 'i18n:tutorial.battleIntro.battlefield', maskInput: true, textPosition: "top" },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.firstTurnNoAttack' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.ENEMY_FIELD, text: 'i18n:tutorial.battleIntro.enemyField', maskInput: true },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.TURN_STATUS, text: 'i18n:tutorial.battleIntro.turnStatus', maskInput: true, textPosition: "top" },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.END_TURN_BUTTON, text: 'i18n:tutorial.battleIntro.endTurnButton', maskInput: true },
+    { type: 'maskInput', enabled: false },
+    { type: 'if', flag: 'turn_ended', then: 'after_turn_ended', else: 'wait_for_turn_end' },
+    { type: 'label', name: 'wait_for_turn_end' },
+    { type: 'wait', ms: 2000 },
+    { type: 'if', flag: 'turn_ended', then: 'after_turn_ended', else: 'prompt_turn_end' },
+    { type: 'label', name: 'prompt_turn_end' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.endTurnReminder' },
+    { type: 'goto', label: 'wait_for_turn_end' },
+    { type: 'label', name: 'after_turn_ended' },
+    { type: 'maskInput', enabled: false },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.turnCycle' },
+    { type: 'label', name: 'wait_for_opponent_turn' },
+    { type: 'if', flag: 'ai_turn_completed', then: 'opponent_turn_complete', else: 'opponent_turn_wait' },
+    { type: 'label', name: 'opponent_turn_wait' },
+    { type: 'wait', ms: 1000 },
+    { type: 'goto', label: 'wait_for_opponent_turn' },
+    { type: 'label', name: 'opponent_turn_complete' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.attackReady' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.attackIntro' },
     { type: 'maskInput', enabled: false },
     { type: 'if', flag: 'creature_selected', then: 'explain_attacks', else: 'wait_for_selection' },
-    
     { type: 'label', name: 'wait_for_selection' },
     { type: 'wait', ms: 2000 },
     { type: 'if', flag: 'creature_selected', then: 'explain_attacks', else: 'prompt_selection' },
-    
     { type: 'label', name: 'prompt_selection' },
-    { type: 'say', speaker: 'Battle Guide', text: 'Tap on your creature on the battlefield!' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.attackReminder' },
     { type: 'goto', label: 'wait_for_selection' },
-    
     { type: 'label', name: 'explain_attacks' },
-    { type: 'say', speaker: 'Battle Guide', text: 'Perfect! You can see the creature\'s attacks and their energy costs.' },
-    { type: 'say', speaker: 'Battle Guide', text: 'Choose an attack and select a target to deal damage.' },
-    
-    // Turn System
-    { type: 'highlight', anchorId: COMMON_ANCHORS.END_TURN_BUTTON, text: 'When you\'re done, click here to end your turn.', maskInput: true },
-    { type: 'say', speaker: 'Battle Guide', text: 'Your opponent will then take their turn, and the cycle continues.' },
-    
-    // Strategy Tips
-    { type: 'say', speaker: 'Battle Guide', text: 'Some strategy tips:' },
-    { type: 'say', speaker: 'Battle Guide', text: '• Manage your energy wisely - stronger cards cost more.' },
-    { type: 'say', speaker: 'Battle Guide', text: '• Different elements have advantages against others.' },
-    { type: 'say', speaker: 'Battle Guide', text: '• Plan ahead - sometimes saving energy for next turn is better!' },
-    
-    // Finish Tutorial
-    { type: 'say', speaker: 'Battle Guide', text: 'You\'re ready to battle! Remember, victory comes from smart strategy.' },
-    { type: 'say', speaker: 'Battle Guide', text: 'Good luck, and may the Nexus guide you!' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.attackExplain' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.autoEnd' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.manualEnd' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.fieldManage' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.attackPreview' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.END_TURN_BUTTON, text: 'i18n:tutorial.battleIntro.endTurnButton', maskInput: true },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.turnCycle' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.strategyHeading' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.strategyEnergy' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.strategyAffinity' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.strategyPlanning' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.closing' },
+    { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.farewell' },
     { type: 'setFlag', key: 'tutorial_battle_completed', value: true },
     { type: 'hidePortrait', side: 'left', animation: 'slideOut' },
     { type: 'end' }
-  ],
-  priority: 80
+  ]
 };
-*/
 
 // First Victory Celebration
 /*
@@ -365,7 +373,7 @@ export const ALL_TUTORIAL_SCENES: SceneSpec[] = [
   SCENE_FIRST_LAUNCH,
   SCENE_STORY_MODE_INTRO,
   SCENE_CHAPTER_MAP_INTRO,
-  //SCENE_BATTLE_TUTORIAL,
+  SCENE_BATTLE_TUTORIAL,
   //SCENE_FIRST_VICTORY,
   SCENE_HOME_INTRO,
   SCENE_COLLECTION_INTRO,

@@ -557,7 +557,9 @@
       "quickTitle": "Combat rapide",
       "quickDescription": "Plongez directement dans un duel contre l'IA",
       "storyTitle": "Mode Histoire",
-      "storyDescription": "Partez pour une aventure épique au cœur du Nexus"
+      "storyDescription": "Partez pour une aventure épique au cœur du Nexus",
+      "tutorialTitle": "Tutoriel de combat",
+      "tutorialDescription": "Suivez un affrontement guidé pour comprendre chaque mécanique"
     },
     "detail": {
       "unknownPlayer": "Joueur inconnu",
@@ -878,7 +880,8 @@
       "nexusGuide": "Guide du Nexus",
       "collectionGuide": "Guide de la Collection",
       "deckMaster": "Maître des Decks",
-      "nexusMerchant": "Marchand du Nexus"
+      "nexusMerchant": "Marchand du Nexus",
+      "battleGuide": "Mentor de Combat"
     },
     "firstLaunch": {
       "welcome": "Bienvenue dans le Nexus des Créatures, invocateur ! Je suis votre guide dans ce royaume mystique.",
@@ -936,6 +939,46 @@
       "elementalPacks": "Les packs élémentaires garantissent des créatures d'un élément précis.",
       "premiumPacks": "Les packs premium garantissent des créatures rares - parfait pour les collectionneurs déterminés !",
       "freePack": "N'oubliez pas - vous recevez un pack gratuit toutes les 12 heures !"
+    },
+    "battle": {
+      "loading": "Préparation du tutoriel de combat...",
+      "exitTitle": "Quitter le tutoriel ?",
+      "exitMessage": "Si vous quittez maintenant, vous retournerez à l'arène et la progression guidée sera perdue.",
+      "exitConfirm": "Quitter le tutoriel"
+    },
+    "battleIntro": {
+      "welcome": "Bienvenue dans votre premier combat ! Je vais vous guider pas à pas.",
+      "playerStatusBar": "Voici votre barre d'état. Elle indique votre énergie disponible, le nombre de cartes dans votre main et vos points. Collectez 4 points pour remporter la partie.",
+      "enemyStatusBar": "Voici la barre d'état de votre adversaire. Elle affiche les mêmes informations que la vôtre. Surveillez bien son total de points : s'il en obtient 4, la partie est perdue !",
+      "energy": "Ce panneau affiche votre énergie. Vous en gagnez 1 au début de chaque tour.",
+      "hand": "Voici les cartes de votre main. Chaque créature indique ses PV et ses attaques.",
+      "cardsCost": "Poser une carte est gratuit - l'énergie sert uniquement à lancer des attaques ou à retirer une créature du terrain.",
+      "playPrompt": "Essayez de jouer une carte. Touchez n'importe quelle carte de votre main, puis appuyez sur Jouer.",
+      "playReminder": "Allez-y — touchez une carte pour la placer sur le champ de bataille !",
+      "cardPlaced": "Parfait ! Votre créature est maintenant en jeu.",
+      "playMore": "Placez trois autres créatures pour remplir votre ligne de front avec quatre combattants.",
+      "playMoreReminder": "Continuez à poser des créatures jusqu'à en avoir quatre sur le champ de bataille.",
+      "battlefield": "Voici le champ de bataille. Vos créatures actives combattent depuis cette zone.",
+      "firstTurnNoAttack": "Au premier tour, vous ne pouvez pas attaquer : profitez-en pour installer votre stratégie.",
+      "enemyField": "Voici le terrain de votre adversaire. C'est ici que vous choisirez les créatures à cibler.",
+      "turnStatus": "Cette zone indique le joueur actif et la phase en cours. Consultez-la pour savoir quand agir.",
+      "attackIntro": "Passons à l'attaque ! Touchez votre créature pour voir ses attaques.",
+      "attackReminder": "Touchez votre créature sur le champ de bataille pour continuer.",
+      "attackExplain": "Chaque attaque affiche son coût en énergie. Choisissez-en une et sélectionnez une cible pour infliger des dégâts.",
+      "autoEnd": "Dès que toutes les créatures capables d'attaquer l'ont fait, votre tour s'achève automatiquement.",
+      "manualEnd": "Vous pouvez quand même terminer le tour manuellement si vous préférez garder des actions ou passer plus vite.",
+      "fieldManage": "Si vous voulez jouer ou retirer des créatures, faites-le avant d'utiliser toutes vos attaques — retirer une créature coûte 1 énergie.",
+      "endTurnReminder": "Quand tout est prêt, appuyez sur Fin du tour pour laisser l'adversaire jouer.",
+      "endTurnButton": "Quand vous avez terminé, appuyez ici pour finir votre tour.",
+      "turnCycle": "Votre adversaire jouera ensuite son tour, puis ce sera à vous à nouveau.",
+      "attackReady": "L'adversaire a joué. C'est le moment de lancer une attaque !",
+      "strategyHeading": "Quelques conseils stratégie :",
+      "strategyEnergy": "Gérez votre énergie avec soin : les actions puissantes coûtent davantage.",
+      "strategyAffinity": "Les affinités élémentaires modifient les dégâts infligés : un élément favorable ajoute +20 points, un élément défavorable en retire 20. L'Eau bat le Feu, le Feu bat l'Air, l'Air bat la Terre et la Terre bat l'Eau.",
+      "strategyPlanning": "Planifiez vos tours. Garder de l'énergie pour le tour suivant peut être la meilleure option.",
+      "attackPreview": "Observez l'aperçu des dégâts lorsque vous choisissez une attaque : le vert indique un bonus élémentaire de +20, le rouge un malus de -20 et le blanc signale qu'il n'y a ni bonus ni malus.",
+      "closing": "Voilà tout ce qu'il faut pour débuter !",
+      "farewell": "Bonne chance, et que le Nexus vous guide !"
     }
   }
 }

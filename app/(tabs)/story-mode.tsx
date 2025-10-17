@@ -30,15 +30,17 @@ export default function StoryModeScreen() {
     router.push('/(tabs)/battle');
   };
 
+  const anchorIds = isLoading ? [] : [COMMON_ANCHORS.CHAPTER_NODE];
+
+  useAnchorPolling(anchorIds, () => {
+    if (!isLoading) {
+      sceneTrigger({ type: 'onEnterScreen', screen: 'story-mode' });
+    }
+  });
+
   if (isLoading) {
     return <LoadingOverlay message={t('story.loading')} />;
   }
-
-  useAnchorPolling([
-    COMMON_ANCHORS.CHAPTER_NODE,
-  ], () => {
-    sceneTrigger({ type: 'onEnterScreen', screen: 'story-mode' });
-  });
 
   return (
     <View style={styles.container}>

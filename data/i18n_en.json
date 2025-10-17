@@ -557,7 +557,9 @@
       "quickTitle": "Quick Battle",
       "quickDescription": "Jump straight into battle against an AI opponent",
       "storyTitle": "Story Mode",
-      "storyDescription": "Embark on an epic adventure through the Creature Nexus"
+      "storyDescription": "Embark on an epic adventure through the Creature Nexus",
+      "tutorialTitle": "Battle Tutorial",
+      "tutorialDescription": "Play a guided fight that teaches every core mechanic"
     },
     "detail": {
       "unknownPlayer": "Unknown Player",
@@ -878,7 +880,8 @@
       "nexusGuide": "Nexus Guide",
       "collectionGuide": "Collection Guide",
       "deckMaster": "Deck Master",
-      "nexusMerchant": "Nexus Merchant"
+      "nexusMerchant": "Nexus Merchant",
+      "battleGuide": "Battle Guide"
     },
     "firstLaunch": {
       "welcome": "Welcome to the Creature Nexus, summoner! I am your guide in this mystical realm.",
@@ -936,6 +939,46 @@
       "elementalPacks": "Elemental Packs guarantee creatures of a specific element.",
       "premiumPacks": "Premium Packs guarantee rare creatures - perfect for serious collectors!",
       "freePack": "Don't forget - you get a free pack every 12 hours!"
+    },
+    "battle": {
+      "loading": "Preparing battle tutorial...",
+      "exitTitle": "Leave the tutorial?",
+      "exitMessage": "If you exit now, you'll return to the arena and lose this guided progress.",
+      "exitConfirm": "Exit Tutorial"
+    },
+    "battleIntro": {
+      "welcome": "Welcome to your first battle! I'll walk you through the basics.",
+      "playerStatusBar": "This is your status bar. It shows your available energy, cards in hand, and points. Collect 4 points to claim victory.",
+      "enemyStatusBar": "This is your opponent's status bar. It displays the same info as yours. Keep an eye on their points - if they reach 4, the battle is lost!",
+      "energy": "This panel shows your energy. You gain 1 energy at the start of each turn.",
+      "hand": "These are the cards in your hand. Each creature shows its HP and attacks.",
+      "cardsCost": "Playing a card is free - you'll spend energy only when using attacks or removing a creature from the field.",
+      "playPrompt": "Try playing a card now. Tap any card in your hand, then press Play.",
+      "playReminder": "Go ahead — tap a card to place it on the battlefield!",
+      "cardPlaced": "Great! Your creature is now on the battlefield.",
+      "playMore": "Now fill your front line. Play three more creatures so you have four ready to fight.",
+      "playMoreReminder": "Keep playing creatures until your field holds four allies.",
+      "battlefield": "This is the battlefield. Your active creatures fight from here.",
+      "firstTurnNoAttack": "You can't attack on the very first turn; use it to set up your board.",
+      "enemyField": "This is your opponent's field. You'll pick targets here when you attack.",
+      "turnStatus": "This status panel shows whose turn it is and the current phase. Check it to know when you can act.",
+      "attackIntro": "Let's attack! Tap your creature to view its attacks.",
+      "attackReminder": "Tap your creature on the battlefield to continue.",
+      "attackExplain": "Each attack shows its energy cost. Pick one and choose a target to deal damage.",
+      "autoEnd": "Once every creature that can act has attacked, your turn ends automatically.",
+      "manualEnd": "You can still end the turn manually if you want to hold back or move on sooner.",
+      "fieldManage": "If you plan to play or retire creatures, do it before spending every attack — retiring a creature costs 1 energy.",
+      "endTurnReminder": "Once your line is ready, press End Turn so your opponent can respond.",
+      "endTurnButton": "When you're done, press here to end your turn.",
+      "turnCycle": "After you end your turn, your opponent will respond. Then it's your turn again.",
+      "attackReady": "Great! Your opponent is done, time to strike back.",
+      "strategyHeading": "Some strategy tips:",
+      "strategyEnergy": "Manage your energy wisely — stronger moves cost more.",
+      "strategyAffinity": "Element matchups tweak the damage you deal: a favourable element adds +20 points, an unfavourable one removes 20. Water beats Fire, Fire beats Air, Air beats Earth, and Earth beats Water.",
+      "strategyPlanning": "Plan ahead. Sometimes saving energy for the next turn is the smartest play.",
+      "attackPreview": "Check the damage preview when you pick an attack: green means a +20 elemental bonus, red shows a −20 penalty, and white indicates there’s no bonus or penalty.",
+      "closing": "That's all you need to start battling!",
+      "farewell": "Good luck, and may the Nexus guide you!"
     }
   }
 }

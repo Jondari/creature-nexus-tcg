@@ -105,6 +105,12 @@ export default function TabLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="battle-tutorial"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

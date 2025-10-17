@@ -208,6 +208,7 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
     switch (event.type) {
       case 'card_played':
         setFlag('card_played', true);
+        setProgress('cards_in_play', (getProgress('cards_in_play') || 0) + 1);
         break;
       case 'creature_selected':
         setFlag('creature_selected', true);
@@ -242,6 +243,17 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
   const getCompletedScenes = useCallback((): string[] => {
     return [...tutorialProgress.completedScenes];
   }, [tutorialProgress.completedScenes]);
+
+  const resetSceneHistory = useCallback((sceneId: string) => {
+    setTutorialProgress(prev => {
+      const { [sceneId]: _removed, ...restLastSeen } = prev.lastSeenAt || {};
+      return {
+        ...prev,
+        completedScenes: prev.completedScenes.filter(id => id !== sceneId),
+        lastSeenAt: restLastSeen,
+      };
+    });
+  }, []);
 
   // Scene condition evaluation
   const evaluateSceneConditions = useCallback((scene: SceneSpec): boolean => {
@@ -482,7 +494,7 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
         // Handle navigation, battles, etc.
         emitEvent({ type: 'scene_step', sceneId: data.sceneId || '', stepIndex: data.stepIndex || 0, command: data.data });
         break;
-      
+
       default:
         if (debugMode) {
           console.log(`[SceneManager] Scene action: ${action}`, data);
@@ -517,6 +529,7 @@ export const SceneManagerProvider: React.FC<SceneManagerProviderProps> = ({
     markSceneCompleted,
     isSceneCompleted,
     getCompletedScenes,
+    resetSceneHistory,
     
     // Persistence
     saveTutorialProgress,

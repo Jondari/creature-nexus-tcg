@@ -201,6 +201,7 @@ export interface SceneManagerAPI {
   markSceneCompleted: (sceneId: string) => void;
   isSceneCompleted: (sceneId: string) => boolean;
   getCompletedScenes: () => string[];
+  resetSceneHistory: (sceneId: string) => void;
   
   // Persistence
   saveTutorialProgress: () => Promise<void>;
@@ -302,10 +303,12 @@ export const COMMON_ANCHORS = {
   // Battle screen anchors
   HAND_AREA: 'handArea',
   FIELD_AREA: 'fieldArea',
+  ENEMY_FIELD: 'enemyField',
   END_TURN_BUTTON: 'endTurnBtn',
   ENERGY_DISPLAY: 'energyDisplay',
   PLAYER_HP: 'playerHp',
   ENEMY_HP: 'enemyHp',
+  TURN_STATUS: 'turnStatus',
   
   // Story mode anchors
   CHAPTER_NODE: 'chapterNode',

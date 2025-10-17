@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Sword, BookOpen } from 'lucide-react-native';
+import { Sword, BookOpen, GraduationCap } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
 
@@ -17,6 +17,10 @@ export default function BattleScreen() {
     router.push('/(tabs)/story-mode');
   };
 
+  const handleBattleTutorial = () => {
+    router.push('/(tabs)/battle-tutorial');
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -26,13 +30,35 @@ export default function BattleScreen() {
         end={{ x: 0.5, y: 0.5 }}
       />
       
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>{t('battle.arena.title')}</Text>
           <Text style={styles.subtitle}>{t('battle.arena.subtitle')}</Text>
         </View>
 
         <View style={styles.optionsContainer}>
+          <TouchableOpacity
+              style={styles.optionCard}
+              onPress={handleBattleTutorial}
+              activeOpacity={0.8}
+          >
+            <LinearGradient
+                colors={[Colors.neutral[700], Colors.neutral[500]]}
+                style={styles.optionGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+            >
+              <GraduationCap size={48} color={Colors.text.primary} />
+              <Text style={styles.optionTitle}>{t('battle.arena.tutorialTitle')}</Text>
+              <Text style={styles.optionDescription}>
+                {t('battle.arena.tutorialDescription')}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.optionCard}
             onPress={handleQuickBattle}
@@ -71,7 +97,8 @@ export default function BattleScreen() {
             </LinearGradient>
           </TouchableOpacity>
         </View>
-      </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -87,9 +114,13 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 60,
+  },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
     justifyContent: 'center',
   },
   header: {
