@@ -13,7 +13,7 @@ import ScenesRegistry from '@/components/ScenesRegistry';
 import { useFonts } from 'expo-font';
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
 import { Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, useWindowDimensions, ViewStyle } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '@/constants/Colors';
 import { SplashScreen } from 'expo-router';
@@ -135,16 +135,18 @@ export default function RootLayout() {
                 {/* Audio Permission Banner */}
                 <AudioPermissionBanner />
 
-                <Stack screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: Colors.background.primary }
-                }}>
-                  <Stack.Screen name="language" options={{ headerShown: false }} />
-                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="+not-found" options={{ title: t('notFound.stackTitle') }} />
-                </Stack>
-                <StatusBar style="light" hidden={Platform.OS === 'android'} />
+                <ZoomWrapper>
+                  <Stack screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: Colors.background.primary }
+                  }}>
+                    <Stack.Screen name="language" options={{ headerShown: false }} />
+                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="+not-found" options={{ title: t('notFound.stackTitle') }} />
+                  </Stack>
+                  <StatusBar style="light" hidden={Platform.OS === 'android'} />
+                </ZoomWrapper>
 
                 {/* Animated Splash Screen */}
                 {showAnimatedSplash && (
@@ -175,6 +177,34 @@ const SceneLayer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
+// Zoom wrapper that applies zoom on Android or Web responsive mode
+const ZoomWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { width, height } = useWindowDimensions();
+
+  // Get zoom scale from env or use 1 as default (no zoom)
+  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+
+  // Apply zoom on Android or Web with mobile-sized screen (< 768px)
+  const shouldZoom = Platform.OS === 'android' || (Platform.OS === 'web' && width < 768);
+
+  // Calculate compensated dimensions in pixels
+  const compensatedWidth = width / zoomScale;
+  const compensatedHeight = height / zoomScale;
+
+  const dynamicZoomStyle: ViewStyle = {
+    width: compensatedWidth,
+    height: compensatedHeight,
+    transform: [{ scale: zoomScale }],
+    transformOrigin: 'top left',
+  };
+
+  return (
+    <View style={shouldZoom ? dynamicZoomStyle : styles.noZoomContainer}>
+      {children}
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -186,5 +216,8 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
+  },
+  noZoomContainer: {
+    flex: 1,
   }
 });

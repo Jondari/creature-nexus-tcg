@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
@@ -77,6 +77,18 @@ export function GameBoard() {
   useAnchorRegister(COMMON_ANCHORS.ENEMY_HP, topStatsRef);
   useAnchorRegister(COMMON_ANCHORS.END_TURN_BUTTON, endTurnBtnRef as any);
   useAnchorRegister(COMMON_ANCHORS.TURN_STATUS, turnStatusRef);
+
+  // Zoom configuration for GameBoard
+  const { width, height } = useWindowDimensions();
+  const globalZoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+  const gameboardZoomScale = parseFloat(process.env.EXPO_PUBLIC_GAMEBOARD_ZOOM_SCALE || '0.75');
+  const shouldZoom = Platform.OS === 'android' || (Platform.OS === 'web' && width < 768);
+  // Calculate relative zoom: GameBoard wants to be at gameboardZoomScale of original (100%)
+  // Parent already applies globalZoomScale, so we need: gameboardZoomScale / globalZoomScale
+  const relativeZoom = gameboardZoomScale / globalZoomScale;
+  const compensatedWidth = shouldZoom ? (width / gameboardZoomScale) : width;
+  const compensatedHeight = shouldZoom ? (height / gameboardZoomScale) : height;
+  const zoomTransform = shouldZoom ? [{ scale: relativeZoom }] : undefined;
 
   useEffect(() => {
     if (!gameState || !gameEngine) return;
@@ -500,9 +512,17 @@ export function GameBoard() {
     );
   }
 
+  const zoomWrapperStyle = shouldZoom ? {
+    width: compensatedWidth,
+    height: compensatedHeight,
+    transform: zoomTransform,
+    transformOrigin: 'top left' as const,
+  } : { flex: 1 };
+
   return (
-    <View style={styles.mainContainer}>
-      <ScrollView style={styles.gameContainer}>
+    <View style={zoomWrapperStyle}>
+      <View style={styles.mainContainer}>
+        <ScrollView style={styles.gameContainer}>
       {/* Top Player Info */}
       <PlayerInfo
         name={playerAtTop.name}
@@ -700,6 +720,7 @@ export function GameBoard() {
           onComplete={clearSpellCastAnimation}
         />
       )}
+      </View>
     </View>
   );
 }
