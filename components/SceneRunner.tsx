@@ -102,7 +102,10 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
 
   // Visual state
   const [background, setBackground] = useState<string | number | { uri: string; width?: number; height?: number } | undefined>(scene.backgroundImage);
-  const [portraits, setPortraits] = useState<{ left?: string | number | { uri: string; width?: number; height?: number }; right?: string | number | { uri: string; width?: number; height?: number } }>({});
+  const [portraits, setPortraits] = useState<{
+    left?: { uri: string | number | { uri: string; width?: number; height?: number }; mirror?: boolean };
+    right?: { uri: string | number | { uri: string; width?: number; height?: number }; mirror?: boolean }
+  }>({});
   const [overlays, setOverlays] = useState<Array<{
     id: string;
     uri: string | number | { uri: string; width?: number; height?: number };
@@ -420,8 +423,8 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
       case 'showPortrait': {
         (async () => {
           const r = await resolveUri(cmd.uri);
-          if (__DEV__) console.log('[SceneRunner] showPortrait', cmd.side, 'uri:', cmd.uri, 'resolved:', r);
-          setPortraits(prev => ({ ...prev, [cmd.side]: r }));
+          if (__DEV__) console.log('[SceneRunner] showPortrait', cmd.side, 'uri:', cmd.uri, 'resolved:', r, 'mirror:', cmd.mirror);
+          setPortraits(prev => ({ ...prev, [cmd.side]: { uri: r, mirror: cmd.mirror } }));
         })();
         animatePortrait(cmd.side, true);
         setPc(pc + 1);
@@ -624,21 +627,21 @@ export const SceneRunner: React.FC<SceneRunnerProps> = ({
       {/* Portraits */}
       {portraits.left && (
         <Animated.Image
-          source={toImageSource(portraits.left)}
+          source={toImageSource(portraits.left.uri)}
           style={[
             styles.portraitLeft,
-            { transform: [{ translateX: portraitLeft }] }
+            { transform: [{ translateX: portraitLeft }, { scaleX: portraits.left.mirror ? -1 : 1 }] }
           ]}
           resizeMode="contain"
         />
       )}
-      
+
       {portraits.right && (
         <Animated.Image
-          source={toImageSource(portraits.right)}
+          source={toImageSource(portraits.right.uri)}
           style={[
             styles.portraitRight,
-            { transform: [{ translateX: portraitRight }] }
+            { transform: [{ translateX: portraitRight }, { scaleX: portraits.right.mirror ? -1 : 1 }] }
           ]}
           resizeMode="contain"
         />

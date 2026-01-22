@@ -42,7 +42,7 @@ export type SceneCommand =
   
   // Visual novel features
   | { type: 'setBackground'; uri: string | number; transition?: 'fade' | 'slide' | 'none' }
-  | { type: 'showPortrait'; side: 'left' | 'right'; uri: string | number; animation?: 'slideIn' | 'fadeIn' | 'none' }
+  | { type: 'showPortrait'; side: 'left' | 'right'; uri: string | number; animation?: 'slideIn' | 'fadeIn' | 'none'; mirror?: boolean }
   | { type: 'hidePortrait'; side: 'left' | 'right'; animation?: 'slideOut' | 'fadeOut' | 'none' }
   | { type: 'imageOverlay'; uri: string | number; x: number; y: number; width?: number; height?: number; duration?: number }
   | { type: 'playSound'; uri: string; loop?: boolean }
