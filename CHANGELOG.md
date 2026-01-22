@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.19.0...v0.19.1) (2026-01-22)
+
+
+### Features
+
+* add portrait mirror option and fix tutorial overlay issues ([a979be1](https://github.com/Jondari/creature-nexus-tcg/commit/a979be1116125463eda9c2439faa2f4d7ecff06b))
+
 ## [0.19.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.18.1...v0.19.0) (2026-01-22)
 
 
