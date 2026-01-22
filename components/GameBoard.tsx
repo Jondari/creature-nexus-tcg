@@ -516,7 +516,7 @@ export function GameBoard() {
 
       {/* Top Player Field */}
       <Battlefield
-        label={`${playerAtTop.name} ${t('player.field')}`}
+        label={t('player.opponentField')}
         cards={playerAtTop.field}
         theme={getPlayerTheme('top')}
         position="top"
@@ -558,7 +558,7 @@ export function GameBoard() {
 
       {/* Bottom Player Field */}
       <Battlefield
-        label={`${playerAtBottom.name} ${t('player.field')}`}
+        label={t('player.yourField')}
         cards={playerAtBottom.field}
         theme={getPlayerTheme('bottom')}
         position="bottom"

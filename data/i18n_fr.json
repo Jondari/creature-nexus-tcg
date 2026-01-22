@@ -521,7 +521,9 @@
     "hp": "PV",
     "deck": "Deck",
     "hand": "Main",
-    "field": "Terrain"
+    "field": "Terrain",
+    "yourField": "Votre terrain",
+    "opponentField": "Terrain adverse"
   },
   "cards": {
     "costEnergy": "Coût : {{value}} Énergie",

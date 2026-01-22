@@ -521,7 +521,9 @@
     "hp": "HP",
     "deck": "Deck",
     "hand": "Hand",
-    "field": "Field"
+    "field": "Field",
+    "yourField": "Your Field",
+    "opponentField": "Opponent Field"
   },
   "cards": {
     "costEnergy": "Cost: {{value}} Energy",
