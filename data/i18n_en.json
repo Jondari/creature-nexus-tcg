@@ -43,7 +43,8 @@
     },
     "skip": "Skip",
     "skipAll": "Skip All",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "confirm": "Confirm"
   },
   "time": {
     "justNow": "just now",
@@ -304,6 +305,15 @@
       "unlockAllSuccess": "All chapters have been unlocked!",
       "unlockAllFailed": "Failed to unlock chapters. Please try again."
     }
+  },
+  "avatar": {
+    "title": "Avatar",
+    "changeAvatar": "Change Avatar",
+    "selectAvatar": "Select your avatar",
+    "selectAvatarDesc": "Choose a creature to represent you",
+    "defaultAvatar": "Default",
+    "avatarUpdated": "Avatar updated successfully!",
+    "avatarUpdateFailed": "Failed to update avatar. Please try again."
   },
   "cardTest": {
     "subtitle": "Total: {{total}} cards ({{monsters}} monsters, {{spells}} spells)",

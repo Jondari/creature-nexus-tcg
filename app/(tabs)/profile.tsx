@@ -9,6 +9,8 @@ import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube, Gift, Shield } fro
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import { addNexusCoins } from '@/utils/currencyUtils';
 import { RedeemCodeModal } from '@/components/RedeemCodeModal';
+import { PlayerAvatar } from '@/components/PlayerAvatar';
+import { AvatarSelector } from '@/components/AvatarSelector';
 import { MusicControls } from '@/components/MusicControls';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
@@ -16,11 +18,11 @@ import { t } from '@/utils/i18n';
 const packageJson = require('../../package.json');
 
 export default function ProfileScreen() {
-  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous } = useAuth();
+  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar } = useAuth();
   const { cardSize, setCardSize, showBattleLog, setShowBattleLog, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
-  
+
   // Debug auth state
   if (__DEV__) {
     console.log('Profile Screen - User:', user);
@@ -29,6 +31,7 @@ export default function ProfileScreen() {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -128,7 +131,25 @@ export default function ProfileScreen() {
       setDeleteLoading(false);
     }
   };
-  
+
+  const handleAvatarSelect = async (creatureName: string | null) => {
+    try {
+      await updateAvatar(creatureName);
+      showSuccessAlert(
+        t('common.success'),
+        t('avatar.avatarUpdated')
+      );
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating avatar:', error);
+      }
+      showErrorAlert(
+        t('common.error'),
+        t('avatar.avatarUpdateFailed')
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -143,7 +164,22 @@ export default function ProfileScreen() {
           <Text style={styles.title}>{t('profile.title')}</Text>
           <Text style={styles.subtitle}>{t('profile.subtitle')}</Text>
         </View>
-        
+
+        {/* Avatar Section */}
+        <View style={styles.avatarSection}>
+          <PlayerAvatar
+            creatureName={avatarCreature}
+            size="large"
+          />
+          <TouchableOpacity
+            style={styles.changeAvatarButton}
+            onPress={() => setShowAvatarSelector(true)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.changeAvatarText}>{t('avatar.changeAvatar')}</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{t('profile.accountTitle')}</Text>
           <View style={styles.infoRow}>
@@ -579,6 +615,13 @@ export default function ProfileScreen() {
           // Optionally refresh currency or show additional success feedback
         }}
       />
+
+      <AvatarSelector
+        visible={showAvatarSelector}
+        currentAvatar={avatarCreature}
+        onClose={() => setShowAvatarSelector(false)}
+        onSelect={handleAvatarSelect}
+      />
     </View>
   );
 }
@@ -873,6 +916,23 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+  },
+  avatarSection: {
+    alignItems: 'center',
+    paddingVertical: 30,
+    marginHorizontal: 20,
+  },
+  changeAvatarButton: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    backgroundColor: Colors.accent[500],
+    borderRadius: 20,
+  },
+  changeAvatarText: {
+    fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: Colors.text.primary,
   },

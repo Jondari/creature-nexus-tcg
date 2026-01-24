@@ -34,6 +34,8 @@ interface AuthContextType {
   createAccountWithEmail: (email: string, password: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   isAnonymous: boolean;
+  avatarCreature: string | null;
+  updateAvatar: (creatureName: string | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -48,6 +50,8 @@ const AuthContext = createContext<AuthContextType>({
   createAccountWithEmail: async () => {},
   deleteAccount: async () => {},
   isAnonymous: false,
+  avatarCreature: null,
+  updateAvatar: async () => {},
 });
 
 // Configure WebBrowser for auth session
@@ -68,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [avatarCreature, setAvatarCreature] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -104,7 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Check if user document exists
         const userDocRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
-        
+
         // If not, create it
         if (!userDoc.exists()) {
           await setDoc(userDocRef, {
@@ -112,12 +117,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             createdAt: serverTimestamp(),
             lastPackOpened: null,
             cards: [],
-            nexusCoins: DEFAULT_STARTING_COINS
+            nexusCoins: DEFAULT_STARTING_COINS,
+            avatarCreature: null
           });
         }
+
+        // Load avatar from Firestore
+        const userData = userDoc.data();
+        setAvatarCreature(userData?.avatarCreature || null);
       } else {
         setUser(null);
         setIsAnonymous(false);
+        setAvatarCreature(null);
       }
       setLoading(false);
     });
@@ -312,7 +323,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           lastPackOpened: null,
           cards: [],
           nexusCoins: DEFAULT_STARTING_COINS,
-          isAnonymous: false
+          isAnonymous: false,
+          avatarCreature: null
         });
       }
     } catch (error) {
@@ -347,7 +359,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastPackOpened: null,
         cards: [],
         nexusCoins: DEFAULT_STARTING_COINS,
-        isAnonymous: false
+        isAnonymous: false,
+        avatarCreature: null
       });
     } catch (error) {
       if (__DEV__) {
@@ -368,7 +381,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userDocRef = doc(db, 'users', user.uid);
-      
+
       // Delete user document from Firestore
       await deleteDoc(userDocRef);
 
@@ -377,9 +390,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Clear any stored data
       await AsyncStorage.removeItem(ANONYMOUS_USER_KEY);
+      await AsyncStorage.removeItem(`avatar_${user.uid}`);
     } catch (error) {
       if (__DEV__) {
         console.error('Error deleting account:', error);
+      }
+      throw error;
+    }
+  };
+
+  const updateAvatar = async (creatureName: string | null) => {
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+
+    try {
+      // Update Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        avatarCreature: creatureName
+      });
+
+      // Update local state
+      setAvatarCreature(creatureName);
+
+      // Persist to AsyncStorage for offline
+      await AsyncStorage.setItem(
+        `avatar_${user.uid}`,
+        creatureName || 'default'
+      );
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating avatar:', error);
       }
       throw error;
     }
@@ -399,6 +441,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createAccountWithEmail,
         deleteAccount,
         isAnonymous,
+        avatarCreature,
+        updateAvatar,
       }}
     >
       {children}
