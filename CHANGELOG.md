@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.20.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.19.1...v0.20.0) (2026-01-24)
+
+
+### Features
+
+* add avatar selection system with 5 customizable creature options ([9ab6486](https://github.com/Jondari/creature-nexus-tcg/commit/9ab64867ec0e356cc27133c30a8d856e17dd0e4e))
+
 ### [0.19.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.19.0...v0.19.1) (2026-01-22)
 
 
