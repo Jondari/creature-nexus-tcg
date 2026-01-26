@@ -357,6 +357,20 @@
     "avatarUpdated": "Avatar mis à jour avec succès !",
     "avatarUpdateFailed": "Échec de la mise à jour de l'avatar. Veuillez réessayer."
   },
+  "pseudo": {
+    "defaultPseudo": "Joueur",
+    "changePseudo": "Changer de pseudo",
+    "changeUsed": "Pseudo changé",
+    "changePseudoTitle": "Changer votre pseudo",
+    "changePseudoWarning": "Attention : Vous ne pouvez changer votre pseudo qu'une seule fois !",
+    "pseudoPlaceholder": "Entrez votre nouveau pseudo",
+    "pseudoHint": "{{min}}-{{max}} caractères, lettres, chiffres et underscore uniquement",
+    "pseudoUpdated": "Pseudo mis à jour avec succès !",
+    "pseudoUpdateFailed": "Échec de la mise à jour du pseudo. Veuillez réessayer.",
+    "errorTooShort": "Le pseudo est trop court",
+    "errorTooLong": "Le pseudo est trop long",
+    "errorInvalidChars": "Le pseudo ne peut contenir que des lettres, chiffres et underscore"
+  },
   "cardTest": {
     "subtitle": "Total : {{total}} cartes ({{monsters}} monstres, {{spells}} sorts)",
     "monsterSection": "Cartes Monstres",

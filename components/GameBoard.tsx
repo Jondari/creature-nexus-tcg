@@ -47,7 +47,7 @@ export function GameBoard() {
     initializeGame
   } = useGame();
   const { activeDeck } = useDecks();
-  const { avatarCreature } = useAuth();
+  const { avatarCreature, pseudo } = useAuth();
   const { cardSize, setCardSize, showBattleLog } = useSettings();
   const sceneManager = useSceneManager();
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
@@ -636,7 +636,7 @@ export function GameBoard() {
 
       {/* Bottom Player Info */}
       <PlayerInfo
-        name={playerAtBottom.name}
+        name={pseudo || playerAtBottom.name}
         stats={[
           { label: t('player.energy'), value: playerAtBottom.energy },
           { label: t('player.points'), value: playerAtBottom.points },

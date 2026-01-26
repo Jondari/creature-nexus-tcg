@@ -14,6 +14,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { DEFAULT_STARTING_COINS } from '@/utils/currencyUtils';
+import { generateDefaultPseudo } from '@/utils/pseudoUtils';
 import { auth, db } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
@@ -36,6 +37,9 @@ interface AuthContextType {
   isAnonymous: boolean;
   avatarCreature: string | null;
   updateAvatar: (creatureName: string | null) => Promise<void>;
+  pseudo: string | null;
+  pseudoChangeUsed: boolean;
+  updatePseudo: (newPseudo: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -52,6 +56,9 @@ const AuthContext = createContext<AuthContextType>({
   isAnonymous: false,
   avatarCreature: null,
   updateAvatar: async () => {},
+  pseudo: null,
+  pseudoChangeUsed: false,
+  updatePseudo: async () => {},
 });
 
 // Configure WebBrowser for auth session
@@ -73,6 +80,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [avatarCreature, setAvatarCreature] = useState<string | null>(null);
+  const [pseudo, setPseudo] = useState<string | null>(null);
+  const [pseudoChangeUsed, setPseudoChangeUsed] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -112,23 +121,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // If not, create it
         if (!userDoc.exists()) {
+          const defaultPseudo = generateDefaultPseudo();
           await setDoc(userDocRef, {
             uid: user.uid,
             createdAt: serverTimestamp(),
             lastPackOpened: null,
             cards: [],
             nexusCoins: DEFAULT_STARTING_COINS,
-            avatarCreature: null
+            avatarCreature: null,
+            pseudo: defaultPseudo,
+            pseudoChangeUsed: false
           });
-        }
+          setPseudo(defaultPseudo);
+          setPseudoChangeUsed(false);
+        } else {
+          // Load data from Firestore
+          const userData = userDoc.data();
+          setAvatarCreature(userData?.avatarCreature || null);
 
-        // Load avatar from Firestore
-        const userData = userDoc.data();
-        setAvatarCreature(userData?.avatarCreature || null);
+          // Migration for existing accounts without pseudo
+          if (userData?.pseudo === undefined) {
+            const defaultPseudo = generateDefaultPseudo();
+            await updateDoc(userDocRef, {
+              pseudo: defaultPseudo,
+              pseudoChangeUsed: false
+            });
+            setPseudo(defaultPseudo);
+            setPseudoChangeUsed(false);
+          } else {
+            setPseudo(userData.pseudo);
+            setPseudoChangeUsed(userData.pseudoChangeUsed || false);
+          }
+        }
       } else {
         setUser(null);
         setIsAnonymous(false);
         setAvatarCreature(null);
+        setPseudo(null);
+        setPseudoChangeUsed(false);
       }
       setLoading(false);
     });
@@ -314,6 +344,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userDoc = await getDoc(userDocRef);
       
       if (!userDoc.exists()) {
+        const defaultPseudo = generateDefaultPseudo();
         await setDoc(userDocRef, {
           uid: result.user.uid,
           email: result.user.email,
@@ -324,7 +355,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           cards: [],
           nexusCoins: DEFAULT_STARTING_COINS,
           isAnonymous: false,
-          avatarCreature: null
+          avatarCreature: null,
+          pseudo: defaultPseudo,
+          pseudoChangeUsed: false
         });
       }
     } catch (error) {
@@ -349,8 +382,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createAccountWithEmail = async (email: string, password: string) => {
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       // Create user document
+      const defaultPseudo = generateDefaultPseudo();
       const userDocRef = doc(db, 'users', result.user.uid);
       await setDoc(userDocRef, {
         uid: result.user.uid,
@@ -360,7 +394,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cards: [],
         nexusCoins: DEFAULT_STARTING_COINS,
         isAnonymous: false,
-        avatarCreature: null
+        avatarCreature: null,
+        pseudo: defaultPseudo,
+        pseudoChangeUsed: false
       });
     } catch (error) {
       if (__DEV__) {
@@ -427,6 +463,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updatePseudo = async (newPseudo: string) => {
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+
+    if (pseudoChangeUsed) {
+      throw new Error('Pseudo change already used');
+    }
+
+    try {
+      // Update Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        pseudo: newPseudo,
+        pseudoChangeUsed: true
+      });
+
+      // Update local state
+      setPseudo(newPseudo);
+      setPseudoChangeUsed(true);
+
+      // Persist to AsyncStorage for offline
+      await AsyncStorage.setItem(`pseudo_${user.uid}`, newPseudo);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating pseudo:', error);
+      }
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -443,6 +510,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAnonymous,
         avatarCreature,
         updateAvatar,
+        pseudo,
+        pseudoChangeUsed,
+        updatePseudo,
       }}
     >
       {children}

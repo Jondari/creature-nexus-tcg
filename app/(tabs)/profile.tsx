@@ -12,13 +12,14 @@ import { RedeemCodeModal } from '@/components/RedeemCodeModal';
 import { PlayerAvatar } from '@/components/PlayerAvatar';
 import { AvatarSelector } from '@/components/AvatarSelector';
 import { MusicControls } from '@/components/MusicControls';
+import { getPseudoValidationError, PSEUDO_MIN_LENGTH, PSEUDO_MAX_LENGTH } from '@/utils/pseudoUtils';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
 
 const packageJson = require('../../package.json');
 
 export default function ProfileScreen() {
-  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar } = useAuth();
+  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo } = useAuth();
   const { cardSize, setCardSize, showBattleLog, setShowBattleLog, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
@@ -32,10 +33,13 @@ export default function ProfileScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [showPseudoModal, setShowPseudoModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPseudo, setNewPseudo] = useState('');
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [pseudoLoading, setPseudoLoading] = useState(false);
   
 
   
@@ -150,6 +154,39 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleOpenPseudoModal = () => {
+    setNewPseudo(pseudo || '');
+    setShowPseudoModal(true);
+  };
+
+  const handlePseudoChange = async () => {
+    const validationError = getPseudoValidationError(newPseudo);
+    if (validationError) {
+      showErrorAlert(t('common.error'), t(validationError));
+      return;
+    }
+
+    try {
+      setPseudoLoading(true);
+      await updatePseudo(newPseudo);
+      setShowPseudoModal(false);
+      showSuccessAlert(
+        t('common.success'),
+        t('pseudo.pseudoUpdated')
+      );
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating pseudo:', error);
+      }
+      showErrorAlert(
+        t('common.error'),
+        t('pseudo.pseudoUpdateFailed')
+      );
+    } finally {
+      setPseudoLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -171,13 +208,33 @@ export default function ProfileScreen() {
             creatureName={avatarCreature}
             size="large"
           />
-          <TouchableOpacity
-            style={styles.changeAvatarButton}
-            onPress={() => setShowAvatarSelector(true)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.changeAvatarText}>{t('avatar.changeAvatar')}</Text>
-          </TouchableOpacity>
+          <Text style={styles.pseudoDisplay}>{pseudo || t('pseudo.defaultPseudo')}</Text>
+          <View style={styles.avatarButtons}>
+            <TouchableOpacity
+              style={styles.changeAvatarButton}
+              onPress={() => setShowAvatarSelector(true)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.changeAvatarText}>{t('avatar.changeAvatar')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.changeAvatarButton,
+                styles.changePseudoButton,
+                pseudoChangeUsed && styles.changePseudoButtonDisabled
+              ]}
+              onPress={handleOpenPseudoModal}
+              activeOpacity={0.8}
+              disabled={pseudoChangeUsed}
+            >
+              <Text style={[
+                styles.changeAvatarText,
+                pseudoChangeUsed && styles.changePseudoTextDisabled
+              ]}>
+                {pseudoChangeUsed ? t('pseudo.changeUsed') : t('pseudo.changePseudo')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.card}>
@@ -622,6 +679,52 @@ export default function ProfileScreen() {
         onClose={() => setShowAvatarSelector(false)}
         onSelect={handleAvatarSelect}
       />
+
+      <Modal
+        visible={showPseudoModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPseudoModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('pseudo.changePseudoTitle')}</Text>
+            <Text style={styles.modalSubtitle}>{t('pseudo.changePseudoWarning')}</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder={t('pseudo.pseudoPlaceholder')}
+              placeholderTextColor={Colors.text.secondary}
+              value={newPseudo}
+              onChangeText={setNewPseudo}
+              autoCapitalize="none"
+              maxLength={PSEUDO_MAX_LENGTH}
+            />
+            <Text style={styles.pseudoHint}>
+              {t('pseudo.pseudoHint', { min: String(PSEUDO_MIN_LENGTH), max: String(PSEUDO_MAX_LENGTH) })}
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowPseudoModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>{t('profile.cancel')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handlePseudoChange}
+                disabled={pseudoLoading}
+              >
+                <Text style={styles.saveButtonText}>
+                  {pseudoLoading ? t('common.loading') : t('common.confirm')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -935,5 +1038,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: Colors.text.primary,
+  },
+  pseudoDisplay: {
+    fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
+    color: Colors.text.primary,
+    marginTop: 12,
+  },
+  avatarButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  changePseudoButton: {
+    backgroundColor: Colors.primary[600],
+  },
+  changePseudoButtonDisabled: {
+    backgroundColor: Colors.background.secondary,
+  },
+  changePseudoTextDisabled: {
+    color: Colors.text.secondary,
+  },
+  pseudoHint: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: Colors.text.secondary,
+    marginTop: -4,
+    marginBottom: 12,
   },
 });

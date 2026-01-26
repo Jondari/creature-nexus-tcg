@@ -315,6 +315,20 @@
     "avatarUpdated": "Avatar updated successfully!",
     "avatarUpdateFailed": "Failed to update avatar. Please try again."
   },
+  "pseudo": {
+    "defaultPseudo": "Player",
+    "changePseudo": "Change Pseudo",
+    "changeUsed": "Pseudo Changed",
+    "changePseudoTitle": "Change Your Pseudo",
+    "changePseudoWarning": "Warning: You can only change your pseudo once!",
+    "pseudoPlaceholder": "Enter your new pseudo",
+    "pseudoHint": "{{min}}-{{max}} characters, letters, numbers and underscore only",
+    "pseudoUpdated": "Pseudo updated successfully!",
+    "pseudoUpdateFailed": "Failed to update pseudo. Please try again.",
+    "errorTooShort": "Pseudo is too short",
+    "errorTooLong": "Pseudo is too long",
+    "errorInvalidChars": "Pseudo can only contain letters, numbers and underscore"
+  },
   "cardTest": {
     "subtitle": "Total: {{total}} cards ({{monsters}} monsters, {{spells}} spells)",
     "monsterSection": "Monster Cards",
