@@ -674,6 +674,11 @@
       "points": "4 points atteints",
       "noCards": "L'adversaire n'a plus de cartes",
       "noMonsters": "L'adversaire n'a plus de créatures"
+    },
+    "defeat_reason": {
+      "points": "L'adversaire a atteint 4 points",
+      "noCards": "Vous n'avez plus de cartes",
+      "noMonsters": "Vous n'avez plus de créatures"
     }
   },
   "phases": {

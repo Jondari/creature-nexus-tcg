@@ -674,6 +674,11 @@
       "points": "Reached 4 points",
       "noCards": "Opponent has no cards left",
       "noMonsters": "Opponent has no monsters"
+    },
+    "defeat_reason": {
+      "points": "Opponent reached 4 points",
+      "noCards": "You have no cards left",
+      "noMonsters": "You have no monsters left"
     }
   },
   "phases": {

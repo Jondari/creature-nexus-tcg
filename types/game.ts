@@ -32,12 +32,15 @@ export interface Player {
   hasEnergyBooster: boolean; // Permanent effect: energy = turn number instead of 1
 }
 
+export type WinReason = 'points' | 'deckout' | 'fieldwipe';
+
 export interface GameState {
   players: [Player, Player];
   currentPlayerIndex: number;
   turnNumber: number;
   phase: 'draw' | 'main' | 'combat' | 'end';
   winner?: string;
+  winReason?: WinReason;
   isGameOver: boolean;
   attackedThisTurn: Set<string>; // Card IDs that have attacked this turn
 }

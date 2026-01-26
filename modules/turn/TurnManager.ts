@@ -1,4 +1,4 @@
-import { GameState, Player, GameAction } from '../../types/game';
+import { GameState, Player, GameAction, WinReason } from '../../types/game';
 import { PlayerUtils } from '../player';
 import { Deck } from '../card/Deck';
 import { isSpellCard } from '../../models/cards-extended';
@@ -43,20 +43,30 @@ export class TurnManager {
     const [deck1, deck2] = playerDecks;
 
     let winner: string | undefined;
+    let winReason: WinReason | undefined;
 
+    // Check points victory (4 points)
     if (PlayerUtils.hasWon(player1)) {
       winner = player1.id;
+      winReason = 'points';
     } else if (PlayerUtils.hasWon(player2)) {
       winner = player2.id;
-    } else if (PlayerUtils.hasLost(player1, deck1, gameState.turnNumber)) {
+      winReason = 'points';
+    }
+    // Check loss conditions (deck-out or field wipe)
+    else if (PlayerUtils.hasLost(player1, deck1, gameState.turnNumber)) {
       winner = player2.id;
+      // Determine reason: deck empty or field empty
+      winReason = deck1.isEmpty() ? 'deckout' : 'fieldwipe';
     } else if (PlayerUtils.hasLost(player2, deck2, gameState.turnNumber)) {
       winner = player1.id;
+      winReason = deck2.isEmpty() ? 'deckout' : 'fieldwipe';
     }
 
     return {
       ...gameState,
       winner,
+      winReason,
       isGameOver: winner !== undefined,
     };
   }

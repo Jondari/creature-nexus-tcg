@@ -475,9 +475,9 @@ export function GameBoard() {
       // Get the current player names and decks to restart with same setup
       const humanPlayer = playerAtBottom;
       const aiPlayer = playerAtTop;
-      
+
       resetGame();
-      
+
       // Wait a moment for reset to complete, then reinitialize
       setTimeout(() => {
         initializeGame(humanPlayer.name, humanPlayer.deck, aiPlayer.deck);
@@ -489,20 +489,41 @@ export function GameBoard() {
       setShowDeckSelection(true);
     };
 
+    const isPlayerVictory = gameState.winner === playerAtBottom.id;
+    const winnerName = isPlayerVictory ? (pseudo || playerAtBottom.name) : playerAtTop.name;
+
+    // Map winReason to i18n keys (different messages for victory vs defeat)
+    const getWinReasonText = () => {
+      const prefix = isPlayerVictory ? 'game_over.reason' : 'game_over.defeat_reason';
+      switch (gameState.winReason) {
+        case 'points':
+          return t(`${prefix}.points`);
+        case 'deckout':
+          return t(`${prefix}.noCards`);
+        case 'fieldwipe':
+          return t(`${prefix}.noMonsters`);
+        default:
+          return '';
+      }
+    };
+
     return (
       <View style={styles.centered}>
         <Text style={styles.gameOver}>
-          {gameState.winner === playerAtBottom.id ? t('game_over.victory') : t('game_over.defeat')}
+          {isPlayerVictory ? t('game_over.victory') : t('game_over.defeat')}
         </Text>
-        <Text style={styles.winner}>{t('game_over.winner')}: {gameState.winner}</Text>
-        
+        <Text style={styles.winner}>{t('game_over.winner')}: {winnerName}</Text>
+        {gameState.winReason && (
+          <Text style={styles.winReason}>{getWinReasonText()}</Text>
+        )}
+
         <View style={styles.gameOverButtons}>
           <TouchableOpacity style={styles.gameOverButton} onPress={handlePlayAgain}>
             <Text style={styles.gameOverButtonText}>{t('game.playAgain')}</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.gameOverButton, styles.gameOverButtonSecondary]} 
+
+          <TouchableOpacity
+            style={[styles.gameOverButton, styles.gameOverButtonSecondary]}
             onPress={handleReturnToMenu}
           >
             <Text style={[styles.gameOverButtonText, styles.gameOverButtonTextSecondary]}>
@@ -767,6 +788,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     color: Colors.text.secondary,
+  },
+  winReason: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: Colors.text.secondary,
+    marginTop: 8,
+    fontStyle: 'italic',
   },
   field: {
     margin: 8,
