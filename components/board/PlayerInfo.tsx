@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Colors from '@/constants/Colors';
+import { PlayerAvatar } from '@/components/PlayerAvatar';
 
 interface StatDescriptor {
   label: string;
@@ -12,6 +13,8 @@ interface PlayerInfoProps {
   stats: StatDescriptor[];
   subtitle?: React.ReactNode;
   containerRef?: React.Ref<View>;
+  avatarCreature?: string | null;
+  avatarPosition?: 'left' | 'right';
 }
 
 export function PlayerInfo({
@@ -19,10 +22,26 @@ export function PlayerInfo({
   stats,
   subtitle,
   containerRef,
+  avatarCreature,
+  avatarPosition = 'left',
 }: PlayerInfoProps) {
-  return (
-    <View ref={containerRef} style={styles.container}>
-      <Text style={styles.playerName}>{name}</Text>
+  const showAvatar = avatarCreature !== undefined;
+  const isAvatarLeft = avatarPosition === 'left';
+
+  const renderAvatar = () => {
+    if (!showAvatar) return null;
+    return (
+      <View style={styles.avatarContainer}>
+        <PlayerAvatar creatureName={avatarCreature} size="small" />
+      </View>
+    );
+  };
+
+  const renderContent = () => (
+    <View style={[styles.contentContainer, showAvatar && styles.contentWithAvatar]}>
+      <Text style={[styles.playerName, showAvatar && styles.playerNameWithAvatar]}>
+        {name}
+      </Text>
 
       {subtitle ? (
         <View style={styles.subtitleContainer}>
@@ -34,13 +53,21 @@ export function PlayerInfo({
         </View>
       ) : null}
 
-      <View style={styles.statsRow}>
+      <View style={[styles.statsRow, showAvatar && styles.statsRowWithAvatar]}>
         {stats.map(({ label, value }, index) => (
           <Text key={`${label}-${index}`} style={styles.statText}>
             {label}: {value}
           </Text>
         ))}
       </View>
+    </View>
+  );
+
+  return (
+    <View ref={containerRef} style={[styles.container, showAvatar && styles.containerWithAvatar]}>
+      {isAvatarLeft && renderAvatar()}
+      {renderContent()}
+      {!isAvatarLeft && renderAvatar()}
     </View>
   );
 }
@@ -54,12 +81,29 @@ const styles = StyleSheet.create({
     boxShadow: '0px 1px 2.22px 0px rgba(0, 0, 0, 0.22)',
     elevation: 3,
   },
+  containerWithAvatar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    marginHorizontal: 8,
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  contentWithAvatar: {
+    flex: 1,
+  },
   playerName: {
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
     color: Colors.text.primary,
+  },
+  playerNameWithAvatar: {
+    textAlign: 'center',
+    marginBottom: 4,
   },
   subtitleContainer: {
     marginBottom: 8,
@@ -71,6 +115,9 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  statsRowWithAvatar: {
     justifyContent: 'space-around',
   },
   statText: {

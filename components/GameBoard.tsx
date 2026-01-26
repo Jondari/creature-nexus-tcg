@@ -5,6 +5,7 @@ import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
 import { useSettings } from '../context/SettingsContext';
+import { useAuth } from '../context/AuthContext';
 import { CardComponent } from './CardComponent';
 import { CardActionButtons } from './CardActionButtons';
 import { Battlefield } from './board/Battlefield';
@@ -46,6 +47,7 @@ export function GameBoard() {
     initializeGame
   } = useGame();
   const { activeDeck } = useDecks();
+  const { avatarCreature } = useAuth();
   const { cardSize, setCardSize, showBattleLog } = useSettings();
   const sceneManager = useSceneManager();
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
@@ -532,6 +534,8 @@ export function GameBoard() {
           { label: t('player.hand'), value: playerAtTop.hand.length },
         ]}
         containerRef={topStatsRef as any}
+        avatarCreature={null}
+        avatarPosition="right"
       />
 
       {/* Top Player Field */}
@@ -639,6 +643,8 @@ export function GameBoard() {
           { label: t('player.hand'), value: playerAtBottom.hand.length },
         ]}
         containerRef={bottomStatsRef as any}
+        avatarCreature={avatarCreature}
+        avatarPosition="left"
       />
 
       {/* Bottom Player Hand */}
