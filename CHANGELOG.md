@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.22.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.21.0...v0.22.0) (2026-01-26)
+
+
+### Features
+
+* implements pseudo and use it in the player Info ([fa867b4](https://github.com/Jondari/creature-nexus-tcg/commit/fa867b47e05457a7f214950d87f9906bf36850ca))
+
 ## [0.21.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.20.0...v0.21.0) (2026-01-26)
 
 
