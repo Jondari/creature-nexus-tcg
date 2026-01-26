@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.21.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.20.0...v0.21.0) (2026-01-26)
+
+
+### Features
+
+* display avatars in battle player info bars ([caa27fb](https://github.com/Jondari/creature-nexus-tcg/commit/caa27fbbfcfe0e4e7b48e23acb490803e917cb78))
+
 ## [0.20.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.19.1...v0.20.0) (2026-01-24)
 
 
