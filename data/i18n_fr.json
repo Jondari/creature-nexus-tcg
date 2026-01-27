@@ -913,10 +913,12 @@
     "battleComplete": {
       "victoryTitle": "Victoire !",
       "victoryMessage": "Vous avez vaincu {{name}} ! {{tail}}",
+      "victoryMessageWithReason": "Vous avez vaincu {{name}} !\n{{reason}}\n{{tail}}",
       "victoryTailBoss": "Boss vaincu !",
       "victoryTail": "Bien joué !",
       "defeatTitle": "Défaite",
       "defeatMessage": "Vous avez été vaincu par {{name}}. Entraînez-vous et réessayez !",
+      "defeatMessageWithReason": "Vous avez été vaincu par {{name}}.\n{{reason}}\nEntraînez-vous et réessayez !",
       "retry": "Recommencer",
       "returnToMap": "Retour à la carte"
     }

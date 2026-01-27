@@ -169,13 +169,41 @@ function StoryBattleContent() {
 
     const isPlayerWin = winnerId === 'player1';
 
+    // Get translated win/loss reason
+    const getReasonText = () => {
+      const prefix = isPlayerWin ? 'game_over.reason' : 'game_over.defeat_reason';
+      switch (gameState?.winReason) {
+        case 'points':
+          return t(`${prefix}.points`);
+        case 'deckout':
+          return t(`${prefix}.noCards`);
+        case 'fieldwipe':
+          return t(`${prefix}.noMonsters`);
+        default:
+          return '';
+      }
+    };
+
+    const reason = getReasonText();
+
     if (isPlayerWin) {
       // Update battle progress using context
       completeBattle(chapter.id, battle.id);
-      
+
+      const message = reason
+        ? t('story.battleComplete.victoryMessageWithReason', {
+            name: t(battle.name),
+            reason,
+            tail: battle.isBoss ? t('story.battleComplete.victoryTailBoss') : t('story.battleComplete.victoryTail')
+          })
+        : t('story.battleComplete.victoryMessage', {
+            name: t(battle.name),
+            tail: battle.isBoss ? t('story.battleComplete.victoryTailBoss') : t('story.battleComplete.victoryTail')
+          });
+
       showSuccessAlert(
         t('story.battleComplete.victoryTitle'),
-        t('story.battleComplete.victoryMessage', { name: t(battle.name), tail: battle.isBoss ? t('story.battleComplete.victoryTailBoss') : t('story.battleComplete.victoryTail') }),
+        message,
         () => {
           resetGame();
           // Navigate back to the specific chapter map
@@ -186,9 +214,13 @@ function StoryBattleContent() {
         }
       );
     } else {
+      const message = reason
+        ? t('story.battleComplete.defeatMessageWithReason', { name: t(battle.name), reason })
+        : t('story.battleComplete.defeatMessage', { name: t(battle.name) });
+
       showAlert(
         t('story.battleComplete.defeatTitle'),
-        t('story.battleComplete.defeatMessage', { name: t(battle.name) }),
+        message,
         [
           {
             text: t('story.battleComplete.retry'),

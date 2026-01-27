@@ -913,10 +913,12 @@
     "battleComplete": {
       "victoryTitle": "Victory!",
       "victoryMessage": "You have defeated {{name}}! {{tail}}",
+      "victoryMessageWithReason": "You have defeated {{name}}!\n{{reason}}\n{{tail}}",
       "victoryTailBoss": "Boss conquered!",
       "victoryTail": "Well fought!",
       "defeatTitle": "Defeat",
       "defeatMessage": "You were defeated by {{name}}. Train harder and try again!",
+      "defeatMessageWithReason": "You were defeated by {{name}}.\n{{reason}}\nTrain harder and try again!",
       "retry": "Retry",
       "returnToMap": "Return to Map"
     }
