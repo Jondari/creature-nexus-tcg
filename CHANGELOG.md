@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.23.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.22.0...v0.23.0) (2026-01-29)
+
+
+### Features
+
+* display win/loss reason at end of battle ([aa5ad7d](https://github.com/Jondari/creature-nexus-tcg/commit/aa5ad7da29d139ec3fb9d857d6d87d1544234c9b))
+* extend win reason display to story mode ([9ec49d6](https://github.com/Jondari/creature-nexus-tcg/commit/9ec49d6a4fccd41c268a2da4a03c8a184c69630f))
+
+
+### Bug Fixes
+
+* add missing period after win/loss reason in story battle messages ([46cb160](https://github.com/Jondari/creature-nexus-tcg/commit/46cb160dd999c15b56a76afdd093462a704ab5b0))
+
 ## [0.22.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.21.0...v0.22.0) (2026-01-26)
 
 
