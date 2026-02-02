@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { GameProvider, useGame } from '@/context/GameContext';
 import { useDecks } from '@/context/DeckContext';
+import { useSceneManager } from '@/context/SceneManagerContext';
 import { GameBoard } from '@/components/GameBoard';
 import {getAIDeckForBattle, useStoryMode} from '@/context/StoryModeContext';
 import { StoryChapter, StoryBattle } from '@/data/storyMode';
@@ -23,9 +24,11 @@ function StoryBattleContent() {
   const { gameState, gameEngine, initializeGame, resetGame } = useGame();
   const { activeDeck, savedDecks } = useDecks();
   const { chapters, completeBattle } = useStoryMode();
+  const sceneManager = useSceneManager();
   const [loading, setLoading] = useState(true);
   const [battle, setBattle] = useState<StoryBattle | null>(null);
   const [chapter, setChapter] = useState<StoryChapter | null>(null);
+  const [preBattleSceneShown, setPreBattleSceneShown] = useState(false);
 
   // Main initialization effect
   useEffect(() => {
@@ -155,6 +158,16 @@ function StoryBattleContent() {
       resetGame(); // ensure a clean engine/context
       // Initialize the game with player deck vs AI deck
       initializeGame(t('player.you'), activeDeck.cards, aiDeck);
+
+      // Trigger pre-battle scene if not already shown
+      if (!preBattleSceneShown) {
+        setPreBattleSceneShown(true);
+        sceneManager.checkTriggers({
+          type: 'onBattleStart',
+          chapterId: foundChapter.id,
+          battleId: foundBattle.id,
+        });
+      }
       
     } catch (error) {
       console.error('Error initializing story battle:', error);
@@ -168,6 +181,12 @@ function StoryBattleContent() {
     if (!battle || !chapter) return;
 
     const isPlayerWin = winnerId === 'player1';
+
+    // Trigger post-battle scene
+    sceneManager.checkTriggers({
+      type: 'onBattleEnd',
+      result: isPlayerWin ? 'win' : 'lose',
+    });
 
     // Get translated win/loss reason
     const getReasonText = () => {

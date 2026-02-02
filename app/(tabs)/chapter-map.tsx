@@ -26,6 +26,12 @@ export default function ChapterMapScreen() {
       const foundChapter = chapters.find(c => c.id === parseInt(chapterId));
       if (foundChapter) {
         setChapter(foundChapter);
+
+        // Trigger story intro scene when entering a chapter for the first time
+        sceneManager.checkTriggers({
+          type: 'onStoryProgress',
+          chapterId: foundChapter.id,
+        });
       } else {
         router.replace('/(tabs)/story-mode');
       }

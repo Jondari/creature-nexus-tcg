@@ -921,6 +921,83 @@
       "defeatMessageWithReason": "Vous avez été vaincu par {{name}}.\n{{reason}}.\nEntraînez-vous et réessayez !",
       "retry": "Recommencer",
       "returnToMap": "Retour à la carte"
+    },
+    "characters": {
+      "narrator": "Narrateur",
+      "archivist": "Archiviste Ancien",
+      "guide": "Guide du Nexus",
+      "guardian": "Gardien du Temple",
+      "core_guardian": "Gardien du Cœur du Nexus"
+    },
+    "scenes": {
+      "chapter_1": {
+        "intro": {
+          "title": "L'Éveil du Nexus",
+          "line_1": "Ah, un nouvel Invocateur approche ! Bienvenue au Nexus, le carrefour de tous les mondes élémentaires.",
+          "line_2": "Je suis l'Archiviste, gardien du savoir ancien. J'ai attendu des siècles quelqu'un avec ton potentiel.",
+          "line_3": "Le Nexus était endormi depuis des siècles, mais ton arrivée a éveillé quelque chose en son cœur.",
+          "choice_nexus": "Quel est cet endroit ?",
+          "choice_summoner": "Que signifie être un Invocateur ?",
+          "choice_ready": "Je suis prêt à commencer !",
+          "nexus_explain_1": "Le Nexus est le point de convergence de quatre royaumes élémentaires : Feu, Eau, Terre et Air.",
+          "nexus_explain_2": "Il a été créé par les anciens pour maintenir l'équilibre entre les mondes. Maintenant, il a besoin d'un gardien.",
+          "summoner_explain_1": "Un Invocateur peut appeler des créatures de n'importe quel royaume élémentaire et créer des liens avec elles.",
+          "summoner_explain_2": "Ton don unique te permet de commander des créatures qui normalement ne combattraient jamais ensemble.",
+          "ready_1": "Ta première épreuve t'attend. Le Nexus doit tester ta valeur avant de t'accorder son pouvoir.",
+          "ready_2": "Affronte les gardiens qui protègent ce lieu sacré. Prouve ta force, et le chemin s'ouvrira devant toi."
+        },
+        "nexus_1": {
+          "pre_1": "C'est ton premier vrai défi, Invocateur. Ne sois pas nerveux !",
+          "pre_2": "Les créatures ici te testent, elles ne cherchent pas à te détruire. Montre-leur du respect.",
+          "pre_3": "Souviens-toi : équilibre tes attaques et tes défenses. Les avantages élémentaires peuvent changer le cours du combat !",
+          "victory_1": "Excellent travail ! Tu as prouvé que tu as ce qu'il faut.",
+          "victory_2": "Le chemin vers les profondeurs du Nexus est maintenant ouvert. D'autres défis t'attendent !"
+        },
+        "nexus_2": {
+          "pre_1": "Tu as atteint la Chambre des Portails. Ces anciennes portes sont connectées aux mondes élémentaires.",
+          "pre_2": "Les portails sont scellés depuis des âges. Pour les réactiver, tu dois vaincre leurs gardiens.",
+          "choice_curious": "Je veux tous les explorer !",
+          "choice_cautious": "Cela semble dangereux...",
+          "pre_3": "Curieux ou prudent, tu dois avancer. Les gardiens attendent ton défi."
+        },
+        "nexus_3": {
+          "pre_1": "Halte, intrus ! Tu te tiens devant le Temple des Anciens.",
+          "pre_2": "Depuis des millénaires, nous gardons les secrets qu'il renferme. Nul ne peut passer sans prouver sa valeur.",
+          "pre_3": "Prépare-toi, jeune Invocateur. Nous verrons si tu es vraiment l'élu !"
+        },
+        "nexus_4": {
+          "pre_1": "Tu es allé loin, Invocateur. Ici, les quatre éléments convergent en énergie pure.",
+          "pre_2": "Ce point de convergence est instable. Des créatures nées d'éléments mélangés y résident.",
+          "pre_3": "L'air crépite de puissance. D'étranges créatures se matérialisent des énergies tourbillonnantes..."
+        },
+        "nexus_boss": {
+          "pre_1": "Au cœur du Nexus, une silhouette massive s'éveille de son sommeil ancestral...",
+          "pre_2": "Alors... un nouvel Invocateur ose approcher le Cœur. Comme c'est amusant.",
+          "pre_3": "Je suis le gardien de ce lieu. Depuis dix mille ans, personne ne m'a vaincu.",
+          "choice_brave": "Je n'ai pas peur de toi !",
+          "choice_diplomatic": "Je viens chercher la connaissance, pas le conflit.",
+          "choice_determined": "Je ferai tout ce qu'il faut pour réussir.",
+          "brave_reply": "Paroles courageuses ! Voyons si tes actes sont à la hauteur de ton courage.",
+          "diplomatic_reply": "La connaissance ? Très bien. Vaincs-moi, et tu auras toute la connaissance que tu cherches.",
+          "determined_reply": "La détermination seule ne suffit pas. Montre-moi ta vraie puissance !",
+          "pre_4": "PRÉPARE-TOI, INVOCATEUR ! LE GARDIEN DU CŒUR S'ÉVEILLE !"
+        },
+        "complete": {
+          "line_1": "Le Gardien du Cœur tombe ! La lumière inonde la chambre ancienne alors que le Nexus s'éveille pleinement.",
+          "line_2": "Impressionnant... Tu es le premier à me vaincre depuis des âges innombrables.",
+          "line_3": "Le Nexus te reconnaît comme son champion. Va et restaure l'équilibre des royaumes.",
+          "line_4": "Magnifique ! Tu as accompli ce que j'espérais mais n'attendais jamais !",
+          "line_5": "Le Cœur du Nexus s'est lié à toi. Son pouvoir coule dans tout ton être.",
+          "line_6": "Avec cette victoire, les portails élémentaires ont commencé à se stabiliser.",
+          "reward": "Tu as débloqué l'accès au Monde de l'Eau ! De nouvelles créatures attendent ta découverte.",
+          "tease_water": "Le Monde de l'Eau t'appelle en premier. Cherche son gardien et restaure le royaume aquatique."
+        },
+        "defeat": {
+          "line_1": "Ne te décourage pas, Invocateur. Même les plus grands guerriers connaissent des revers.",
+          "line_2": "Revois ton deck, réfléchis à ta stratégie, et réessaie quand tu seras prêt.",
+          "line_3": "Le Nexus croit en toi. Ce n'est qu'un obstacle temporaire sur ton chemin."
+        }
+      }
     }
   },
   "tutorial": {

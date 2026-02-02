@@ -921,6 +921,83 @@
       "defeatMessageWithReason": "You were defeated by {{name}}.\n{{reason}}.\nTrain harder and try again!",
       "retry": "Retry",
       "returnToMap": "Return to Map"
+    },
+    "characters": {
+      "narrator": "Narrator",
+      "archivist": "Ancient Archivist",
+      "guide": "Nexus Guide",
+      "guardian": "Temple Guardian",
+      "core_guardian": "Nexus Core Guardian"
+    },
+    "scenes": {
+      "chapter_1": {
+        "intro": {
+          "title": "The Nexus Awakens",
+          "line_1": "Ah, a new Summoner approaches! Welcome to the Nexus, the crossroads of all elemental worlds.",
+          "line_2": "I am the Archivist, keeper of ancient knowledge. I have waited ages for one with your potential.",
+          "line_3": "The Nexus has been dormant for centuries, but your arrival has stirred something within its core.",
+          "choice_nexus": "What is this place?",
+          "choice_summoner": "What does it mean to be a Summoner?",
+          "choice_ready": "I'm ready to begin!",
+          "nexus_explain_1": "The Nexus is the convergence point of four elemental realms: Fire, Water, Earth, and Air.",
+          "nexus_explain_2": "It was created by the ancient ones to maintain balance between the worlds. Now, it needs a guardian.",
+          "summoner_explain_1": "A Summoner can call upon creatures from any elemental realm and form bonds with them.",
+          "summoner_explain_2": "Your unique gift allows you to command creatures that would normally never fight together.",
+          "ready_1": "Your first trial awaits. The Nexus must test your worthiness before granting you its power.",
+          "ready_2": "Face the guardians that protect this sacred place. Prove your strength, and the path forward will open."
+        },
+        "nexus_1": {
+          "pre_1": "This is your first real challenge, Summoner. Don't be nervous!",
+          "pre_2": "The creatures here are testing you, not trying to destroy you. Show them respect.",
+          "pre_3": "Remember: balance your attacks and defenses. Elemental advantages can turn the tide!",
+          "victory_1": "Excellent work! You've proven you have what it takes.",
+          "victory_2": "The path deeper into the Nexus is now open. More challenges await!"
+        },
+        "nexus_2": {
+          "pre_1": "You've reached the Portal Chamber. These ancient gateways connect to the elemental worlds.",
+          "pre_2": "The portals have been sealed for ages. To reactivate them, you must defeat their guardians.",
+          "choice_curious": "I want to explore them all!",
+          "choice_cautious": "This seems dangerous...",
+          "pre_3": "Whether curious or cautious, you must press forward. The guardians await your challenge."
+        },
+        "nexus_3": {
+          "pre_1": "Halt, intruder! You stand before the Temple of the Ancients.",
+          "pre_2": "For millennia, we have guarded the secrets within. None may pass without proving their worth.",
+          "pre_3": "Prepare yourself, young Summoner. We shall see if you are truly chosen!"
+        },
+        "nexus_4": {
+          "pre_1": "You've made it far, Summoner. Here, the four elements converge into pure energy.",
+          "pre_2": "This convergence point is unstable. Creatures born of mixed elements dwell here.",
+          "pre_3": "The air crackles with power. Strange creatures materialize from the swirling energies..."
+        },
+        "nexus_boss": {
+          "pre_1": "At the heart of the Nexus, a massive figure awakens from its ancient slumber...",
+          "pre_2": "So... a new Summoner dares to approach the Core. How amusing.",
+          "pre_3": "I am the guardian of this place. For ten thousand years, none have defeated me.",
+          "choice_brave": "I'm not afraid of you!",
+          "choice_diplomatic": "I come seeking knowledge, not conflict.",
+          "choice_determined": "I will do whatever it takes to succeed.",
+          "brave_reply": "Brave words! Let us see if your actions match your courage.",
+          "diplomatic_reply": "Knowledge? Very well. Defeat me, and you shall have all the knowledge you seek.",
+          "determined_reply": "Determination alone is not enough. Show me your true power!",
+          "pre_4": "PREPARE YOURSELF, SUMMONER! THE CORE GUARDIAN AWAKENS!"
+        },
+        "complete": {
+          "line_1": "The Core Guardian falls! Light floods the ancient chamber as the Nexus fully awakens.",
+          "line_2": "Impressive... You are the first to defeat me in countless ages.",
+          "line_3": "The Nexus recognizes you as its champion. Go forth and restore balance to the realms.",
+          "line_4": "Magnificent! You have done what I dared to hope but never expected!",
+          "line_5": "The Nexus Core has bonded with you. Its power flows through your very being.",
+          "line_6": "With this victory, the elemental portals have begun to stabilize.",
+          "reward": "You have unlocked access to the Water World! New creatures await your discovery.",
+          "tease_water": "The Water World calls to you first. Seek out its guardian and restore the aquatic realm."
+        },
+        "defeat": {
+          "line_1": "Don't be discouraged, Summoner. Even the greatest warriors face setbacks.",
+          "line_2": "Review your deck, consider your strategy, and try again when you're ready.",
+          "line_3": "The Nexus believes in you. This is merely a temporary obstacle on your path."
+        }
+      }
     }
   },
   "tutorial": {
