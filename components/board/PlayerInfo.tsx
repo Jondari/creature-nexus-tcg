@@ -56,7 +56,7 @@ export function PlayerInfo({
       <View style={[styles.statsRow, showAvatar && styles.statsRowWithAvatar]}>
         {stats.map(({ label, value }, index) => (
           <Text key={`${label}-${index}`} style={styles.statText}>
-            {label}: {value}
+            {label ? `${label}: ${value}` : value}
           </Text>
         ))}
       </View>

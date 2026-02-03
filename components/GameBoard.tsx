@@ -33,6 +33,14 @@ import { TurnTransitionBanner } from './Animation/TurnTransitionBanner';
 import { GameOverAnimation } from './Animation/GameOverAnimation';
 import { useEffectiveViewport } from '@/hooks/useEffectiveViewport';
 
+// TODO: Move to GameConfig when implementing configurable win conditions
+const POINTS_TO_WIN = 4;
+
+// Render hearts display: full hearts (❤️) for remaining lives, empty hearts (🖤) for lost lives
+const renderHearts = (fullHearts: number, emptyHearts: number): string => {
+  return '❤️'.repeat(Math.max(0, fullHearts)) + '🖤'.repeat(Math.max(0, emptyHearts));
+};
+
 export function GameBoard() {
   const { 
     gameState, 
@@ -582,7 +590,7 @@ export function GameBoard() {
         name={playerAtTop.name}
         stats={[
           { label: t('player.energy'), value: playerAtTop.energy },
-          { label: t('player.points'), value: playerAtTop.points },
+          { label: '', value: renderHearts(POINTS_TO_WIN - playerAtBottom.points, playerAtBottom.points) },
           { label: t('player.hand'), value: playerAtTop.hand.length },
         ]}
         containerRef={topStatsRef as any}
@@ -693,7 +701,7 @@ export function GameBoard() {
         name={pseudo || playerAtBottom.name}
         stats={[
           { label: t('player.energy'), value: playerAtBottom.energy },
-          { label: t('player.points'), value: playerAtBottom.points },
+          { label: '', value: renderHearts(POINTS_TO_WIN - playerAtTop.points, playerAtTop.points) },
           { label: t('player.hand'), value: playerAtBottom.hand.length },
         ]}
         containerRef={bottomStatsRef as any}
