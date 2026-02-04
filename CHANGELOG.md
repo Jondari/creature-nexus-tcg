@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.24.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.23.0...v0.24.0) (2026-02-04)
+
+
+### Features
+
+* add Electron support for desktop builds ([31cd637](https://github.com/Jondari/creature-nexus-tcg/commit/31cd6373ed09ec66bbe19dcb1332ef1229bf62f7))
+
 ## [0.23.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.22.0...v0.23.0) (2026-01-29)
 
 
