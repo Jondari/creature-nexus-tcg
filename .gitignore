@@ -50,3 +50,5 @@ expo-env.d.ts
 
 # Development tracking (internal use only)
 ISSUES.md
+# Electron build output
+release/

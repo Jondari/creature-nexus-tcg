@@ -14,6 +14,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "electron:dev": "cross-env ELECTRON_START_URL=http://localhost:19006 concurrently \"expo start --web\" \"wait-on http://localhost:19006 && electron electron/main.js\"",
+    "electron:build": "rimraf dist release && npm run build:web && electron-builder -c electron/electron-builder.yml",
     "release": "standard-version",
     "redeem-code": "node scripts/redeem-code.js",
     "eas-build-post-install": "bash scripts/postinstall-eas.sh",
@@ -78,6 +80,12 @@
     "imagemin-mozjpeg": "^10.0.0",
     "imagemin-pngquant": "^10.0.0",
     "standard-version": "^9.5.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "rimraf": "^6.0.1",
+    "wait-on": "^8.0.2"
   }
 }

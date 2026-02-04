@@ -62,6 +62,28 @@ npm run build:web
 npm run deploy
 ```
 
+## Desktop (Electron)
+
+1. Start development mode (opens Expo Web + Electron):
+```bash
+npm run electron:dev
+```
+2. Generate a desktop build ready for packaging:
+```bash
+npm run electron:build
+```
+This command first exports the Expo web bundle to `dist/`, then `electron-builder` produces Windows executables in `release/`.
+
+## Steam Deployment
+
+1. Copy the `release/win-unpacked` folder to `Steamworks SDK/tools/ContentBuilder/content/<your_depot>`.
+2. Configure your `app_build_<appid>.vdf` and `depot_build_<depotid>.vdf` files in `Steamworks SDK/tools/ContentBuilder/scripts/` pointing to this folder.
+3. Publish via SteamCMD:
+```bash
+steamcmd +login <username> +run_app_build ..\\scripts\\app_build_<appid>.vdf +quit
+```
+4. Manage branches (alpha/beta/live) and the store page in Steamworks.
+
 ## Project Structure
 
 - `app/` - Contains all the screens and navigation setup using Expo Router
