@@ -49,6 +49,6 @@ expo-env.d.ts
 .idea/
 
 # Development tracking (internal use only)
-ISSUES.md
+*.internal.md
 # Electron build output
 release/

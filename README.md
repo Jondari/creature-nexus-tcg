@@ -2,21 +2,27 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/7f369d2a-ba9a-46d9-982a-7b74f39c05b8/deploy-status)](https://app.netlify.com/projects/creature-nexus/deploys)
 
-A digital trading card game featuring mythical creatures built with Expo and React Native.
+A cross-platform digital trading card game featuring mythical creatures, built with Expo and React Native.
 
 ## Features
 
-- Anonymous authentication with Firebase
-- Card pack opening system with cooldown timer
-- Different card rarities with unique visual effects
-- Collection management with filtering capabilities
-- Responsive design for both mobile and web platforms
+- PvE battles against AI with elemental affinity system
+- Story mode with 6 elemental chapters and 30+ battles
+- Card collection with 5 rarities (common, rare, epic, legendary, mythic)
+- Deck builder (20–60 cards, max 3 copies per model)
+- Shop with packs, promo codes, and Nexus Coins economy
+- 5 battlefield themes with animated particle effects
+- Tutorial system with visual novel engine
+- Player identity (avatar, pseudo)
+- Authentication: anonymous, email/password, Google OAuth
+- Internationalization (English / French)
+- Platforms: Web (Netlify), Android, iOS, Desktop (Electron — experimental)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or later)
+- Node.js (v18 or later)
 - npm or yarn
 - Firebase project with Authentication and Firestore enabled
 
@@ -24,7 +30,7 @@ A digital trading card game featuring mythical creatures built with Expo and Rea
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/creature-nexus-tcg.git
+git clone https://github.com/Jondari/creature-nexus-tcg.git
 cd creature-nexus-tcg
 ```
 
@@ -74,25 +80,21 @@ npm run electron:build
 ```
 This command first exports the Expo web bundle to `dist/`, then `electron-builder` produces Windows executables in `release/`.
 
-## Steam Deployment
-
-1. Copy the `release/win-unpacked` folder to `Steamworks SDK/tools/ContentBuilder/content/<your_depot>`.
-2. Configure your `app_build_<appid>.vdf` and `depot_build_<depotid>.vdf` files in `Steamworks SDK/tools/ContentBuilder/scripts/` pointing to this folder.
-3. Publish via SteamCMD:
-```bash
-steamcmd +login <username> +run_app_build ..\\scripts\\app_build_<appid>.vdf +quit
-```
-4. Manage branches (alpha/beta/live) and the store page in Steamworks.
-
 ## Project Structure
 
-- `app/` - Contains all the screens and navigation setup using Expo Router
+- `app/` - Screens and navigation (Expo Router)
 - `components/` - Reusable React components
 - `config/` - Firebase configuration
-- `context/` - React Context for global state management
-- `models/` - TypeScript interfaces and type definitions
+- `context/` - React Contexts (Auth, Game, Deck, StoryMode, Settings, etc.)
+- `data/` - Card definitions, story chapters, scenes, i18n files
+- `modules/` - Game engine (Player, battle logic)
+- `types/` - TypeScript type definitions
 - `utils/` - Utility functions
-- `constants/` - App constants like colors, themes, etc.
+- `constants/` - App constants (colors, themes, etc.)
+
+## Documentation
+
+See the [doc/](doc/INDEX.md) folder for detailed feature documentation.
 
 ## Firebase Setup
 
