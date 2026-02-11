@@ -4,8 +4,6 @@ import { HelpCircle } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 import { useDecks } from '@/context/DeckContext';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/config/firebase';
 import { Card } from '@/models/Card';
 import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { DeckBuilder } from '@/components/DeckBuilder';
@@ -19,7 +17,7 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 export default function DecksScreen() {
-  const { user } = useAuth();
+  const { user, getCards } = useAuth();
   const sceneManager = useSceneManager();
   const { setFlag } = sceneManager;
   const { savedDecks, activeDeck, saveDeck, deleteDeck, setActiveDeck } = useDecks();
@@ -61,29 +59,24 @@ export default function DecksScreen() {
   const fetchUserCards = async () => {
     try {
       setLoading(true);
-      
+
       if (!user) return;
-      
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-      
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        // Keep only well-formed card objects; drop invalid entries (e.g., string IDs)
-        const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
-          if (!Array.isArray(cards)) return [];
-          return cards.filter((c: any) => (
-            c && typeof c === 'object' &&
-            typeof c.id === 'string' &&
-            typeof c.name === 'string' &&
-            typeof c.rarity === 'string' &&
-            typeof c.element === 'string' &&
-            (isMonsterCard(c) || isSpellCard(c))
-          ));
-        };
-        setUserCards(sanitizeCards(userData.cards));
-        setLastFetchTime(Date.now());
-      }
+
+      const rawCards = await getCards();
+      // Keep only well-formed card objects; drop invalid entries (e.g., string IDs)
+      const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
+        if (!Array.isArray(cards)) return [];
+        return cards.filter((c: any) => (
+          c && typeof c === 'object' &&
+          typeof c.id === 'string' &&
+          typeof c.name === 'string' &&
+          typeof c.rarity === 'string' &&
+          typeof c.element === 'string' &&
+          (isMonsterCard(c) || isSpellCard(c))
+        ));
+      };
+      setUserCards(sanitizeCards(rawCards));
+      setLastFetchTime(Date.now());
     } catch (error) {
       if (__DEV__) {
         console.error('Error fetching user cards:', error);

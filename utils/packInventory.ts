@@ -63,11 +63,15 @@ export const removePackFromInventory = async (
   packToRemove: InventoryPack
 ): Promise<void> => {
   try {
-    // Get current packs and filter out the opened one
+    // Get current packs and remove only the first match
     const currentPacks = await getInventoryPacks(userId);
-    const updatedPacks = currentPacks.filter(
-      pack => pack.earnedAt !== packToRemove.earnedAt || pack.packId !== packToRemove.packId
+    const index = currentPacks.findIndex(
+      pack => pack.earnedAt === packToRemove.earnedAt && pack.packId === packToRemove.packId
     );
+    const updatedPacks = [...currentPacks];
+    if (index !== -1) {
+      updatedPacks.splice(index, 1);
+    }
     
     const userDocRef = doc(db, 'users', userId);
     await updateDoc(userDocRef, {

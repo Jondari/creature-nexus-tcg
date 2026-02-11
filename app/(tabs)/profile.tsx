@@ -7,9 +7,13 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LogOut, Github, Globe, Mail, Save, Trash2, TestTube, Gift, Shield } from 'lucide-react-native';
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
-import { addNexusCoins } from '@/utils/currencyUtils';
-import { RedeemCodeModal } from '@/components/RedeemCodeModal';
 import { PlayerAvatar } from '@/components/PlayerAvatar';
+import { isDemoMode } from '@/config/localMode';
+
+// Lazy-load RedeemCodeModal to avoid pulling Firebase in demo mode
+const RedeemCodeModal = isDemoMode
+  ? null
+  : require('@/components/RedeemCodeModal').RedeemCodeModal;
 import { AvatarSelector } from '@/components/AvatarSelector';
 import { MusicControls } from '@/components/MusicControls';
 import { getPseudoValidationError, PSEUDO_MIN_LENGTH, PSEUDO_MAX_LENGTH } from '@/utils/pseudoUtils';
@@ -19,7 +23,7 @@ import { t } from '@/utils/i18n';
 const packageJson = require('../../package.json');
 
 export default function ProfileScreen() {
-  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo } = useAuth();
+  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins } = useAuth();
   const { cardSize, setCardSize, showBattleLog, setShowBattleLog, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
@@ -261,7 +265,7 @@ export default function ProfileScreen() {
           </View>
         </View>
         
-        {isAnonymous && (
+        {isAnonymous && !isDemoMode && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>{t('profile.saveProgressTitle')}</Text>
             <Text style={styles.cardText}>{t('profile.saveProgressText')}</Text>
@@ -390,16 +394,17 @@ export default function ProfileScreen() {
           <MusicControls />
         </View>
 
+        {!isDemoMode && (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{t('profile.redeemTitle')}</Text>
-          
+
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>{t('profile.redeemEnterCode')}</Text>
               <Text style={styles.settingDescription}>{t('profile.redeemDesc')}</Text>
             </View>
             <View style={styles.settingButtons}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.redeemButton}
                 onPress={() => setShowRedeemModal(true)}
                 activeOpacity={0.8}
@@ -410,6 +415,7 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
+        )}
 
         {/* A supprimer */}
         {__DEV__ && (
@@ -447,7 +453,7 @@ export default function ProfileScreen() {
               onPress={async () => {
                 if (user) {
                   try {
-                    await addNexusCoins(user.uid, 10000);
+                    await addCoins(10000);
                     showSuccessAlert(
                       t('profile.devToolsTitle'),
                       t('profile.dev.addCoinsSuccess', { amount: '10,000' })
@@ -665,13 +671,15 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
-      <RedeemCodeModal
-        visible={showRedeemModal}
-        onClose={() => setShowRedeemModal(false)}
-        onSuccess={() => {
-          // Optionally refresh currency or show additional success feedback
-        }}
-      />
+      {!isDemoMode && RedeemCodeModal && (
+        <RedeemCodeModal
+          visible={showRedeemModal}
+          onClose={() => setShowRedeemModal(false)}
+          onSuccess={() => {
+            // Optionally refresh currency or show additional success feedback
+          }}
+        />
+      )}
 
       <AvatarSelector
         visible={showAvatarSelector}

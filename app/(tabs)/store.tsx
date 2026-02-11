@@ -11,11 +11,9 @@ import PackOpeningAnimation from '@/components/Animation/PackOpeningAnimation';
 import { PACK_CATEGORIES, getAvailablePacks, BoosterPack } from '@/data/boosterPacks';
 import { UserCurrency } from '@/models/BoosterPack';
 import { showErrorAlert, showSuccessAlert, showConfirmAlert } from '@/utils/alerts';
-import { getUserCurrency, spendNexusCoins, addNexusCoins } from '@/utils/currencyUtils';
 import { generatePackCards } from '@/utils/boosterUtils';
-import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { db } from '@/config/firebase';
 import { BillingService } from '@/services/billingService';
+import { isDemoMode } from '@/config/localMode';
 import { useSceneTrigger, useSceneManager } from '@/context/SceneManagerContext';
 import { useAnchorRegister } from '@/context/AnchorsContext';
 import { COMMON_ANCHORS } from '@/types/scenes';
@@ -25,7 +23,7 @@ const { width } = Dimensions.get('window');
 const isWideScreen = width >= 768; // Tablet/desktop breakpoint
 
 export default function StoreScreen() {
-  const { user } = useAuth();
+  const { user, getCoins, spendCoins, addCoins, addCards } = useAuth();
   const sceneManager = useSceneManager();
   const coinRef = useRef<View | null>(null);
   const packGridRef = useRef<View | null>(null);
@@ -46,7 +44,9 @@ export default function StoreScreen() {
   useEffect(() => {
     if (user) {
       fetchUserCurrency();
-      fetchRealPrices(); // Load real prices from RevenueCat
+      if (!isDemoMode) {
+        fetchRealPrices(); // Load real prices from RevenueCat
+      }
     }
   }, [user]);
 
@@ -91,9 +91,9 @@ export default function StoreScreen() {
     try {
       setLoading(true);
       if (!user) return;
-      
-      const currency = await getUserCurrency(user.uid);
-      setUserCurrency(currency);
+
+      const coins = await getCoins();
+      setUserCurrency({ nexusCoins: coins });
       setLastFetchTime(Date.now());
     } catch (error) {
       if (__DEV__) {
@@ -108,37 +108,34 @@ export default function StoreScreen() {
   const executePurchase = async (pack: BoosterPack, quantity: number, totalCost: number) => {
     try {
       if (!user) return;
-      
-      const success = await spendNexusCoins(user.uid, totalCost);
-      
+
+      const success = await spendCoins(totalCost);
+
       if (success) {
         try {
           // Generate cards but don't show success message yet
-          const allCards = [];
-          
+          const allNewCards = [];
+
           // Check if this is a bundle purchase and calculate total packs (including bonus)
           let totalPacksToGenerate = quantity;
           if (pack.bundleDiscount && quantity === pack.bundleDiscount.quantity) {
             // This is a bundle purchase, add the bonus packs
             totalPacksToGenerate = quantity + pack.bundleDiscount.bonus;
           }
-          
+
           for (let i = 0; i < totalPacksToGenerate; i++) {
             const packCards = generatePackCards(pack);
-            allCards.push(...packCards);
+            allNewCards.push(...packCards);
           }
-          
-          // Add cards to user collection
-          const userDocRef = doc(db, 'users', user.uid);
-          await updateDoc(userDocRef, {
-            cards: arrayUnion(...allCards)
-          });
-          
+
+          // Add cards to user collection via context
+          await addCards(allNewCards);
+
           // Show pack opening animation
           setCurrentPackName(`${pack.name}${totalPacksToGenerate > 1 ? ` x${totalPacksToGenerate}` : ''}`);
-          setPackResults(allCards);
+          setPackResults(allNewCards);
           setShowPackResults(true);
-          
+
           // Refresh currency display
           await fetchUserCurrency();
         } catch (packError) {
@@ -147,7 +144,7 @@ export default function StoreScreen() {
             console.error('Error after payment, refunding coins:', packError);
           }
           try {
-            await addNexusCoins(user.uid, totalCost);
+            await addCoins(totalCost);
             await fetchUserCurrency(); // Refresh to show refund
             showErrorAlert(t('store.purchaseFailed'), t('store.packOpenFailedRefunded'));
           } catch (refundError) {
@@ -312,23 +309,13 @@ export default function StoreScreen() {
         t('store.confirmPurchaseRealMoney', { name: pack.name, price: String(product.price) }),
         async () => {
           const result = await BillingService.purchaseProduct(productId);
-          
+
           if (result.success) {
             // Purchase successful - grant the pack to the user
             const packCards = generatePackCards(pack);
-            
-            // Add full card objects to user's collection (not just IDs)
-            const userRef = doc(db, 'users', user.uid);
-            await updateDoc(userRef, {
-              cards: arrayUnion(...packCards),
-              lastPackOpened: new Date(),
-              packHistory: arrayUnion({
-                packName: pack.name,
-                openedAt: new Date(),
-                cost: product.price,
-                paymentMethod: 'real_money'
-              })
-            });
+
+            // Add cards to collection via context
+            await addCards(packCards);
 
             // Finish the transaction
             if (result.purchaseToken) {
@@ -339,7 +326,7 @@ export default function StoreScreen() {
             setPackResults(packCards);
             setCurrentPackName(pack.name);
             setShowPackResults(true);
-            
+
             showSuccessAlert(t('store.purchaseSuccessTitle'), t('store.purchaseSuccessRealMoney', { name: pack.name, price: String(product.price) }));
           } else {
             showErrorAlert(t('store.purchaseFailed'), result.error || t('store.purchaseFailedComplete'));
@@ -409,8 +396,8 @@ export default function StoreScreen() {
                 </View>
               </TouchableOpacity>
 
-              {/* Real Money Purchase */}
-              {pack.realMoneyPrice && (
+              {/* Real Money Purchase (hidden in demo mode) */}
+              {!isDemoMode && pack.realMoneyPrice && (
                 <TouchableOpacity
                   style={styles.moneyPurchaseButton}
                   onPress={() => handleRealMoneyPurchase(pack)}

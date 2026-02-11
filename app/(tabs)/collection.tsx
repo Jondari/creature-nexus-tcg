@@ -4,8 +4,6 @@ import { HelpCircle } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSettings } from '@/context/SettingsContext';
 import { useAuth } from '@/context/AuthContext';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/config/firebase';
 import { Card, CardRarity } from '@/models/Card';
 import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { groupByModel, CardGrouped } from '@/utils/cardUtils';
@@ -20,7 +18,7 @@ import { COMMON_ANCHORS } from '@/types/scenes';
 import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 export default function CollectionScreen() {
-  const { user } = useAuth();
+  const { user, getCards } = useAuth();
   const sceneManager = useSceneManager();
   const { cardSize, setCardSize } = useSettings();
   // Keep raw instances for accurate totals
@@ -63,27 +61,22 @@ export default function CollectionScreen() {
 
       if (!user) return;
 
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        // Store only well-formed card objects; drop any invalid entries (e.g., string IDs)
-        const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
-          if (!Array.isArray(cards)) return [];
-          return cards.filter((c: any) => (
-            c && typeof c === 'object' &&
-            typeof c.id === 'string' &&
-            typeof c.name === 'string' &&
-            typeof c.rarity === 'string' &&
-            typeof c.element === 'string' &&
-            (isMonsterCard(c) || isSpellCard(c))
-          ));
-        };
-        // Store all owned card instances; we group them in-memory for the grid.
-        setAllCards(sanitizeCards(userData.cards));
-        setLastFetchTime(Date.now());
-      }
+      const rawCards = await getCards();
+      // Store only well-formed card objects; drop any invalid entries (e.g., string IDs)
+      const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
+        if (!Array.isArray(cards)) return [];
+        return cards.filter((c: any) => (
+          c && typeof c === 'object' &&
+          typeof c.id === 'string' &&
+          typeof c.name === 'string' &&
+          typeof c.rarity === 'string' &&
+          typeof c.element === 'string' &&
+          (isMonsterCard(c) || isSpellCard(c))
+        ));
+      };
+      // Store all owned card instances; we group them in-memory for the grid.
+      setAllCards(sanitizeCards(rawCards));
+      setLastFetchTime(Date.now());
     } catch (error) {
       if (__DEV__) {
         console.error('Error fetching user cards:', error);

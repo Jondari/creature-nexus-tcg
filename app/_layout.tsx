@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+
+// Providers are facades that conditionally load Firebase or Local implementations
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { DeckProvider } from '@/context/DeckContext';
+import { StoryModeProvider } from '@/context/StoryModeContext';
+
 import { SettingsProvider } from '@/context/SettingsContext';
 import GlobalAlertProvider from '@/components/GlobalAlertProvider';
-import { StoryModeProvider } from '@/context/StoryModeContext';
 import { AnchorsProvider } from '@/context/AnchorsContext';
 import { SceneManagerProvider } from '@/context/SceneManagerContext';
 import ScenesRegistry from '@/components/ScenesRegistry';
@@ -19,10 +22,13 @@ import Colors from '@/constants/Colors';
 import { SplashScreen } from 'expo-router';
 import * as NavigationBar from 'expo-navigation-bar';
 import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
-import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+// Conditionally load react-native-purchases to avoid native module issues on web/demo
+const Purchases = Platform.OS !== 'web' ? require('react-native-purchases').default : null;
+const LOG_LEVEL = Platform.OS !== 'web' ? require('react-native-purchases').LOG_LEVEL : null;
 import { useAudio, MusicType } from '@/hooks/useAudio';
 import { AudioPermissionBanner } from '@/components/AudioPermissionBanner';
 import { t } from '@/utils/i18n';
+import { isDemoMode } from '@/config/localMode';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -85,14 +91,14 @@ export default function RootLayout() {
     }
   }, []);
 
-  // Configure RevenueCat (Android only)
+  // Configure RevenueCat (Android only, skip in demo mode)
   useEffect(() => {
-    if (Platform.OS !== 'android') return;
-    
+    if (Platform.OS !== 'android' || isDemoMode || !Purchases) return;
+
     const initializeRevenueCat = async () => {
       try {
         const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
-        
+
         if (!apiKey) {
           if (__DEV__) {
             console.warn('RevenueCat Android API key not found in environment variables');
@@ -100,12 +106,12 @@ export default function RootLayout() {
           return;
         }
 
-        if (__DEV__) {
+        if (__DEV__ && LOG_LEVEL) {
           Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
         }
-        
+
         await Purchases.configure({ apiKey });
-        
+
         if (__DEV__) {
           console.log('RevenueCat configured successfully');
         }
@@ -115,7 +121,7 @@ export default function RootLayout() {
         }
       }
     };
-    
+
     initializeRevenueCat();
   }, []);
 

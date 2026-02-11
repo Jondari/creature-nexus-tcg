@@ -8,6 +8,7 @@ import { showErrorAlert } from '@/utils/alerts';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { t } from '@/utils/i18n';
+import { isDemoMode } from '@/config/localMode';
 import MonsterShowcaseAnimation from '@/components/Animation/MonsterShowcaseAnimation';
 
 // Premium monster showcase images
@@ -164,23 +165,27 @@ export default function AuthScreen() {
           </LinearGradient>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={() => setShowLoginModal(true)}
-          activeOpacity={0.8}
-        >
-          <Mail size={20} color={Colors.accent[500]} />
-          <Text style={styles.loginButtonText}>{t('auth.signInWithEmail')}</Text>
-        </TouchableOpacity>
+        {!isDemoMode && (
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => setShowLoginModal(true)}
+            activeOpacity={0.8}
+          >
+            <Mail size={20} color={Colors.accent[500]} />
+            <Text style={styles.loginButtonText}>{t('auth.signInWithEmail')}</Text>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity 
-          style={[styles.loginButton, styles.googleButton]} 
-          onPress={handleGoogleSignIn}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.googleIcon}>G</Text>
-          <Text style={styles.googleButtonText}>{t('auth.continueWithGoogle')}</Text>
-        </TouchableOpacity>
+        {!isDemoMode && (
+          <TouchableOpacity
+            style={[styles.loginButton, styles.googleButton]}
+            onPress={handleGoogleSignIn}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.googleIcon}>G</Text>
+            <Text style={styles.googleButtonText}>{t('auth.continueWithGoogle')}</Text>
+          </TouchableOpacity>
+        )}
         
         <Text style={styles.termsText}>
           {t('auth.terms.prefix')}
@@ -194,57 +199,59 @@ export default function AuthScreen() {
         </Text>
       </View>
 
-      <Modal
-        visible={showLoginModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowLoginModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t('auth.modal.title')}</Text>
-            <Text style={styles.modalSubtitle}>{t('auth.modal.subtitle')}</Text>
-            
-            <TextInput
-              style={styles.input}
-              placeholder={t('auth.emailPlaceholder')}
-              placeholderTextColor={Colors.text.secondary}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            
-            <TextInput
-              style={styles.input}
-              placeholder={t('auth.passwordPlaceholder')}
-              placeholderTextColor={Colors.text.secondary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowLoginModal(false)}
-              >
-                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.modalButton, styles.signInButton]}
-                onPress={handleEmailLogin}
-                disabled={loginLoading}
-              >
-                <Text style={styles.signInButtonText}>
-                  {loginLoading ? t('auth.signingIn') : t('auth.signIn')}
-                </Text>
-              </TouchableOpacity>
+      {!isDemoMode && (
+        <Modal
+          visible={showLoginModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowLoginModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>{t('auth.modal.title')}</Text>
+              <Text style={styles.modalSubtitle}>{t('auth.modal.subtitle')}</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder={t('auth.emailPlaceholder')}
+                placeholderTextColor={Colors.text.secondary}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder={t('auth.passwordPlaceholder')}
+                placeholderTextColor={Colors.text.secondary}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => setShowLoginModal(false)}
+                >
+                  <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.signInButton]}
+                  onPress={handleEmailLogin}
+                  disabled={loginLoading}
+                >
+                  <Text style={styles.signInButtonText}>
+                    {loginLoading ? t('auth.signingIn') : t('auth.signIn')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
 
       {/* Full Screen Monster Animation Overlay */}
       {showAnimation && (

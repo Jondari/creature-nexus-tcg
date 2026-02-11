@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Image } from 'react-native';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, type InventoryPack } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { doc, getDoc, updateDoc, arrayUnion, Timestamp } from 'firebase/firestore';
-import { db } from '@/config/firebase';
-import { generateCardPack, canOpenNewPack, getTimeUntilNextPack } from '@/utils/cardUtils';
+import { canOpenNewPack, getTimeUntilNextPack } from '@/utils/cardUtils';
 import { generatePackCards } from '@/utils/boosterUtils';
 import { FREE_DAILY_PACK, getPackById } from '@/data/boosterPacks';
-import { getInventoryPacks, removePackFromInventory, InventoryPack } from '@/utils/packInventory';
 import { Card } from '@/models/Card';
 import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
 import { PackageOpen, Gift, HelpCircle } from 'lucide-react-native';
@@ -60,7 +57,7 @@ const sortInventoryPacks = (packs: InventoryPack[]): InventoryPack[] => {
 };
 
 export default function OpenPackScreen() {
-  const { user } = useAuth();
+  const { user, getCards, addCards, getPacks, removePack: removePackFromInventory, getLastFreePack, setLastFreePack } = useAuth();
   const sceneTrigger = useSceneTrigger();
   const sceneManager = useSceneManager();
   const [cards, setCards] = useState<Array<Card | ExtendedCard>>([]);
@@ -127,43 +124,38 @@ export default function OpenPackScreen() {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      
+
       if (!user) return;
-      
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-      
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        // Sanitize cards: keep only well-formed card objects; drop strings/partials
-        const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
-          if (!Array.isArray(cards)) return [];
-          return cards.filter((c: any) => (
-            c && typeof c === 'object' &&
-            typeof c.id === 'string' &&
-            typeof c.name === 'string' &&
-            typeof c.rarity === 'string' &&
-            typeof c.element === 'string' &&
-            (isMonsterCard(c) || isSpellCard(c))
-          ));
-        };
-        setCards(sanitizeCards(userData.cards));
-        
-        // Check if we can open a new pack
-        const lastPackOpenedTimestamp = userData.lastPackOpened?.toMillis();
-        if (lastPackOpenedTimestamp) {
-          if (!canOpenNewPack(lastPackOpenedTimestamp)) {
-            const remaining = getTimeUntilNextPack(lastPackOpenedTimestamp);
-            setTimeRemaining(remaining);
-          }
-        } else {
-          // First time user - request permission gracefully
-          requestNotificationPermissionGracefully();
+
+      // Fetch cards via context
+      const rawCards = await getCards();
+      const sanitizeCards = (cards: any): Array<Card | ExtendedCard> => {
+        if (!Array.isArray(cards)) return [];
+        return cards.filter((c: any) => (
+          c && typeof c === 'object' &&
+          typeof c.id === 'string' &&
+          typeof c.name === 'string' &&
+          typeof c.rarity === 'string' &&
+          typeof c.element === 'string' &&
+          (isMonsterCard(c) || isSpellCard(c))
+        ));
+      };
+      setCards(sanitizeCards(rawCards));
+
+      // Check if we can open a new pack
+      const lastPackOpenedTimestamp = await getLastFreePack();
+      if (lastPackOpenedTimestamp) {
+        if (!canOpenNewPack(lastPackOpenedTimestamp)) {
+          const remaining = getTimeUntilNextPack(lastPackOpenedTimestamp);
+          setTimeRemaining(remaining);
         }
+      } else {
+        // First time user - request permission gracefully
+        requestNotificationPermissionGracefully();
       }
-      
+
       // Load inventory packs
-      const userInventoryPacks = await getInventoryPacks(user.uid);
+      const userInventoryPacks = await getPacks();
       setInventoryPacks(sortInventoryPacks(userInventoryPacks));
       setLastFetchTime(Date.now());
     } catch (error) {
@@ -178,24 +170,21 @@ export default function OpenPackScreen() {
   const handleOpenPack = async () => {
     try {
       if (!user) return;
-      
+
       setOpening(true);
-      
+
       // Generate a new free daily pack using the booster system
       const newCards = generatePackCards(FREE_DAILY_PACK);
-      
-      // Update Firestore
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, {
-        cards: arrayUnion(...newCards),
-        lastPackOpened: Timestamp.now()
-      });
-      
+
+      // Save cards and update last pack timestamp via context
+      await addCards(newCards);
+      await setLastFreePack(Date.now());
+
       // Update local state
       setCards((prevCards) => [...prevCards, ...newCards]);
       setPackResults(newCards);
       setShowPackResults(true);
-      
+
       // Set the cooldown timer
       setTimeRemaining(12 * 60 * 60 * 1000); // 12 hours in milliseconds
 
@@ -214,9 +203,9 @@ export default function OpenPackScreen() {
   const handleOpenInventoryPack = async (inventoryPack: InventoryPack) => {
     try {
       if (!user) return;
-      
+
       setOpening(true);
-      
+
       // Get pack definition
       const packDef = getPackById(inventoryPack.packId);
       if (!packDef) {
@@ -225,26 +214,21 @@ export default function OpenPackScreen() {
         }
         return;
       }
-      
+
       // Generate cards using the booster system
       const newCards = generatePackCards(packDef);
-      
-      // Update Firestore
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, {
-        cards: arrayUnion(...newCards)
-      });
-      
-      // Remove pack from inventory
-      await removePackFromInventory(user.uid, inventoryPack);
-      
+
+      // Save cards and remove pack via context
+      await addCards(newCards);
+      await removePackFromInventory(inventoryPack);
+
       // Update local state
       setCards((prevCards) => [...prevCards, ...newCards]);
       setPackResults(newCards);
       setShowPackResults(true);
-      
+
       // Refresh inventory
-      const updatedInventory = await getInventoryPacks(user.uid);
+      const updatedInventory = await getPacks();
       setInventoryPacks(sortInventoryPacks(updatedInventory));
     } catch (error) {
       if (__DEV__) {
