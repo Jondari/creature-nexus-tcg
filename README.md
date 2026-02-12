@@ -63,6 +63,11 @@ To deploy the web version of the app:
 npm run build:web
 ```
 
+(Optional but required for itch.io) Run the post-processing script to make every asset path relative:
+```bash
+node scripts/fix-web-build.js
+```
+
 2. Deploy to Firebase Hosting:
 ```bash
 npm run deploy
