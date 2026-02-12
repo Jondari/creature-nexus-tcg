@@ -270,6 +270,7 @@
     "aboutTitle": "À propos de Creature Nexus TCG",
     "aboutText": "Creature Nexus est un jeu de cartes à collectionner numérique avec des créatures mythiques. Collectionnez des cartes rares, construisez votre collection et découvrez des synergies puissantes.",
     "github": "Dépôt GitHub",
+    "discord": "Rejoindre le Discord",
     "website": "Site officiel",
     "privacy": "Politique de confidentialité",
     "language": "Langue",
@@ -679,6 +680,10 @@
       "points": "L'adversaire a atteint 4 points",
       "noCards": "Vous n'avez plus de cartes",
       "noMonsters": "Vous n'avez plus de créatures"
+    },
+    "demoCta": {
+      "title": "Vous aimez la démo ?\nAidez-nous à améliorer le jeu !",
+      "button": "Rejoindre le Discord"
     }
   },
   "phases": {

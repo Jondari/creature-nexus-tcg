@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Sword, BookOpen, GraduationCap } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
+import {isDemoMode} from "@/config/localMode";
 
 export default function BattleScreen() {
   const router = useRouter();
@@ -78,24 +79,26 @@ export default function BattleScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.optionCard}
-            onPress={handleStoryMode}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={[Colors.primary[700], Colors.primary[500]]}
-              style={styles.optionGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+          { !isDemoMode &&
+            <TouchableOpacity
+              style={styles.optionCard}
+              onPress={handleStoryMode}
+              activeOpacity={0.8}
             >
-              <BookOpen size={48} color={Colors.text.primary} />
-              <Text style={styles.optionTitle}>{t('battle.arena.storyTitle')}</Text>
-              <Text style={styles.optionDescription}>
-                {t('battle.arena.storyDescription')}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              <LinearGradient
+                colors={[Colors.primary[700], Colors.primary[500]]}
+                style={styles.optionGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <BookOpen size={48} color={Colors.text.primary} />
+                <Text style={styles.optionTitle}>{t('battle.arena.storyTitle')}</Text>
+                <Text style={styles.optionDescription}>
+                  {t('battle.arena.storyDescription')}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          }
         </View>
         </View>
       </ScrollView>
