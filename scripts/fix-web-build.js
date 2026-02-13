@@ -176,6 +176,8 @@ function injectAssetBaseHelper(code) {
     output = output.replace('var __BUNDLE_START_TIME__', `${helper}var __BUNDLE_START_TIME__`);
   }
   output = output.replace(/:"\/assets/g, ':__EXPO_ASSET_BASE__+"/assets');
+  output = output.replace(/="\/assets/g, '=__EXPO_ASSET_BASE__+"/assets');
+  output = output.replace(/='\/assets/g, "=__EXPO_ASSET_BASE__+'/assets");
   const locationNeedle =
     'const P="web"===u.Platform.OS&&"undefined"!=typeof window?new URL(window.location.href):void 0;';
   output = output.replace(
