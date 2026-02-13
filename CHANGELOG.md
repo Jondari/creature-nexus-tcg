@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.25.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.24.0...v0.25.0) (2026-02-13)
+
+
+### Features
+
+* add Discord CTA for demo feedback and disable story mode in demo mode ([968af8b](https://github.com/Jondari/creature-nexus-tcg/commit/968af8b9570932d6c8cfb29142ddcddf5ef27061))
+* add offline demo mode with local storage fallback ([15d8d67](https://github.com/Jondari/creature-nexus-tcg/commit/15d8d671e496ff6bf31b913eb622a6ea154c0c2e))
+
+
+### Bug Fixes
+
+* force relative asset URLs in fix-web-build script ([cbf8d02](https://github.com/Jondari/creature-nexus-tcg/commit/cbf8d024a64425ede303756ae5391d3e1ac05e8d))
+
 ## [0.24.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.23.0...v0.24.0) (2026-02-04)
 
 
