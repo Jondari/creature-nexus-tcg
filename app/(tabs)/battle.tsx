@@ -79,7 +79,7 @@ export default function BattleScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          { !isDemoMode &&
+          {!isDemoMode && (
             <TouchableOpacity
               style={styles.optionCard}
               onPress={handleStoryMode}
@@ -98,7 +98,7 @@ export default function BattleScreen() {
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
-          }
+          )}
         </View>
         </View>
       </ScrollView>

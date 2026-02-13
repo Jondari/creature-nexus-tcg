@@ -73,6 +73,12 @@ node scripts/fix-web-build.js
 npm run deploy
 ```
 
+## Demo Mode (itch.io)
+
+A standalone demo build can run without Firebase, using local storage for all data. Set `EXPO_PUBLIC_DEMO_MODE=true` then follow the deployment steps above (build + `fix-web-build.js`) and upload the `dist/` folder to itch.io as an HTML5 game.
+
+In demo mode, authentication, story mode, promo codes, and cloud sync are disabled. See [doc/demo-mode.md](doc/demo-mode.md) for full details.
+
 ## Desktop (Electron)
 
 1. Start development mode (opens Expo Web + Electron):
