@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.26.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.25.0...v0.26.0) (2026-02-14)
+
+
+### Features
+
+* animation foundations — Skia install, constants, DamageAnimation type, SFX registry ([5d79d96](https://github.com/Jondari/creature-nexus-tcg/commit/5d79d961dbfe27b9adf835e779c6123a0dedf7d2))
+
 ## [0.25.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.24.0...v0.25.0) (2026-02-13)
 
 
