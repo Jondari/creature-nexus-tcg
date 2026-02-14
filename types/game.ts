@@ -81,6 +81,10 @@ export interface DamageAnimation {
   cardId: string;
   isActive: boolean;
   duration: number;
+  damage?: number;
+  isLethal?: boolean;
+  attackElement?: Element;
+  attackName?: string;
 }
 
 export type AIStatus = 

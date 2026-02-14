@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions, Linking } from 'react-native';
 import { DiscordIcon } from '@/components/DiscordIcon';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
+import { KILL_ANIM_MS, NON_KILL_ANIM_MS } from '../constants/animation';
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
@@ -327,8 +328,6 @@ export function GameBoard() {
       const isPredictedLethal = !!(preview && card.hp != null && preview.total >= card.hp);
 
       // Play the hit animation on the target card first
-      const KILL_ANIM_MS = 600;   // short & snappy so it feels responsive
-      const NON_KILL_ANIM_MS = 1000;
       const animMs = isPredictedLethal ? KILL_ANIM_MS : NON_KILL_ANIM_MS;
 
       if (card.id) {

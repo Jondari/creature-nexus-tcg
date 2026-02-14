@@ -5,7 +5,7 @@ import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
 import { initializeSounds } from '../utils/game/soundManager';
-import { SPELL_CAST_ENGINE_DELAY_MS } from '../constants/animation';
+import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS } from '../constants/animation';
 
 interface GameContextState {
   gameEngine: GameEngine | null;
@@ -410,8 +410,6 @@ export function GameProvider({ children }: GameProviderProps) {
           const total = Math.max(0, base + affinity);
           const isPredictedLethal = !!(target && target.hp != null && total >= target.hp);
 
-          const KILL_ANIM_MS = 600;
-          const NON_KILL_ANIM_MS = 1000;
           const animMs = isPredictedLethal ? KILL_ANIM_MS : NON_KILL_ANIM_MS;
 
           // Show the hit animation on the target

@@ -8,6 +8,23 @@ export enum MusicType {
   BATTLE = 'battle'
 }
 
+// Sound effect keys — sounds that don't have an asset yet will be silently skipped
+export const SFX = {
+  IMPACT: 'impact',
+  CARD_PLAY: 'card_play',
+  CARD_DEATH: 'card_death',
+  CARD_RETIRE: 'card_retire',
+  VICTORY: 'victory',
+  DEFEAT: 'defeat',
+  TURN_END: 'turn_end',
+  ENERGY_GAIN: 'energy_gain',
+  SPELL_CAST: 'spell_cast',
+  ATTACK_FIRE: 'attack_fire',
+  ATTACK_WATER: 'attack_water',
+  ATTACK_AIR: 'attack_air',
+  ATTACK_EARTH: 'attack_earth',
+} as const;
+
 interface AudioSettings {
   musicEnabled: boolean;
   musicVolume: number;
@@ -135,6 +152,7 @@ class SoundManager {
           }
         }
       } else {
+        // Sound not loaded yet — this is expected for SFX keys without assets
         if (__DEV__) {
           console.warn(`Sound ${name} not found`);
         }
@@ -418,11 +436,14 @@ class SoundManager {
 // Create singleton instance
 export const soundManager = new SoundManager();
 
-// Initialize sounds
+// Initialize sounds — only loads assets that exist, missing SFX keys are silently skipped at play time
 export const initializeSounds = (): void => {
   try {
-    // Load impact sound
-    soundManager.loadSound('impact', require('../../assets/impact.wav'));
+    soundManager.loadSound(SFX.IMPACT, require('../../assets/impact.wav'));
+    // Future SFX assets will be loaded here as they become available:
+    // soundManager.loadSound(SFX.CARD_PLAY, require('../../assets/audio/sfx/card_play.wav'));
+    // soundManager.loadSound(SFX.CARD_DEATH, require('../../assets/audio/sfx/card_death.wav'));
+    // etc.
   } catch (error) {
     if (__DEV__) {
       console.warn('Failed to initialize sounds:', error);
@@ -432,5 +453,5 @@ export const initializeSounds = (): void => {
 
 // Convenience function to play impact sound
 export const playImpactSound = (): void => {
-  soundManager.playSound('impact');
+  soundManager.playSound(SFX.IMPACT);
 };
