@@ -82,6 +82,9 @@ const CardComponent = React.memo(({
   // Size-specific styles
   const containerStyle = size === 'small' ? styles.cardContainerSmall : styles.cardContainer;
   const cardStyle = size === 'small' ? styles.cardSmall : styles.card;
+  // Outer margin style — applied outside DamageEffect so the flash overlay
+  // matches the card bounds exactly (margins are not part of the flash area)
+  const outerMarginStyle = size === 'small' ? styles.cardMarginSmall : styles.cardMargin;
   
   // Size-specific style overrides
   const creatureNameStyle = size === 'small' ? styles.creatureNameSmall : styles.creatureName;
@@ -174,7 +177,7 @@ const CardComponent = React.memo(({
 
   if (isPremium) {
     return (
-      <Animated.View style={animatedStyle}>
+      <Animated.View style={[animatedStyle, outerMarginStyle]}>
         <DamageEffect
           isActive={damageAnimation?.isActive || false}
           duration={damageAnimation?.duration || 1000}
@@ -389,7 +392,7 @@ const CardComponent = React.memo(({
 
   // Standard card layout
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={[animatedStyle, outerMarginStyle]}>
       <DamageEffect
         isActive={damageAnimation?.isActive || false}
         duration={damageAnimation?.duration || 1000}
@@ -843,8 +846,6 @@ function getElementSymbol(element: string) {
 const styles = StyleSheet.create({
   cardContainer: {
     width: 280,
-    marginBottom: 20,
-    marginHorizontal: 8,
   },
   card: {
     width: 280,
@@ -852,16 +853,24 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     overflow: 'hidden',
   },
+  // Margins applied on the outer Animated.View (outside DamageEffect)
+  // so the flash overlay matches the card bounds exactly
+  cardMargin: {
+    marginBottom: 20,
+    marginHorizontal: 8,
+  },
   cardContainerSmall: {
     width: 140, // Half size
-    marginBottom: 10,
-    marginHorizontal: 4,
   },
   cardSmall: {
     width: 140,
     height: 195, // Half height
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  cardMarginSmall: {
+    marginBottom: 10,
+    marginHorizontal: 4,
   },
   // Small card text styles
   creatureNameSmall: {
