@@ -5,7 +5,8 @@ import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
 import { initializeSounds } from '../utils/game/soundManager';
-import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS } from '../constants/animation';
+import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS, ENERGY_WAVE_DURATION_MS } from '../constants/animation';
+import { AnimationQueue } from '../utils/game/animationQueue';
 
 interface GameContextState {
   gameEngine: GameEngine | null;
@@ -181,6 +182,27 @@ interface GameProviderProps {
 export function GameProvider({ children }: GameProviderProps) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
+  // Animation queue for sequencing turn-transition animations
+  const animationQueueRef = React.useRef<AnimationQueue>(new AnimationQueue());
+
+  // Configure queue callbacks once
+  useEffect(() => {
+    animationQueueRef.current.setCallbacks(
+      // onPlay — start the animation
+      (item) => {
+        if (item.type === 'energyWave') {
+          dispatch({ type: 'TRIGGER_ENERGY_WAVE_ANIMATION', payload: item.payload });
+        }
+      },
+      // onComplete — clean up the animation
+      (item) => {
+        if (item.type === 'energyWave') {
+          dispatch({ type: 'CLEAR_ENERGY_WAVE_ANIMATION' });
+        }
+      },
+    );
+  }, []);
+
   // Initialize sounds when provider mounts
   useEffect(() => {
     initializeSounds();
@@ -274,12 +296,17 @@ export function GameProvider({ children }: GameProviderProps) {
       
       const gameEngine = new GameEngine(player1, player2, playerDeck, aiDeck);
       
-      // Set up energy gain callback
+      // Set up energy gain callback — enqueue instead of triggering directly
+      // so the animation waits for AI turn animations to finish
       gameEngine.setOnPlayerEnergyGain((playerId: string, amount: number) => {
         const players = gameEngine.getPlayers();
         const player = players.find(p => p.id === playerId);
         if (player && !player.isAI) {
-          triggerEnergyWaveAnimation(amount);
+          animationQueueRef.current.enqueue({
+            type: 'energyWave',
+            payload: amount,
+            duration: ENERGY_WAVE_DURATION_MS,
+          });
         }
       });
       
@@ -507,10 +534,13 @@ export function GameProvider({ children }: GameProviderProps) {
       // Final game state update
       const newGameState = state.gameEngine.getGameState();
       dispatch({ type: 'UPDATE_GAME_STATE', payload: newGameState });
-      
+
       // Clear all AI visuals
       dispatch({ type: 'CLEAR_AI_VISUALS' });
-      
+
+      // Play queued turn-transition animations (energy wave, etc.)
+      await animationQueueRef.current.flush();
+
     } catch (error) {
       dispatch({ type: 'CLEAR_AI_VISUALS' });
       dispatch({ 
@@ -521,6 +551,7 @@ export function GameProvider({ children }: GameProviderProps) {
   };
 
   const resetGame = () => {
+    animationQueueRef.current.clear();
     dispatch({ type: 'RESET_GAME' });
   };
 
