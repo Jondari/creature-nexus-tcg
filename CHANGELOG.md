@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.26.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.1...v0.26.2) (2026-02-15)
+
+
+### Features
+
+* add animation queue to sequence turn-transition animations ([a15997a](https://github.com/Jondari/creature-nexus-tcg/commit/a15997a27796e60e734b97b547e52779fd66c107))
+
+
+### Bug Fixes
+
+* flash overlay matches card bounds on all card sizes ([dde39f6](https://github.com/Jondari/creature-nexus-tcg/commit/dde39f62ff4458830eb9924df8ce4cacce853c69))
+
 ### [0.26.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.0...v0.26.1) (2026-02-15)
 
 
