@@ -18,7 +18,7 @@ function generateParticles(count: number) {
     particles.push({
       dx: Math.cos(angle) * distance,
       dy: Math.sin(angle) * distance,
-      size: 2 + Math.random() * 3,
+      size: 3 + Math.random() * 4,
     });
   }
   return particles;
@@ -34,11 +34,14 @@ export default function SkiaFlashOverlay({ color, flashProgress, particleProgres
   return (
     <View style={styles.overlay} pointerEvents="none">
       <Canvas style={styles.canvas}>
+        {/* Solid base layer for overall color tint */}
+        <RoundedRect x={0} y={0} width={width} height={height} r={8} color={color} opacity={flashProgress} />
+        {/* Radial gradient for brighter center */}
         <RoundedRect x={0} y={0} width={width} height={height} r={8} opacity={flashProgress}>
           <RadialGradient
             c={vec(cx, cy)}
-            r={Math.max(width, height) * 0.6}
-            colors={[color, `${color}00`]}
+            r={Math.max(width, height) * 0.5}
+            colors={[`${color}FF`, `${color}00`]}
           />
         </RoundedRect>
 

@@ -82,9 +82,9 @@ export function DamageEffect({
     flashProgress.value = withDelay(
       HITSTOP_DURATION_MS,
       withSequence(
-        withTiming(isLethal ? 0.8 : 0.6, { duration: 60, easing: Easing.out(Easing.quad) }),
-        withTiming(0.1, { duration: 150 }),
-        withTiming(isLethal ? 0.5 : 0.3, { duration: 60 }),
+        withTiming(isLethal ? 0.9 : 0.75, { duration: 60, easing: Easing.out(Easing.quad) }),
+        withTiming(0.15, { duration: 150 }),
+        withTiming(isLethal ? 0.6 : 0.45, { duration: 60 }),
         withTiming(0, { duration: duration * 0.4 }),
       ),
     );
