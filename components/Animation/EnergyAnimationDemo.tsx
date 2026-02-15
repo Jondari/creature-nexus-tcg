@@ -6,12 +6,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { EnergyOrbAnimation } from './EnergyOrbAnimation';
 import { EnergyWaveAnimation } from './EnergyWaveAnimation';
 import { SpellCastAnimation } from './SpellCastAnimation';
+import { DamageEffect } from '../DamageEffect';
 import { CardLoader } from '../../utils/game/cardLoader';
 import { RewardAnimation } from './RewardAnimation';
 import { generateRandomCard } from '@/utils/cardUtils';
 import { STANDARD_PACK } from '@/data/boosterPacks';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
+import type { Element } from '@/types/game';
 
 export const EnergyAnimationDemo: React.FC = () => {
   const router = useRouter();
@@ -22,6 +24,22 @@ export const EnergyAnimationDemo: React.FC = () => {
   const energyCatalyst = spellCards.find(card => card.name === 'Energy Catalyst');
   const testSpell = energyCatalyst || spellCards[0]; // Use Energy Catalyst or first spell as fallback
 
+  // State for DamageEffect demos
+  const [damageActive, setDamageActive] = useState(false);
+  const [damageConfig, setDamageConfig] = useState<{
+    damage: number;
+    isLethal: boolean;
+    attackElement?: Element;
+  }>({ damage: 30, isLethal: false });
+
+  const triggerDamageDemo = (config: typeof damageConfig) => {
+    setDamageActive(false);
+    setDamageConfig(config);
+    // Small delay to reset the component
+    setTimeout(() => setDamageActive(true), 50);
+    setTimeout(() => setDamageActive(false), 1200);
+  };
+
   const animations = [
     { labelKey: 'demo.animation.buttons.orb', component: EnergyOrbAnimation, key: 'orb' },
     { labelKey: 'demo.animation.buttons.wave', component: EnergyWaveAnimation, key: 'wave' },
@@ -31,6 +49,16 @@ export const EnergyAnimationDemo: React.FC = () => {
     { labelKey: 'demo.animation.buttons.rewardPack', component: RewardAnimation, key: 'reward-pack' },
     { labelKey: 'demo.animation.buttons.rewardCard', component: RewardAnimation, key: 'reward-card' },
   ] as const;
+
+  const damageAnimations = [
+    { label: 'Damage (Normal)', key: 'dmg-normal', config: { damage: 30, isLethal: false } },
+    { label: 'Damage (Lethal)', key: 'dmg-lethal', config: { damage: 80, isLethal: true } },
+    { label: 'Damage (Fire)', key: 'dmg-fire', config: { damage: 45, isLethal: false, attackElement: 'fire' as Element } },
+    { label: 'Damage (Water)', key: 'dmg-water', config: { damage: 45, isLethal: false, attackElement: 'water' as Element } },
+    { label: 'Damage (Earth)', key: 'dmg-earth', config: { damage: 45, isLethal: false, attackElement: 'earth' as Element } },
+    { label: 'Damage (Air)', key: 'dmg-air', config: { damage: 45, isLethal: false, attackElement: 'air' as Element } },
+    { label: 'Lethal Fire', key: 'dmg-lethal-fire', config: { damage: 120, isLethal: true, attackElement: 'fire' as Element } },
+  ];
 
   const triggerAnimation = (key: string) => {
     setActiveAnimation(key);
@@ -127,7 +155,19 @@ export const EnergyAnimationDemo: React.FC = () => {
           <Text style={styles.subtitle}>{t('demo.animation.subtitle')}</Text>
         </View>
         
-        <ScrollView contentContainerStyle={styles.buttonContainer}>
+        <ScrollView style={styles.buttonScroll} contentContainerStyle={styles.buttonContainer}>
+          <Text style={styles.sectionTitle}>Damage Effects</Text>
+          {damageAnimations.map((anim) => (
+            <TouchableOpacity
+              key={anim.key}
+              style={styles.button}
+              onPress={() => triggerDamageDemo(anim.config)}
+            >
+              <Text style={styles.buttonText}>{anim.label}</Text>
+            </TouchableOpacity>
+          ))}
+
+          <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Other Animations</Text>
           {animations.map((animation) => (
             <TouchableOpacity
               key={animation.key}
@@ -149,6 +189,26 @@ export const EnergyAnimationDemo: React.FC = () => {
         </View>
 
         {renderAnimation()}
+
+        {damageActive && (
+          <View style={styles.damageOverlay}>
+            <DamageEffect
+              isActive={damageActive}
+              duration={1000}
+              damage={damageConfig.damage}
+              isLethal={damageConfig.isLethal}
+              attackElement={damageConfig.attackElement}
+            >
+              <View style={styles.demoCard}>
+                <Text style={styles.demoCardTitle}>Demo Creature</Text>
+                <Text style={styles.demoCardHp}>HP: 100</Text>
+                <Text style={styles.demoCardElement}>
+                  {damageConfig.attackElement || 'neutral'}
+                </Text>
+              </View>
+            </DamageEffect>
+          </View>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -200,6 +260,9 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     textAlign: 'center',
   },
+  buttonScroll: {
+    maxHeight: '70%',
+  },
   buttonContainer: {
     paddingHorizontal: 20,
     paddingBottom: 20,
@@ -245,5 +308,53 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
     paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    color: Colors.accent[400],
+    fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  damageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 100,
+  },
+  demoCard: {
+    width: 140,
+    height: 180,
+    backgroundColor: Colors.primary[600],
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: Colors.primary[400],
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  demoCardTitle: {
+    color: Colors.text.primary,
+    fontSize: 14,
+    fontFamily: 'Poppins-Bold',
+    marginBottom: 8,
+  },
+  demoCardHp: {
+    color: '#FF6B6B',
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    marginBottom: 4,
+  },
+  demoCardElement: {
+    color: Colors.text.secondary,
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    textTransform: 'capitalize',
   },
 });

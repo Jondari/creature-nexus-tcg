@@ -175,9 +175,12 @@ const CardComponent = React.memo(({
   if (isPremium) {
     return (
       <Animated.View style={animatedStyle}>
-        <DamageEffect 
+        <DamageEffect
           isActive={damageAnimation?.isActive || false}
           duration={damageAnimation?.duration || 1000}
+          damage={damageAnimation?.damage}
+          isLethal={damageAnimation?.isLethal}
+          attackElement={damageAnimation?.attackElement}
         >
           <TouchableOpacity
             style={[
@@ -387,10 +390,13 @@ const CardComponent = React.memo(({
   // Standard card layout
   return (
     <Animated.View style={animatedStyle}>
-      <DamageEffect 
-      isActive={damageAnimation?.isActive || false}
-      duration={damageAnimation?.duration || 1000}
-    >
+      <DamageEffect
+        isActive={damageAnimation?.isActive || false}
+        duration={damageAnimation?.duration || 1000}
+        damage={damageAnimation?.damage}
+        isLethal={damageAnimation?.isLethal}
+        attackElement={damageAnimation?.attackElement}
+      >
       <TouchableOpacity
         style={[
           containerStyle,

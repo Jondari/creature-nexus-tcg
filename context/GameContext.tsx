@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { GameState, Player, Card, GameAction, ActionLogEntry, DamageAnimation, AIVisualState, AIStatus } from '../types/game';
+import { GameState, Player, Card, GameAction, ActionLogEntry, DamageAnimation, AIVisualState, AIStatus, Element } from '../types/game';
 import { GameEngine } from '../modules/game';
 import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
@@ -24,7 +24,7 @@ interface GameContextActions {
   executeAction: (action: GameAction) => void;
   executeAITurn: () => void;
   resetGame: () => void;
-  triggerDamageAnimation: (cardId: string, duration?: number) => void;
+  triggerDamageAnimation: (cardId: string, duration?: number, extra?: Pick<DamageAnimation, 'damage' | 'isLethal' | 'attackElement'>) => void;
   clearDamageAnimation: (cardId: string) => void;
   triggerEnergyWaveAnimation: (amount: number) => void;
   clearEnergyWaveAnimation: () => void;
@@ -415,7 +415,14 @@ export function GameProvider({ children }: GameProviderProps) {
           // Show the hit animation on the target
           dispatch({
             type: 'ADD_DAMAGE_ANIMATION',
-            payload: { cardId: aiDecision.action.targetCardId, isActive: true, duration: animMs },
+            payload: {
+              cardId: aiDecision.action.targetCardId,
+              isActive: true,
+              duration: animMs,
+              damage: total,
+              isLethal: isPredictedLethal,
+              attackElement: attacker?.element as Element | undefined,
+            },
           });
 
           // If lethal, wait so the card isn't removed before the animation is seen
@@ -517,13 +524,14 @@ export function GameProvider({ children }: GameProviderProps) {
     dispatch({ type: 'RESET_GAME' });
   };
 
-  const triggerDamageAnimation = (cardId: string, duration: number = 1000) => {
+  const triggerDamageAnimation = (cardId: string, duration: number = 1000, extra?: Pick<DamageAnimation, 'damage' | 'isLethal' | 'attackElement'>) => {
     const animation: DamageAnimation = {
       cardId,
       isActive: true,
       duration,
+      ...extra,
     };
-    
+
     dispatch({ type: 'ADD_DAMAGE_ANIMATION', payload: animation });
   };
 

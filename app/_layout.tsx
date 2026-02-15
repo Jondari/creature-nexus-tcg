@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { Platform } from 'react-native';
+
+// Load Skia CanvasKit on web before any Skia component renders
+const LoadSkiaWeb = Platform.OS === 'web'
+  ? require('@shopify/react-native-skia/lib/module/web').LoadSkiaWeb
+  : null;
 
 // Providers are facades that conditionally load Firebase or Local implementations
 import { AuthProvider, useAuth } from '@/context/AuthContext';
@@ -16,7 +22,7 @@ import ScenesRegistry from '@/components/ScenesRegistry';
 import { useFonts } from 'expo-font';
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
 import { Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { View, Text, StyleSheet, Platform, useWindowDimensions, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions, ViewStyle } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '@/constants/Colors';
 import { SplashScreen } from 'expo-router';
@@ -35,7 +41,17 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   useFrameworkReady();
-  
+
+  // Skia CanvasKit must be loaded before any Skia Canvas renders on web
+  const isWeb = Platform.OS === 'web';
+  const [skiaReady, setSkiaReady] = useState(!isWeb);
+
+  useEffect(() => {
+    if (isWeb && LoadSkiaWeb) {
+      LoadSkiaWeb().then(() => setSkiaReady(true));
+    }
+  }, []);
+
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': Inter_400Regular,
     'Inter-Medium': Inter_500Medium,
@@ -125,8 +141,8 @@ export default function RootLayout() {
     initializeRevenueCat();
   }, []);
 
-  // Return null to keep splash screen visible while fonts load
-  if (!fontsLoaded && !fontError) {
+  // Return null to keep splash screen visible while fonts or Skia load
+  if ((!fontsLoaded && !fontError) || !skiaReady) {
     return null;
   }
 

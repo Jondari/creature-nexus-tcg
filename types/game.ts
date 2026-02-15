@@ -84,7 +84,6 @@ export interface DamageAnimation {
   damage?: number;
   isLethal?: boolean;
   attackElement?: Element;
-  attackName?: string;
 }
 
 export type AIStatus = 

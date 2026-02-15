@@ -332,7 +332,11 @@ export function GameBoard() {
 
       if (card.id) {
         // Triggers the existing per-card DamageEffect animation
-        triggerDamageAnimation(card.id, animMs);
+        triggerDamageAnimation(card.id, animMs, {
+          damage: preview?.total,
+          isLethal: isPredictedLethal,
+          attackElement: attacker?.element,
+        });
       }
 
       // Clear UI selection immediately
