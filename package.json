@@ -1,7 +1,7 @@
 {
   "name": "creature-nexus-tcg",
   "main": "expo-router/entry",
-  "version": "0.26.0",
+  "version": "0.26.1",
   "private": true,
   "scripts": {
     "dev": "EXPO_NO_TELEMETRY=1 expo start",

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.26.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.0...v0.26.1) (2026-02-15)
+
+
+### Features
+
+* rewrite DamageEffect with Reanimated + Skia, add DamageNumber and damage propagation ([7401a2a](https://github.com/Jondari/creature-nexus-tcg/commit/7401a2a638188ecf2ee389587d438a815d928155))
+
+
+### Bug Fixes
+
+* improve damage impact visibility — stronger flash opacity, solid base layer, larger particles ([935fb3e](https://github.com/Jondari/creature-nexus-tcg/commit/935fb3e1a9c8c2c79b34988412f3db998cb21125))
+
 ## [0.26.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.25.0...v0.26.0) (2026-02-14)
 
 
