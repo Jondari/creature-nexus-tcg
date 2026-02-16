@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions, Linking } from 'react-native';
 import { DiscordIcon } from '@/components/DiscordIcon';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
-import { KILL_ANIM_MS, NON_KILL_ANIM_MS } from '../constants/animation';
+import { KILL_ANIM_MS, NON_KILL_ANIM_MS, CARD_RETIRE_DURATION_MS } from '../constants/animation';
 import { useGame } from '../context/GameContext';
 import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
@@ -63,6 +63,8 @@ export function GameBoard() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   // Blocks interactions while we delay lethal attacks for the hit animation
   const [resolvingAttack, setResolvingAttack] = useState(false);
+  // Card currently playing its retire animation (fade + slide down)
+  const [retiringCardId, setRetiringCardId] = useState<string | null>(null);
   const publishEvent = useSceneEvents();
   const wasAITurnRef = useRef<boolean | null>(null);
 
@@ -424,8 +426,16 @@ export function GameBoard() {
   };
 
   const handleRetire = (cardId: string) => {
-    retireCard(cardId);
+    // Retire costs 1 energy — don't animate if the action will fail
+    const currentPlayer = gameEngine?.getCurrentPlayer();
+    if (!currentPlayer || currentPlayer.energy < 1) return;
+
+    setRetiringCardId(cardId);
     setSelectedCard(null);
+    setTimeout(() => {
+      retireCard(cardId);
+      setRetiringCardId(null);
+    }, CARD_RETIRE_DURATION_MS);
   };
 
   const handleEndTurn = () => {
@@ -642,6 +652,7 @@ export function GameBoard() {
         disabled={!isPlayerTurn || resolvingAttack}
         aiHighlight={getCardHighlightType}
         damageAnimation={getDamageAnimationForCard}
+        retiringCardId={retiringCardId}
         playerEnergy={playerAtBottom.energy}
         currentTurn={gameState.turnNumber}
         isFirstPlayer={playerAtBottom.id === gameState.players[0].id}

@@ -29,6 +29,7 @@ interface BattlefieldProps {
   previewDamage?: (card: Card) => { base: number; affinity: number; total: number } | null;
   aiHighlight?: (cardId: string) => 'selected' | 'target' | null;
   damageAnimation?: (cardId: string) => DamageAnimation | undefined;
+  retiringCardId?: string | null;
   playerEnergy?: number;
   currentTurn?: number;
   isFirstPlayer?: boolean;
@@ -52,6 +53,7 @@ export function Battlefield({
   previewDamage,
   aiHighlight,
   damageAnimation,
+  retiringCardId,
   playerEnergy,
   currentTurn,
   isFirstPlayer,
@@ -132,6 +134,7 @@ export function Battlefield({
       aiHighlight: aiHighlight?.(card.id) ?? null,
       damageAnimation: damageAnimation?.(card.id),
       entryAnimation: newCardIds.current.has(card.id),
+      isRetiring: retiringCardId === card.id,
       playerEnergy,
       currentTurn,
       isFirstPlayer,

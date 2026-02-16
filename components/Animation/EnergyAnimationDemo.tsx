@@ -13,7 +13,7 @@ import { RewardAnimation } from './RewardAnimation';
 import { generateRandomCard } from '@/utils/cardUtils';
 import { STANDARD_PACK } from '@/data/boosterPacks';
 import Colors from '@/constants/Colors';
-import { CARD_ENTRY_DURATION_MS } from '@/constants/animation';
+import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS } from '@/constants/animation';
 import { t } from '@/utils/i18n';
 import type { Element } from '@/types/game';
 
@@ -48,6 +48,25 @@ export const EnergyAnimationDemo: React.FC = () => {
     }, 50);
     // Auto-dismiss after animation completes
     setTimeout(() => setEntryDemoVisible(false), CARD_ENTRY_DURATION_MS + 800);
+  }, []);
+
+  // State for card retire animation demo
+  const [retireDemoVisible, setRetireDemoVisible] = useState(false);
+  const [retireDemoRetiring, setRetireDemoRetiring] = useState(false);
+  const [retireDemoKey, setRetireDemoKey] = useState(0);
+
+  const triggerRetireDemo = useCallback(() => {
+    setRetireDemoVisible(false);
+    setRetireDemoRetiring(false);
+    // Show the card first, then trigger retire after a short pause
+    setTimeout(() => {
+      setRetireDemoKey(k => k + 1);
+      setRetireDemoVisible(true);
+    }, 50);
+    // Start retire animation after a brief display
+    setTimeout(() => setRetireDemoRetiring(true), 500);
+    // Auto-dismiss after retire animation completes
+    setTimeout(() => setRetireDemoVisible(false), 500 + CARD_RETIRE_DURATION_MS + 300);
   }, []);
 
   const triggerDamageDemo = (config: typeof damageConfig) => {
@@ -181,6 +200,12 @@ export const EnergyAnimationDemo: React.FC = () => {
           >
             <Text style={styles.buttonText}>Card Entry</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={triggerRetireDemo}
+          >
+            <Text style={styles.buttonText}>Card Retire</Text>
+          </TouchableOpacity>
 
           <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Damage Effects</Text>
           {damageAnimations.map((anim) => (
@@ -242,6 +267,17 @@ export const EnergyAnimationDemo: React.FC = () => {
               key={`entry-demo-${entryDemoKey}`}
               card={sampleCard}
               entryAnimation
+              size="small"
+            />
+          </View>
+        )}
+
+        {retireDemoVisible && sampleCard && (
+          <View style={styles.damageOverlay}>
+            <CardComponent
+              key={`retire-demo-${retireDemoKey}`}
+              card={sampleCard}
+              isRetiring={retireDemoRetiring}
               size="small"
             />
           </View>

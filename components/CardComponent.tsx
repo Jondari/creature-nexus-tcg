@@ -7,7 +7,7 @@ import { DamageEffect } from './DamageEffect';
 import { t } from '../utils/i18n';
 import Colors from '../constants/Colors';
 import { CardUtils } from '../modules/card';
-import { CARD_ENTRY_DURATION_MS } from '../constants/animation';
+import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS } from '../constants/animation';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -49,6 +49,8 @@ interface CardComponentProps {
   isFirstPlayer?: boolean;
   // Entry animation when card first appears on battlefield
   entryAnimation?: boolean;
+  // Retire animation (fade out + slide down)
+  isRetiring?: boolean;
 }
 
 const CardComponent = React.memo(({ 
@@ -68,7 +70,8 @@ const CardComponent = React.memo(({
   playerEnergy = 0,
   currentTurn = 1,
   isFirstPlayer = false,
-  entryAnimation = false
+  entryAnimation = false,
+  isRetiring = false
 }: CardComponentProps) => {
   // Dev guard to trace corrupted card prop sources
   if (__DEV__ && (typeof (card as any) !== 'object' || card === null)) {
@@ -144,12 +147,24 @@ const CardComponent = React.memo(({
     }
   }, [entryAnimation]);
 
+  // Retire animation (card leaving the battlefield)
+  const retireOpacity = useSharedValue(1);
+  const retireTranslateY = useSharedValue(0);
+
+  React.useEffect(() => {
+    if (isRetiring) {
+      retireOpacity.value = withTiming(0, { duration: CARD_RETIRE_DURATION_MS });
+      retireTranslateY.value = withTiming(30, { duration: CARD_RETIRE_DURATION_MS });
+    }
+  }, [isRetiring]);
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      opacity: opacity.value * entryOpacity.value,
+      opacity: opacity.value * entryOpacity.value * retireOpacity.value,
       transform: [
         { scale: scale.value * entryScale.value },
-        { rotate: rotate.value }
+        { rotate: rotate.value },
+        { translateY: retireTranslateY.value }
       ]
     };
   });
@@ -661,6 +676,7 @@ const CardComponent = React.memo(({
   if (prevProps.showAnimation !== nextProps.showAnimation) return false;
   if (prevProps.index !== nextProps.index) return false;
   if (prevProps.entryAnimation !== nextProps.entryAnimation) return false;
+  if (prevProps.isRetiring !== nextProps.isRetiring) return false;
   
   // Damage animation comparison - be very careful here
   const prevDamage = prevProps.damageAnimation;
