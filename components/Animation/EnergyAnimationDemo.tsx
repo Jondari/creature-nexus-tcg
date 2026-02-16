@@ -38,6 +38,7 @@ export const EnergyAnimationDemo: React.FC = () => {
   const [entryDemoVisible, setEntryDemoVisible] = useState(false);
   const [entryDemoKey, setEntryDemoKey] = useState(0);
   const sampleCard = CardLoader.getMonsterCards()[0];
+  const premiumCard = CardLoader.getMonsterCards().find(c => c.rarity === 'legendary' || c.rarity === 'mythic');
 
   const triggerEntryDemo = useCallback(() => {
     setEntryDemoVisible(false);
@@ -67,6 +68,23 @@ export const EnergyAnimationDemo: React.FC = () => {
     setTimeout(() => setRetireDemoRetiring(true), 500);
     // Auto-dismiss after retire animation completes
     setTimeout(() => setRetireDemoVisible(false), 500 + CARD_RETIRE_DURATION_MS + 300);
+  }, []);
+
+  // State for selection glow demo
+  const [glowDemoVisible, setGlowDemoVisible] = useState(false);
+  const [glowDemoType, setGlowDemoType] = useState<'selected' | 'ai-selected' | 'ai-target'>('selected');
+  const [glowDemoPremium, setGlowDemoPremium] = useState(false);
+  const [glowDemoKey, setGlowDemoKey] = useState(0);
+
+  const triggerGlowDemo = useCallback((type: 'selected' | 'ai-selected' | 'ai-target', premium = false) => {
+    setGlowDemoVisible(false);
+    setGlowDemoType(type);
+    setGlowDemoPremium(premium);
+    setTimeout(() => {
+      setGlowDemoKey(k => k + 1);
+      setGlowDemoVisible(true);
+    }, 50);
+    setTimeout(() => setGlowDemoVisible(false), 3000);
   }, []);
 
   const triggerDamageDemo = (config: typeof damageConfig) => {
@@ -206,6 +224,30 @@ export const EnergyAnimationDemo: React.FC = () => {
           >
             <Text style={styles.buttonText}>Card Retire</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => triggerGlowDemo('selected')}
+          >
+            <Text style={styles.buttonText}>Selection Glow (Player)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => triggerGlowDemo('ai-selected')}
+          >
+            <Text style={styles.buttonText}>Selection Glow (AI Attacker)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => triggerGlowDemo('ai-target')}
+          >
+            <Text style={styles.buttonText}>Selection Glow (AI Target)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => triggerGlowDemo('selected', true)}
+          >
+            <Text style={styles.buttonText}>Selection Glow (Premium)</Text>
+          </TouchableOpacity>
 
           <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Damage Effects</Text>
           {damageAnimations.map((anim) => (
@@ -278,6 +320,18 @@ export const EnergyAnimationDemo: React.FC = () => {
               key={`retire-demo-${retireDemoKey}`}
               card={sampleCard}
               isRetiring={retireDemoRetiring}
+              size="small"
+            />
+          </View>
+        )}
+
+        {glowDemoVisible && (glowDemoPremium ? premiumCard : sampleCard) && (
+          <View style={styles.damageOverlay}>
+            <CardComponent
+              key={`glow-demo-${glowDemoKey}`}
+              card={(glowDemoPremium ? premiumCard : sampleCard)!}
+              selected={glowDemoType === 'selected'}
+              aiHighlight={glowDemoType === 'ai-selected' ? 'selected' : glowDemoType === 'ai-target' ? 'target' : null}
               size="small"
             />
           </View>

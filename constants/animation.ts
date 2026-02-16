@@ -23,6 +23,9 @@ export const ENERGY_WAVE_DURATION_MS = 1500;
 export const TURN_TRANSITION_DURATION_MS = 1200; // turn banner slide in + hold + slide out
 export const GAME_OVER_ANIM_DURATION_MS = 1500; // victory/defeat animation
 
+// Feature flags
+export const USE_SKIA_GLOW = true; // true = Skia pulsing glow, false = CSS boxShadow
+
 // Z-indices for animation layers
 export const Z_INDEX = {
   BATTLEFIELD: 0,

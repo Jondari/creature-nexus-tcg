@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Card, DamageAnimation, Attack } from '../types/game';
@@ -7,7 +7,12 @@ import { DamageEffect } from './DamageEffect';
 import { t } from '../utils/i18n';
 import Colors from '../constants/Colors';
 import { CardUtils } from '../modules/card';
-import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS } from '../constants/animation';
+import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS, USE_SKIA_GLOW } from '../constants/animation';
+
+// Lazy-load Skia glow so the Skia module is only evaluated after CanvasKit is ready
+const LazySkiaSelectionGlow = React.lazy(() =>
+  import('./Animation/SkiaSelectionGlow').then(m => ({ default: m.SkiaSelectionGlow }))
+);
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -221,11 +226,19 @@ const CardComponent = React.memo(({
               selected && (size === 'small' ? styles.selectedSmall : styles.selected),
               aiHighlight === 'selected' && (size === 'small' ? styles.aiHighlightSelectedSmall : styles.aiHighlightSelected),
               aiHighlight === 'target' && (size === 'small' ? styles.aiHighlightTargetSmall : styles.aiHighlightTarget),
-              disabled && styles.disabled
+              disabled && styles.disabled,
+              USE_SKIA_GLOW && (selected || aiHighlight) && { boxShadow: 'none', elevation: 0 },
             ]}
             onPress={onPress}
             disabled={disabled}
           >
+          {USE_SKIA_GLOW && (
+            <Suspense fallback={null}>
+              <LazySkiaSelectionGlow color={Colors.accent[400]} isActive={selected} borderRadius={15} />
+              <LazySkiaSelectionGlow color="#4CAF50" isActive={aiHighlight === 'selected'} borderRadius={15} />
+              <LazySkiaSelectionGlow color="#FF5722" isActive={aiHighlight === 'target'} borderRadius={15} />
+            </Suspense>
+          )}
           <View style={[cardStyle, styles.premiumCard]}>
             {/* Animated border for premium cards */}
             <LinearGradient
@@ -438,20 +451,27 @@ const CardComponent = React.memo(({
         onPress={onPress}
         disabled={disabled}
       >
+        {USE_SKIA_GLOW && (
+          <Suspense fallback={null}>
+            <LazySkiaSelectionGlow color={Colors.accent[400]} isActive={selected} borderRadius={size === 'small' ? 8 : 15} />
+            <LazySkiaSelectionGlow color="#4CAF50" isActive={aiHighlight === 'selected'} borderRadius={size === 'small' ? 8 : 15} />
+            <LazySkiaSelectionGlow color="#FF5722" isActive={aiHighlight === 'target'} borderRadius={size === 'small' ? 8 : 15} />
+          </Suspense>
+        )}
         <View style={[
-          cardStyle, 
-          styles.standardCard, 
-          { borderColor: selected 
-              ? Colors.accent[400] 
-              : aiHighlight === 'selected' 
-                ? '#4CAF50' 
-                : aiHighlight === 'target' 
-                  ? '#FF5722' 
-                  : colors.border as string 
+          cardStyle,
+          styles.standardCard,
+          { borderColor: selected
+              ? Colors.accent[400]
+              : aiHighlight === 'selected'
+                ? '#4CAF50'
+                : aiHighlight === 'target'
+                  ? '#FF5722'
+                  : colors.border as string
           },
-          selected && (size === 'small' ? styles.selectedCardSmall : styles.selectedCard),
-          aiHighlight === 'selected' && (size === 'small' ? styles.aiHighlightCardSelectedSmall : styles.aiHighlightCardSelected),
-          aiHighlight === 'target' && (size === 'small' ? styles.aiHighlightCardTargetSmall : styles.aiHighlightCardTarget)
+          !USE_SKIA_GLOW && selected && (size === 'small' ? styles.selectedCardSmall : styles.selectedCard),
+          !USE_SKIA_GLOW && aiHighlight === 'selected' && (size === 'small' ? styles.aiHighlightCardSelectedSmall : styles.aiHighlightCardSelected),
+          !USE_SKIA_GLOW && aiHighlight === 'target' && (size === 'small' ? styles.aiHighlightCardTargetSmall : styles.aiHighlightCardTarget)
         ]}>
           <LinearGradient
             colors={colors.background as any}
