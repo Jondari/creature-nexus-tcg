@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CardComponent } from '../CardComponent';
@@ -57,6 +57,31 @@ export function Battlefield({
   isFirstPlayer,
   emptyLabel = 'No creatures on field',
 }: BattlefieldProps) {
+  // Track card IDs currently on the field to detect new entries
+  const seenCardIds = useRef<Set<string>>(new Set());
+  const newCardIds = useRef<Set<string>>(new Set());
+
+  // Determine which cards are new before render
+  newCardIds.current = new Set();
+  const currentIds = new Set(cards.map(c => c.id));
+  for (const card of cards) {
+    if (!seenCardIds.current.has(card.id)) {
+      newCardIds.current.add(card.id);
+    }
+  }
+
+  // After render: add new cards, remove cards that left the field
+  useEffect(() => {
+    for (const id of newCardIds.current) {
+      seenCardIds.current.add(id);
+    }
+    for (const id of seenCardIds.current) {
+      if (!currentIds.has(id)) {
+        seenCardIds.current.delete(id);
+      }
+    }
+  });
+
   const fieldStyle = [
     styles.field,
     {
@@ -106,6 +131,7 @@ export function Battlefield({
       disabled,
       aiHighlight: aiHighlight?.(card.id) ?? null,
       damageAnimation: damageAnimation?.(card.id),
+      entryAnimation: newCardIds.current.has(card.id),
       playerEnergy,
       currentTurn,
       isFirstPlayer,

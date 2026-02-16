@@ -7,9 +7,10 @@ import { DamageEffect } from './DamageEffect';
 import { t } from '../utils/i18n';
 import Colors from '../constants/Colors';
 import { CardUtils } from '../modules/card';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
+import { CARD_ENTRY_DURATION_MS } from '../constants/animation';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
   withSpring,
   withSequence,
   withDelay,
@@ -46,6 +47,8 @@ interface CardComponentProps {
   // Turn information for first-turn restriction
   currentTurn?: number;
   isFirstPlayer?: boolean;
+  // Entry animation when card first appears on battlefield
+  entryAnimation?: boolean;
 }
 
 const CardComponent = React.memo(({ 
@@ -64,7 +67,8 @@ const CardComponent = React.memo(({
   size = 'normal',
   playerEnergy = 0,
   currentTurn = 1,
-  isFirstPlayer = false
+  isFirstPlayer = false,
+  entryAnimation = false
 }: CardComponentProps) => {
   // Dev guard to trace corrupted card prop sources
   if (__DEV__ && (typeof (card as any) !== 'object' || card === null)) {
@@ -105,35 +109,46 @@ const CardComponent = React.memo(({
   const scale = useSharedValue(showAnimation ? 0.8 : 1);
   const opacity = useSharedValue(showAnimation ? 0 : 1);
   const rotate = useSharedValue(showAnimation ? '10deg' : '0deg');
-  
+
   React.useEffect(() => {
     if (showAnimation) {
       // Animation sequence
       opacity.value = withDelay(
-        index * 300, 
+        index * 300,
         withTiming(1, { duration: 500 })
       );
-      
+
       scale.value = withDelay(
-        index * 300, 
+        index * 300,
         withSequence(
           withTiming(1.1, { duration: 400, easing: Easing.out(Easing.exp) }),
           withSpring(1)
         )
       );
-      
+
       rotate.value = withDelay(
         index * 300,
         withTiming('0deg', { duration: 400 })
       );
     }
   }, [showAnimation, index]);
-  
+
+  // Entry animation (card appearing on battlefield)
+  const entryScale = useSharedValue(entryAnimation ? 0.7 : 1);
+  const entryOpacity = useSharedValue(entryAnimation ? 0 : 1);
+
+  React.useEffect(() => {
+    if (entryAnimation) {
+      entryOpacity.value = withTiming(1, { duration: CARD_ENTRY_DURATION_MS });
+      entryScale.value = withSpring(1, { damping: 12, stiffness: 180 });
+    }
+  }, [entryAnimation]);
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      opacity: opacity.value,
+      opacity: opacity.value * entryOpacity.value,
       transform: [
-        { scale: scale.value },
+        { scale: scale.value * entryScale.value },
         { rotate: rotate.value }
       ]
     };
@@ -645,6 +660,7 @@ const CardComponent = React.memo(({
   // Animation comparison
   if (prevProps.showAnimation !== nextProps.showAnimation) return false;
   if (prevProps.index !== nextProps.index) return false;
+  if (prevProps.entryAnimation !== nextProps.entryAnimation) return false;
   
   // Damage animation comparison - be very careful here
   const prevDamage = prevProps.damageAnimation;

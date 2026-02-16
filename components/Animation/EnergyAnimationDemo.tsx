@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
@@ -7,11 +7,13 @@ import { EnergyOrbAnimation } from './EnergyOrbAnimation';
 import { EnergyWaveAnimation } from './EnergyWaveAnimation';
 import { SpellCastAnimation } from './SpellCastAnimation';
 import { DamageEffect } from '../DamageEffect';
+import { CardComponent } from '../CardComponent';
 import { CardLoader } from '../../utils/game/cardLoader';
 import { RewardAnimation } from './RewardAnimation';
 import { generateRandomCard } from '@/utils/cardUtils';
 import { STANDARD_PACK } from '@/data/boosterPacks';
 import Colors from '@/constants/Colors';
+import { CARD_ENTRY_DURATION_MS } from '@/constants/animation';
 import { t } from '@/utils/i18n';
 import type { Element } from '@/types/game';
 
@@ -31,6 +33,22 @@ export const EnergyAnimationDemo: React.FC = () => {
     isLethal: boolean;
     attackElement?: Element;
   }>({ damage: 30, isLethal: false });
+
+  // State for card entry animation demo
+  const [entryDemoVisible, setEntryDemoVisible] = useState(false);
+  const [entryDemoKey, setEntryDemoKey] = useState(0);
+  const sampleCard = CardLoader.getMonsterCards()[0];
+
+  const triggerEntryDemo = useCallback(() => {
+    setEntryDemoVisible(false);
+    // Small delay to remount the component with a fresh key
+    setTimeout(() => {
+      setEntryDemoKey(k => k + 1);
+      setEntryDemoVisible(true);
+    }, 50);
+    // Auto-dismiss after animation completes
+    setTimeout(() => setEntryDemoVisible(false), CARD_ENTRY_DURATION_MS + 800);
+  }, []);
 
   const triggerDamageDemo = (config: typeof damageConfig) => {
     setDamageActive(false);
@@ -156,7 +174,15 @@ export const EnergyAnimationDemo: React.FC = () => {
         </View>
         
         <ScrollView style={styles.buttonScroll} contentContainerStyle={styles.buttonContainer}>
-          <Text style={styles.sectionTitle}>Damage Effects</Text>
+          <Text style={styles.sectionTitle}>Card Lifecycle</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={triggerEntryDemo}
+          >
+            <Text style={styles.buttonText}>Card Entry</Text>
+          </TouchableOpacity>
+
+          <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Damage Effects</Text>
           {damageAnimations.map((anim) => (
             <TouchableOpacity
               key={anim.key}
@@ -207,6 +233,17 @@ export const EnergyAnimationDemo: React.FC = () => {
                 </Text>
               </View>
             </DamageEffect>
+          </View>
+        )}
+
+        {entryDemoVisible && sampleCard && (
+          <View style={styles.damageOverlay}>
+            <CardComponent
+              key={`entry-demo-${entryDemoKey}`}
+              card={sampleCard}
+              entryAnimation
+              size="small"
+            />
           </View>
         )}
       </SafeAreaView>
