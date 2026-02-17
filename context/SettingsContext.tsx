@@ -8,6 +8,8 @@ interface SettingsContextType {
   setCardSize: (size: CardSize) => void;
   showBattleLog: boolean;
   setShowBattleLog: (show: boolean) => void;
+  screenShake: boolean;
+  setScreenShake: (enabled: boolean) => void;
   locale: string;
   setLocale: (locale: string) => Promise<void>;
   loading: boolean;
@@ -20,12 +22,14 @@ const SETTINGS_STORAGE_KEY = '@creature_nexus_settings';
 interface Settings {
   cardSize: CardSize;
   showBattleLog: boolean;
+  screenShake: boolean;
   locale?: string;
 }
 
 const defaultSettings: Settings = {
   cardSize: 'small', // Default to small for better UX
   showBattleLog: false, // Disabled by default
+  screenShake: true, // Enabled by default
   locale: 'en'
 };
 
@@ -84,6 +88,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveSettings(newSettings);
   };
 
+  const setScreenShake = (enabled: boolean) => {
+    const newSettings = { ...settings, screenShake: enabled };
+    saveSettings(newSettings);
+  };
+
   const setLocale = async (locale: string) => {
     const newSettings = { ...settings, locale };
     // Update i18n first to ensure next render reflects the new language immediately
@@ -104,6 +113,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCardSize,
       showBattleLog: settings.showBattleLog,
       setShowBattleLog,
+      screenShake: settings.screenShake,
+      setScreenShake,
       locale: settings.locale || 'en',
       setLocale,
       loading,

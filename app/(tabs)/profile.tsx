@@ -26,7 +26,7 @@ const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
 
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins } = useAuth();
-  const { cardSize, setCardSize, showBattleLog, setShowBattleLog, locale, setLocale } = useSettings();
+  const { cardSize, setCardSize, showBattleLog, setShowBattleLog, screenShake, setScreenShake, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
 
@@ -385,6 +385,43 @@ export default function ProfileScreen() {
                   showBattleLog && styles.settingButtonTextActive
                 ]}>
                   {t('profile.battleLogVisible')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>{t('profile.screenShake')}</Text>
+              <Text style={styles.settingDescription}>{t('profile.screenShakeDesc')}</Text>
+            </View>
+            <View style={styles.settingButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  !screenShake && styles.settingButtonActive
+                ]}
+                onPress={() => setScreenShake(false)}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  !screenShake && styles.settingButtonTextActive
+                ]}>
+                  {t('profile.screenShakeOff')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  screenShake && styles.settingButtonActive
+                ]}
+                onPress={() => setScreenShake(true)}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  screenShake && styles.settingButtonTextActive
+                ]}>
+                  {t('profile.screenShakeOn')}
                 </Text>
               </TouchableOpacity>
             </View>

@@ -27,6 +27,7 @@ The settings UI is rendered in the profile screen (`app/(tabs)/profile.tsx`).
 |---------|------|---------|-------------|
 | `cardSize` | `'small'` \| `'normal'` | `'small'` | Card display size throughout the game |
 | `showBattleLog` | `boolean` | `false` | Show/hide the battle log during gameplay |
+| `screenShake` | `boolean` | `true` | Enable/disable screen shake on combat impacts |
 | `locale` | `string` | `'en'` | App language (`'en'` or `'fr'`) |
 
 ---
@@ -39,6 +40,8 @@ interface SettingsContextType {
   setCardSize: (size: CardSize) => void;
   showBattleLog: boolean;
   setShowBattleLog: (show: boolean) => void;
+  screenShake: boolean;
+  setScreenShake: (enabled: boolean) => void;
   locale: string;
   setLocale: (locale: string) => Promise<void>;
   loading: boolean;
@@ -83,6 +86,10 @@ Settings are loaded once on mount and merged with defaults. Every change trigger
 | `profile.battleLogDesc` | Show or hide the battle log during gameplay | Afficher ou masquer le journal pendant les combats |
 | `profile.battleLogHidden` | Hidden | Masqué |
 | `profile.battleLogVisible` | Visible | Visible |
+| `profile.screenShake` | Screen Shake | Tremblement d'écran |
+| `profile.screenShakeDesc` | Shake the screen on combat impacts | Secouer l'écran lors des impacts en combat |
+| `profile.screenShakeOff` | Off | Désactivé |
+| `profile.screenShakeOn` | On | Activé |
 
 ---
 

@@ -29,6 +29,8 @@ import { useSceneEvents } from '@/context/SceneManagerContext';
 import { useSceneManager } from '@/context/SceneManagerContext';
 import { BATTLEFIELD_THEMES, BattlefieldTheme } from '@/types/battlefield';
 import { isDemoMode } from '@/config/localMode';
+import Animated from 'react-native-reanimated';
+import { useScreenShake } from '../hooks/useScreenShake';
 
 const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
 
@@ -53,7 +55,7 @@ export function GameBoard() {
   } = useGame();
   const { activeDeck } = useDecks();
   const { avatarCreature, pseudo } = useAuth();
-  const { cardSize, setCardSize, showBattleLog } = useSettings();
+  const { cardSize, setCardSize, showBattleLog, screenShake } = useSettings();
   const sceneManager = useSceneManager();
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
@@ -67,6 +69,17 @@ export function GameBoard() {
   const [retiringCardId, setRetiringCardId] = useState<string | null>(null);
   const publishEvent = useSceneEvents();
   const wasAITurnRef = useRef<boolean | null>(null);
+  const { shakeStyle, triggerShake } = useScreenShake();
+
+  // Screen shake on damage impacts (respects user setting)
+  const prevDamageCountRef = useRef(damageAnimations.length);
+  useEffect(() => {
+    if (screenShake && damageAnimations.length > prevDamageCountRef.current) {
+      const latest = damageAnimations[damageAnimations.length - 1];
+      triggerShake(latest?.isLethal ? 8 : 4);
+    }
+    prevDamageCountRef.current = damageAnimations.length;
+  }, [damageAnimations.length, screenShake]);
 
   // Anchor refs for tutorial highlights
   const topFieldRef = useRef<View | null>(null);
@@ -583,7 +596,7 @@ export function GameBoard() {
 
   return (
     <View style={zoomWrapperStyle}>
-      <View style={styles.mainContainer}>
+      <Animated.View style={[styles.mainContainer, shakeStyle]}>
         <ScrollView style={styles.gameContainer}>
       {/* Top Player Info */}
       <PlayerInfo
@@ -787,7 +800,7 @@ export function GameBoard() {
           onComplete={clearSpellCastAnimation}
         />
       )}
-      </View>
+      </Animated.View>
     </View>
   );
 }
