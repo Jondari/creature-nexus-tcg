@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.26.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.3...v0.26.4) (2026-02-17)
+
+
+### Features
+
+* add screen shake on damage impacts with toggle in settings ([2b60b2d](https://github.com/Jondari/creature-nexus-tcg/commit/2b60b2d65446bb311f569a88adcabb66f9ed92b2))
+* add turn transition banner queued before energy wave with toggle in settings ([76508c1](https://github.com/Jondari/creature-nexus-tcg/commit/76508c1c25656739cc3aa236ea6d64544f9cd5cd))
+* extract game over screen into animated component with demo ([1ae5c8d](https://github.com/Jondari/creature-nexus-tcg/commit/1ae5c8d7049429035589b6a8466d167c526c3fc2))
+
 ### [0.26.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.2...v0.26.3) (2026-02-17)
 
 
