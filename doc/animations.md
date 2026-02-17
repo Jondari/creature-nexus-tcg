@@ -213,6 +213,8 @@ Test harness for previewing all animation components: energy, spells, rewards, d
 | EnergyWaveAnimation | Expanding circle + text | Animated | Energy gained |
 | EnergyOrbAnimation | Floating orb trajectory | Animated | Energy gained |
 | MonsterShowcaseAnimation | Flipbook creature reveal | Animated | Login screen |
+| TurnTransitionBanner | Slide in/out turn banner | Reanimated | Turn change |
+| useScreenShake | Screen shake on impacts | Reanimated | Damage dealt |
 
 ---
 
@@ -225,18 +227,19 @@ Test harness for previewing all animation components: energy, spells, rewards, d
 
 Centralized sequential queue for turn-transition animations. Prevents overlapping animations (e.g. energy wave starting before AI damage finishes).
 
-**API**: `enqueue(item)`, `flush()`, `clear()`, with `onPlay`/`onComplete` callbacks dispatching to the GameContext reducer.
+**API**: `enqueue(item)`, `prepend(item)`, `flush()`, `clear()`, with `onPlay`/`onComplete` callbacks dispatching to the GameContext reducer.
 
 ### Which animations go through the queue?
 
 | Animation | Via queue? | Reason |
 |-----------|-----------|--------|
+| Turn Banner (AI→player) | **Yes** | Prepended before energy wave via `prepend()` |
 | EnergyWave (player turn start) | **Yes** | Must wait for AI turn animations to finish |
 | DamageEffect (AI attack) | No | Already sequenced by `await delay()` in `executeAITurn` |
 | DamageEffect (player attack) | No | Triggered by user interaction, no conflict |
 | SpellCast (AI) | No | Already sequenced by `await delay(SPELL_CAST_ENGINE_DELAY_MS)` |
 | SpellCast (player) | No | Triggered by user interaction |
-| Turn Banner (future) | **Yes** | Should chain with energy wave |
+| Turn Banner (player→AI) | No | Triggered directly via local state in GameBoard |
 | Game Over (future) | **Yes** | Should wait for all animations to finish |
 
 ---
@@ -255,7 +258,7 @@ All timing constants are centralized in `constants/animation.ts`:
 | `CARD_RETIRE_DURATION_MS` | 400ms | Card retire fade + slide |
 | `DAMAGE_NUMBER_DURATION_MS` | 900ms | Floating damage number |
 | `ENERGY_WAVE_DURATION_MS` | 1500ms | Energy wave at turn transition |
-| `TURN_TRANSITION_DURATION_MS` | 1200ms | Turn banner animation |
+| `TURN_TRANSITION_DURATION_MS` | 2000ms | Turn banner animation |
 | `SPELL_CAST_ENGINE_DELAY_MS` | 1200ms | Delay before spell effect |
 | `USE_SKIA_GLOW` | true | Feature flag: Skia glow vs CSS boxShadow |
 

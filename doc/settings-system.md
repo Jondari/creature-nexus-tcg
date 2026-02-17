@@ -28,6 +28,7 @@ The settings UI is rendered in the profile screen (`app/(tabs)/profile.tsx`).
 | `cardSize` | `'small'` \| `'normal'` | `'small'` | Card display size throughout the game |
 | `showBattleLog` | `boolean` | `false` | Show/hide the battle log during gameplay |
 | `screenShake` | `boolean` | `true` | Enable/disable screen shake on combat impacts |
+| `turnBanner` | `boolean` | `true` | Show/hide the turn transition banner |
 | `locale` | `string` | `'en'` | App language (`'en'` or `'fr'`) |
 
 ---
@@ -42,6 +43,8 @@ interface SettingsContextType {
   setShowBattleLog: (show: boolean) => void;
   screenShake: boolean;
   setScreenShake: (enabled: boolean) => void;
+  turnBanner: boolean;
+  setTurnBanner: (enabled: boolean) => void;
   locale: string;
   setLocale: (locale: string) => Promise<void>;
   loading: boolean;
@@ -90,6 +93,10 @@ Settings are loaded once on mount and merged with defaults. Every change trigger
 | `profile.screenShakeDesc` | Shake the screen on combat impacts | Secouer l'écran lors des impacts en combat |
 | `profile.screenShakeOff` | Off | Désactivé |
 | `profile.screenShakeOn` | On | Activé |
+| `profile.turnBanner` | Turn Banner | Bandeau de tour |
+| `profile.turnBannerDesc` | Show a banner when the turn changes | Afficher un bandeau lors du changement de tour |
+| `profile.turnBannerOff` | Off | Désactivé |
+| `profile.turnBannerOn` | On | Activé |
 
 ---
 

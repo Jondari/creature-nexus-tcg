@@ -27,6 +27,11 @@ export class AnimationQueue {
     this.queue.push(item);
   }
 
+  /** Insert an animation at the front of the queue */
+  prepend(item: AnimationItem) {
+    this.queue.unshift(item);
+  }
+
   /** Play all queued animations sequentially, then resolve */
   async flush(): Promise<void> {
     if (this.playing) return;

@@ -31,6 +31,7 @@ import { BATTLEFIELD_THEMES, BattlefieldTheme } from '@/types/battlefield';
 import { isDemoMode } from '@/config/localMode';
 import Animated from 'react-native-reanimated';
 import { useScreenShake } from '../hooks/useScreenShake';
+import { TurnTransitionBanner } from './Animation/TurnTransitionBanner';
 
 const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
 
@@ -42,6 +43,7 @@ export function GameBoard() {
     damageAnimations,
     aiVisualState,
     energyWaveAnimation,
+    turnBannerAnimation,
     spellCastAnimation,
     isLoading, 
     error,
@@ -55,7 +57,7 @@ export function GameBoard() {
   } = useGame();
   const { activeDeck } = useDecks();
   const { avatarCreature, pseudo } = useAuth();
-  const { cardSize, setCardSize, showBattleLog, screenShake } = useSettings();
+  const { cardSize, setCardSize, showBattleLog, screenShake, turnBanner: turnBannerEnabled } = useSettings();
   const sceneManager = useSceneManager();
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
@@ -67,6 +69,7 @@ export function GameBoard() {
   const [resolvingAttack, setResolvingAttack] = useState(false);
   // Card currently playing its retire animation (fade + slide down)
   const [retiringCardId, setRetiringCardId] = useState<string | null>(null);
+  const [turnBanner, setTurnBanner] = useState<{ visible: boolean; isPlayerTurn: boolean }>({ visible: false, isPlayerTurn: true });
   const publishEvent = useSceneEvents();
   const wasAITurnRef = useRef<boolean | null>(null);
   const { shakeStyle, triggerShake } = useScreenShake();
@@ -128,6 +131,11 @@ export function GameBoard() {
       sceneManager.setFlag('ai_turn_completed', false);
     } else if (previous && !isAITurn) {
       sceneManager.setFlag('ai_turn_completed', true);
+    }
+
+    // Show turn banner for player→AI transition (AI→player is handled by animation queue)
+    if (turnBannerEnabled && !previous && isAITurn) {
+      setTurnBanner({ visible: true, isPlayerTurn: false });
     }
 
     wasAITurnRef.current = isAITurn;
@@ -800,6 +808,13 @@ export function GameBoard() {
           onComplete={clearSpellCastAnimation}
         />
       )}
+
+      {/* Turn Transition Banner — from queue (AI→player) or local state (player→AI) */}
+      <TurnTransitionBanner
+        isPlayerTurn={turnBannerAnimation?.isPlayerTurn ?? turnBanner.isPlayerTurn}
+        visible={!!turnBannerAnimation?.show || turnBanner.visible}
+        onComplete={() => setTurnBanner(prev => ({ ...prev, visible: false }))}
+      />
       </Animated.View>
     </View>
   );

@@ -10,6 +10,8 @@ interface SettingsContextType {
   setShowBattleLog: (show: boolean) => void;
   screenShake: boolean;
   setScreenShake: (enabled: boolean) => void;
+  turnBanner: boolean;
+  setTurnBanner: (enabled: boolean) => void;
   locale: string;
   setLocale: (locale: string) => Promise<void>;
   loading: boolean;
@@ -23,6 +25,7 @@ interface Settings {
   cardSize: CardSize;
   showBattleLog: boolean;
   screenShake: boolean;
+  turnBanner: boolean;
   locale?: string;
 }
 
@@ -30,6 +33,7 @@ const defaultSettings: Settings = {
   cardSize: 'small', // Default to small for better UX
   showBattleLog: false, // Disabled by default
   screenShake: true, // Enabled by default
+  turnBanner: true, // Enabled by default
   locale: 'en'
 };
 
@@ -93,6 +97,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveSettings(newSettings);
   };
 
+  const setTurnBanner = (enabled: boolean) => {
+    const newSettings = { ...settings, turnBanner: enabled };
+    saveSettings(newSettings);
+  };
+
   const setLocale = async (locale: string) => {
     const newSettings = { ...settings, locale };
     // Update i18n first to ensure next render reflects the new language immediately
@@ -115,6 +124,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setShowBattleLog,
       screenShake: settings.screenShake,
       setScreenShake,
+      turnBanner: settings.turnBanner,
+      setTurnBanner,
       locale: settings.locale || 'en',
       setLocale,
       loading,

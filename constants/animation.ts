@@ -20,7 +20,7 @@ export const DAMAGE_NUMBER_DURATION_MS = 900; // float up + fade out
 export const ENERGY_WAVE_DURATION_MS = 1500;
 
 // Turn & game flow
-export const TURN_TRANSITION_DURATION_MS = 1200; // turn banner slide in + hold + slide out
+export const TURN_TRANSITION_DURATION_MS = 2000; // turn banner slide in + hold + slide out
 export const GAME_OVER_ANIM_DURATION_MS = 1500; // victory/defeat animation
 
 // Feature flags

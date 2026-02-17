@@ -5,8 +5,9 @@ import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
 import { initializeSounds } from '../utils/game/soundManager';
-import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS, ENERGY_WAVE_DURATION_MS } from '../constants/animation';
+import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS, ENERGY_WAVE_DURATION_MS, TURN_TRANSITION_DURATION_MS } from '../constants/animation';
 import { AnimationQueue } from '../utils/game/animationQueue';
+import { useSettings } from './SettingsContext';
 
 interface GameContextState {
   gameEngine: GameEngine | null;
@@ -15,6 +16,7 @@ interface GameContextState {
   damageAnimations: DamageAnimation[];
   aiVisualState: AIVisualState;
   energyWaveAnimation: { show: boolean; amount: number } | null;
+  turnBannerAnimation: { show: boolean; isPlayerTurn: boolean } | null;
   spellCastAnimation: { show: boolean; spell: Card; startPosition: { x: number; y: number } } | null;
   isLoading: boolean;
   error: string | null;
@@ -48,6 +50,8 @@ type GameAction_Context =
   | { type: 'CLEAR_DAMAGE_ANIMATION'; payload: string }
   | { type: 'TRIGGER_ENERGY_WAVE_ANIMATION'; payload: number }
   | { type: 'CLEAR_ENERGY_WAVE_ANIMATION' }
+  | { type: 'TRIGGER_TURN_BANNER'; payload: boolean }
+  | { type: 'CLEAR_TURN_BANNER' }
   | { type: 'TRIGGER_SPELL_CAST_ANIMATION'; payload: { spell: Card; startPosition: { x: number; y: number } } }
   | { type: 'CLEAR_SPELL_CAST_ANIMATION' }
   | { type: 'SET_AI_STATUS'; payload: { status: AIStatus; message?: string } }
@@ -67,6 +71,7 @@ const initialState: GameContextState = {
     isActive: false,
   },
   energyWaveAnimation: null,
+  turnBannerAnimation: null,
   spellCastAnimation: null,
   isLoading: false,
   error: null,
@@ -111,6 +116,16 @@ function gameReducer(state: GameContextState, action: GameAction_Context): GameC
       return {
         ...state,
         energyWaveAnimation: null,
+      };
+    case 'TRIGGER_TURN_BANNER':
+      return {
+        ...state,
+        turnBannerAnimation: { show: true, isPlayerTurn: action.payload },
+      };
+    case 'CLEAR_TURN_BANNER':
+      return {
+        ...state,
+        turnBannerAnimation: null,
       };
     case 'TRIGGER_SPELL_CAST_ANIMATION':
       return {
@@ -181,6 +196,7 @@ interface GameProviderProps {
 
 export function GameProvider({ children }: GameProviderProps) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const { turnBanner: turnBannerEnabled } = useSettings();
 
   // Animation queue for sequencing turn-transition animations
   const animationQueueRef = React.useRef<AnimationQueue>(new AnimationQueue());
@@ -192,12 +208,16 @@ export function GameProvider({ children }: GameProviderProps) {
       (item) => {
         if (item.type === 'energyWave') {
           dispatch({ type: 'TRIGGER_ENERGY_WAVE_ANIMATION', payload: item.payload });
+        } else if (item.type === 'turnBanner') {
+          dispatch({ type: 'TRIGGER_TURN_BANNER', payload: item.payload });
         }
       },
       // onComplete — clean up the animation
       (item) => {
         if (item.type === 'energyWave') {
           dispatch({ type: 'CLEAR_ENERGY_WAVE_ANIMATION' });
+        } else if (item.type === 'turnBanner') {
+          dispatch({ type: 'CLEAR_TURN_BANNER' });
         }
       },
     );
@@ -538,7 +558,16 @@ export function GameProvider({ children }: GameProviderProps) {
       // Clear all AI visuals
       dispatch({ type: 'CLEAR_AI_VISUALS' });
 
-      // Play queued turn-transition animations (energy wave, etc.)
+      // Prepend turn banner (plays before energy wave)
+      if (turnBannerEnabled) {
+        animationQueueRef.current.prepend({
+          type: 'turnBanner',
+          payload: true, // isPlayerTurn = true (AI turn just ended)
+          duration: TURN_TRANSITION_DURATION_MS,
+        });
+      }
+
+      // Play queued turn-transition animations (banner, then energy wave)
       await animationQueueRef.current.flush();
 
     } catch (error) {

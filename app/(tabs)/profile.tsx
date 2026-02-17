@@ -26,7 +26,7 @@ const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
 
 export default function ProfileScreen() {
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins } = useAuth();
-  const { cardSize, setCardSize, showBattleLog, setShowBattleLog, screenShake, setScreenShake, locale, setLocale } = useSettings();
+  const { cardSize, setCardSize, showBattleLog, setShowBattleLog, screenShake, setScreenShake, turnBanner, setTurnBanner, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
 
@@ -422,6 +422,44 @@ export default function ProfileScreen() {
                   screenShake && styles.settingButtonTextActive
                 ]}>
                   {t('profile.screenShakeOn')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Turn Banner */}
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>{t('profile.turnBanner')}</Text>
+              <Text style={styles.settingDescription}>{t('profile.turnBannerDesc')}</Text>
+            </View>
+            <View style={styles.settingButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  !turnBanner && styles.settingButtonActive
+                ]}
+                onPress={() => setTurnBanner(false)}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  !turnBanner && styles.settingButtonTextActive
+                ]}>
+                  {t('profile.turnBannerOff')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  turnBanner && styles.settingButtonActive
+                ]}
+                onPress={() => setTurnBanner(true)}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  turnBanner && styles.settingButtonTextActive
+                ]}>
+                  {t('profile.turnBannerOn')}
                 </Text>
               </TouchableOpacity>
             </View>
