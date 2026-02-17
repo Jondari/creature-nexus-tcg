@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions, Linking } from 'react-native';
-import { DiscordIcon } from '@/components/DiscordIcon';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
 import { KILL_ANIM_MS, NON_KILL_ANIM_MS, CARD_RETIRE_DURATION_MS } from '../constants/animation';
 import { useGame } from '../context/GameContext';
@@ -28,12 +27,10 @@ import { COMMON_ANCHORS } from '@/types/scenes';
 import { useSceneEvents } from '@/context/SceneManagerContext';
 import { useSceneManager } from '@/context/SceneManagerContext';
 import { BATTLEFIELD_THEMES, BattlefieldTheme } from '@/types/battlefield';
-import { isDemoMode } from '@/config/localMode';
 import Animated from 'react-native-reanimated';
 import { useScreenShake } from '../hooks/useScreenShake';
 import { TurnTransitionBanner } from './Animation/TurnTransitionBanner';
-
-const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
+import { GameOverAnimation } from './Animation/GameOverAnimation';
 
 export function GameBoard() {
   const { 
@@ -510,13 +507,9 @@ export function GameBoard() {
 
   if (gameState.isGameOver) {
     const handlePlayAgain = () => {
-      // Get the current player names and decks to restart with same setup
       const humanPlayer = playerAtBottom;
       const aiPlayer = playerAtTop;
-
       resetGame();
-
-      // Wait a moment for reset to complete, then reinitialize
       setTimeout(() => {
         initializeGame(humanPlayer.name, humanPlayer.deck, aiPlayer.deck);
       }, 100);
@@ -530,7 +523,6 @@ export function GameBoard() {
     const isPlayerVictory = gameState.winner === playerAtBottom.id;
     const winnerName = isPlayerVictory ? (pseudo || playerAtBottom.name) : playerAtTop.name;
 
-    // Map winReason to i18n keys (different messages for victory vs defeat)
     const getWinReasonText = () => {
       const prefix = isPlayerVictory ? 'game_over.reason' : 'game_over.defeat_reason';
       switch (gameState.winReason) {
@@ -545,53 +537,14 @@ export function GameBoard() {
       }
     };
 
-    const handleJoinDiscord = () => {
-      if (!DISCORD_INVITE_URL) return;
-      Linking.openURL(DISCORD_INVITE_URL);
-    };
-
     return (
-      <View style={styles.centered}>
-        <Text style={styles.gameOver}>
-          {isPlayerVictory ? t('game_over.victory') : t('game_over.defeat')}
-        </Text>
-        <Text style={styles.winner}>{t('game_over.winner')}: {winnerName}</Text>
-        {gameState.winReason && (
-          <Text style={styles.winReason}>{getWinReasonText()}</Text>
-        )}
-
-        <View style={styles.gameOverButtons}>
-          <TouchableOpacity style={styles.gameOverButton} onPress={handlePlayAgain}>
-            <Text style={styles.gameOverButtonText}>{t('game.playAgain')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.gameOverButton, styles.gameOverButtonSecondary]}
-            onPress={handleReturnToMenu}
-          >
-            <Text style={[styles.gameOverButtonText, styles.gameOverButtonTextSecondary]}>
-              {t('game.returnToMenu')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {isDemoMode && DISCORD_INVITE_URL ? (
-          <View style={styles.demoCtaContainer}>
-            <Text style={styles.demoCtaText}>{t('game_over.demoCta.title')}</Text>
-            <TouchableOpacity
-              style={[styles.gameOverButton, styles.discordButton]}
-              onPress={handleJoinDiscord}
-            >
-              <View style={styles.discordButtonContent}>
-                <DiscordIcon size={20} color={Colors.text.primary} />
-                <Text style={styles.gameOverButtonText}>
-                  {t('game_over.demoCta.button')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        ) : null}
-      </View>
+      <GameOverAnimation
+        isVictory={isPlayerVictory}
+        winnerName={winnerName}
+        winReason={getWinReasonText()}
+        onPlayAgain={handlePlayAgain}
+        onReturnToMenu={handleReturnToMenu}
+      />
     );
   }
 
@@ -845,25 +798,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  gameOver: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-    color: Colors.text.primary,
-  },
-  winner: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: Colors.text.secondary,
-  },
-  winReason: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: Colors.text.secondary,
-    marginTop: 8,
-    fontStyle: 'italic',
-  },
   field: {
     margin: 8,
   },
@@ -899,51 +833,6 @@ const styles = StyleSheet.create({
   attackModeText: {
     color: '#000',
     fontWeight: 'bold',
-  },
-  gameOverButtons: {
-    marginTop: 30,
-    gap: 15,
-  },
-  gameOverButton: {
-    backgroundColor: Colors.primary[600],
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 8,
-    minWidth: 200,
-    alignItems: 'center',
-  },
-  gameOverButtonSecondary: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: Colors.primary[600],
-  },
-  gameOverButtonText: {
-    color: Colors.text.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  gameOverButtonTextSecondary: {
-    color: Colors.primary[600],
-  },
-  demoCtaContainer: {
-    marginTop: 24,
-    alignItems: 'center',
-    gap: 12,
-  },
-  demoCtaText: {
-    color: Colors.text.secondary,
-    textAlign: 'center',
-    fontSize: 18,
-    paddingHorizontal: 16,
-    lineHeight: 20,
-  },
-  discordButton: {
-    backgroundColor: Colors.accent[600],
-  },
-  discordButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
   },
   loadingText: {
     color: Colors.text.primary,

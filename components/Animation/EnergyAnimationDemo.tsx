@@ -13,8 +13,9 @@ import { RewardAnimation } from './RewardAnimation';
 import { generateRandomCard } from '@/utils/cardUtils';
 import { STANDARD_PACK } from '@/data/boosterPacks';
 import Colors from '@/constants/Colors';
-import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS } from '@/constants/animation';
+import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS, GAME_OVER_ANIM_DURATION_MS } from '@/constants/animation';
 import { t } from '@/utils/i18n';
+import { GameOverAnimation } from './GameOverAnimation';
 import type { Element } from '@/types/game';
 
 export const EnergyAnimationDemo: React.FC = () => {
@@ -68,6 +69,18 @@ export const EnergyAnimationDemo: React.FC = () => {
     setTimeout(() => setRetireDemoRetiring(true), 500);
     // Auto-dismiss after retire animation completes
     setTimeout(() => setRetireDemoVisible(false), 500 + CARD_RETIRE_DURATION_MS + 300);
+  }, []);
+
+  // State for game over demo
+  const [gameOverDemo, setGameOverDemo] = useState<{ visible: boolean; isVictory: boolean }>({ visible: false, isVictory: true });
+  const [gameOverKey, setGameOverKey] = useState(0);
+
+  const triggerGameOverDemo = useCallback((isVictory: boolean) => {
+    setGameOverDemo({ visible: false, isVictory });
+    setTimeout(() => {
+      setGameOverKey(k => k + 1);
+      setGameOverDemo({ visible: true, isVictory });
+    }, 50);
   }, []);
 
   // State for selection glow demo
@@ -263,6 +276,20 @@ export const EnergyAnimationDemo: React.FC = () => {
             </TouchableOpacity>
           ))}
 
+          <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Game Flow</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => triggerGameOverDemo(true)}
+          >
+            <Text style={styles.buttonText}>Victory</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => triggerGameOverDemo(false)}
+          >
+            <Text style={styles.buttonText}>Defeat</Text>
+          </TouchableOpacity>
+
           <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Other Animations</Text>
           {animations.map((animation) => (
             <TouchableOpacity
@@ -324,6 +351,18 @@ export const EnergyAnimationDemo: React.FC = () => {
               card={sampleCard}
               isRetiring={retireDemoRetiring}
               size="small"
+            />
+          </View>
+        )}
+
+        {gameOverDemo.visible && (
+          <View key={`gameover-${gameOverKey}`} style={styles.damageOverlay}>
+            <GameOverAnimation
+              isVictory={gameOverDemo.isVictory}
+              winnerName={gameOverDemo.isVictory ? 'Player' : 'AI'}
+              winReason={gameOverDemo.isVictory ? 'All enemy monsters defeated!' : 'All your monsters were defeated.'}
+              onPlayAgain={() => setGameOverDemo({ visible: false, isVictory: true })}
+              onReturnToMenu={() => setGameOverDemo({ visible: false, isVictory: true })}
             />
           </View>
         )}

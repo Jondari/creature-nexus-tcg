@@ -214,6 +214,7 @@ Test harness for previewing all animation components: energy, spells, rewards, d
 | EnergyOrbAnimation | Floating orb trajectory | Animated | Energy gained |
 | MonsterShowcaseAnimation | Flipbook creature reveal | Animated | Login screen |
 | TurnTransitionBanner | Slide in/out turn banner | Reanimated | Turn change |
+| GameOverAnimation | Victory/defeat with bounce + staggered fade-in | Reanimated | Game over |
 | useScreenShake | Screen shake on impacts | Reanimated | Damage dealt |
 
 ---
