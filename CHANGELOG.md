@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.26.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.2...v0.26.3) (2026-02-17)
+
+
+### Features
+
+* add card entry animation on battlefield (scale + opacity spring) ([f39b8aa](https://github.com/Jondari/creature-nexus-tcg/commit/f39b8aa440f32904604bd216c35b2cd30d655e7b))
+* add card retire animation (fade out + slide down) ([10d74ee](https://github.com/Jondari/creature-nexus-tcg/commit/10d74ee0cec925f2b855ec096e5aa8bf652dffa0))
+* add configurable Skia selection glow (replaces CSS boxShadow) ([3629c5e](https://github.com/Jondari/creature-nexus-tcg/commit/3629c5e4b548341aa248c037956437848aea9bf4))
+* add Skia death dissolve animation on lethal hits ([1906d05](https://github.com/Jondari/creature-nexus-tcg/commit/1906d057d9bca22143d2c20fff52858da90ac1ff))
+
 ### [0.26.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.1...v0.26.2) (2026-02-15)
 
 
