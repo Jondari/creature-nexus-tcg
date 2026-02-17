@@ -14,8 +14,9 @@ import { HITSTOP_DURATION_MS } from '../constants/animation';
 import { DamageNumber } from './Animation/DamageNumber';
 import type { Element } from '../types/game';
 
-// Lazy-load Skia overlay so the Skia module is only evaluated after CanvasKit is ready
+// Lazy-load Skia overlays so the Skia module is only evaluated after CanvasKit is ready
 const LazySkiaFlashOverlay = React.lazy(() => import('./Animation/SkiaFlashOverlay'));
+const LazySkiaDeathOverlay = React.lazy(() => import('./Animation/SkiaDeathOverlay'));
 
 interface DamageEffectProps {
   children: React.ReactNode;
@@ -54,6 +55,15 @@ export function DamageEffect({
   const shakeX = useSharedValue(0);
   const flashProgress = useSharedValue(0);
   const particleProgress = useSharedValue(0);
+
+  // Death dissolve shared values (only animate when isLethal)
+  const deathScale = useSharedValue(1);
+  const deathRotate = useSharedValue(0);
+  const deathOpacity = useSharedValue(1);
+  const deathProgress = useSharedValue(0);
+
+  // Shake ends at HITSTOP + 7×40ms = ~360ms from start
+  const SHAKE_END_MS = HITSTOP_DURATION_MS + 7 * 40;
 
   useEffect(() => {
     if (!isActive || duration === 0) return;
@@ -98,6 +108,28 @@ export function DamageEffect({
       ),
     );
 
+    // Death dissolve — starts after shake, must finish within the duration window
+    if (isLethal) {
+      const dissolveDuration = Math.max(duration - SHAKE_END_MS, 200);
+
+      deathScale.value = withDelay(
+        SHAKE_END_MS,
+        withTiming(0.8, { duration: dissolveDuration, easing: Easing.in(Easing.quad) }),
+      );
+      deathRotate.value = withDelay(
+        SHAKE_END_MS,
+        withTiming(8, { duration: dissolveDuration, easing: Easing.in(Easing.quad) }),
+      );
+      deathOpacity.value = withDelay(
+        SHAKE_END_MS,
+        withTiming(0, { duration: dissolveDuration, easing: Easing.in(Easing.cubic) }),
+      );
+      deathProgress.value = withDelay(
+        SHAKE_END_MS,
+        withTiming(1, { duration: dissolveDuration, easing: Easing.out(Easing.quad) }),
+      );
+    }
+
     const totalMs = HITSTOP_DURATION_MS + duration * 0.8;
     const timer = setTimeout(() => {
       onAnimationComplete?.();
@@ -108,11 +140,23 @@ export function DamageEffect({
       shakeX.value = 0;
       flashProgress.value = 0;
       particleProgress.value = 0;
+      deathScale.value = 1;
+      deathRotate.value = 0;
+      deathOpacity.value = 1;
+      deathProgress.value = 0;
     };
   }, [isActive, duration, isLethal]);
 
   const shakeStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: shakeX.value }],
+  }));
+
+  const deathStyle = useAnimatedStyle(() => ({
+    opacity: deathOpacity.value,
+    transform: [
+      { scale: deathScale.value },
+      { rotate: `${deathRotate.value}deg` },
+    ],
   }));
 
   if (duration === 0) {
@@ -124,17 +168,27 @@ export function DamageEffect({
 
   return (
     <Animated.View style={shakeStyle}>
-      {children}
-      {isActive && (
-        <Suspense fallback={<FallbackFlash color={impactColor} />}>
-          <LazySkiaFlashOverlay
-            color={impactColor}
-            flashProgress={flashProgress}
-            particleProgress={particleProgress}
-            particleCount={particleCount}
-          />
-        </Suspense>
-      )}
+      <Animated.View style={isLethal ? deathStyle : undefined}>
+        {children}
+        {isActive && (
+          <Suspense fallback={<FallbackFlash color={impactColor} />}>
+            <LazySkiaFlashOverlay
+              color={impactColor}
+              flashProgress={flashProgress}
+              particleProgress={particleProgress}
+              particleCount={particleCount}
+            />
+          </Suspense>
+        )}
+        {isActive && isLethal && (
+          <Suspense fallback={null}>
+            <LazySkiaDeathOverlay
+              progress={deathProgress}
+              attackElement={attackElement}
+            />
+          </Suspense>
+        )}
+      </Animated.View>
       {isActive && damage != null && (
         <DamageNumber damage={damage} isLethal={isLethal} />
       )}

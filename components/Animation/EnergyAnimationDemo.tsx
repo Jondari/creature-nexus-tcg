@@ -113,6 +113,9 @@ export const EnergyAnimationDemo: React.FC = () => {
     { label: 'Damage (Earth)', key: 'dmg-earth', config: { damage: 45, isLethal: false, attackElement: 'earth' as Element } },
     { label: 'Damage (Air)', key: 'dmg-air', config: { damage: 45, isLethal: false, attackElement: 'air' as Element } },
     { label: 'Lethal Fire', key: 'dmg-lethal-fire', config: { damage: 120, isLethal: true, attackElement: 'fire' as Element } },
+    { label: 'Lethal Water', key: 'dmg-lethal-water', config: { damage: 120, isLethal: true, attackElement: 'water' as Element } },
+    { label: 'Lethal Earth', key: 'dmg-lethal-earth', config: { damage: 120, isLethal: true, attackElement: 'earth' as Element } },
+    { label: 'Lethal Air', key: 'dmg-lethal-air', config: { damage: 120, isLethal: true, attackElement: 'air' as Element } },
   ];
 
   const triggerAnimation = (key: string) => {

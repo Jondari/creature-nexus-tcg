@@ -4,7 +4,7 @@
 export const SPELL_CAST_ENGINE_DELAY_MS = 1200; // delay before executing spell effect
 
 // Damage animation durations
-export const KILL_ANIM_MS = 600; // short & snappy so lethal hits feel responsive
+export const KILL_ANIM_MS = 1200; // dramatic lethal hit: shake → dissolution → fade
 export const NON_KILL_ANIM_MS = 1000; // longer feedback for non-lethal hits
 export const HITSTOP_DURATION_MS = 80; // freeze frame before impact lands
 
