@@ -10,13 +10,14 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { playImpactSound } from '../utils/game/soundManager';
-import { HITSTOP_DURATION_MS } from '../constants/animation';
+import { HITSTOP_DURATION_MS, ATTACK_EFFECT_DURATION_MS } from '../constants/animation';
 import { DamageNumber } from './Animation/DamageNumber';
 import type { Element } from '../types/game';
 
 // Lazy-load Skia overlays so the Skia module is only evaluated after CanvasKit is ready
 const LazySkiaFlashOverlay = React.lazy(() => import('./Animation/SkiaFlashOverlay'));
 const LazySkiaDeathOverlay = React.lazy(() => import('./Animation/SkiaDeathOverlay'));
+const LazySkiaAttackEffect = React.lazy(() => import('./Animation/SkiaAttackEffect'));
 
 interface DamageEffectProps {
   children: React.ReactNode;
@@ -55,6 +56,9 @@ export function DamageEffect({
   const shakeX = useSharedValue(0);
   const flashProgress = useSharedValue(0);
   const particleProgress = useSharedValue(0);
+
+  // Attack effect progress (element-specific visual)
+  const attackProgress = useSharedValue(0);
 
   // Death dissolve shared values (only animate when isLethal)
   const deathScale = useSharedValue(1);
@@ -108,6 +112,14 @@ export function DamageEffect({
       ),
     );
 
+    // Attack effect — element-specific visual burst
+    if (attackElement && attackElement !== 'all') {
+      attackProgress.value = withDelay(
+        HITSTOP_DURATION_MS,
+        withTiming(1, { duration: ATTACK_EFFECT_DURATION_MS, easing: Easing.out(Easing.quad) }),
+      );
+    }
+
     // Death dissolve — starts after shake, must finish within the duration window
     if (isLethal) {
       const dissolveDuration = Math.max(duration - SHAKE_END_MS, 200);
@@ -140,6 +152,7 @@ export function DamageEffect({
       shakeX.value = 0;
       flashProgress.value = 0;
       particleProgress.value = 0;
+      attackProgress.value = 0;
       deathScale.value = 1;
       deathRotate.value = 0;
       deathOpacity.value = 1;
@@ -177,6 +190,14 @@ export function DamageEffect({
               flashProgress={flashProgress}
               particleProgress={particleProgress}
               particleCount={particleCount}
+            />
+          </Suspense>
+        )}
+        {isActive && attackElement && attackElement !== 'all' && (
+          <Suspense fallback={null}>
+            <LazySkiaAttackEffect
+              progress={attackProgress}
+              attackElement={attackElement}
             />
           </Suspense>
         )}

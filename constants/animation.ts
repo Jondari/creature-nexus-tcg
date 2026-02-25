@@ -13,6 +13,9 @@ export const CARD_ENTRY_DURATION_MS = 350; // card appears on field (scale + opa
 export const CARD_DEATH_DURATION_MS = 600; // death dissolve/shrink animation
 export const CARD_RETIRE_DURATION_MS = 400; // card retire fade + slide
 
+// Attack effects
+export const ATTACK_EFFECT_DURATION_MS = 480; // element-specific visual burst
+
 // Damage numbers
 export const DAMAGE_NUMBER_DURATION_MS = 900; // float up + fade out
 
