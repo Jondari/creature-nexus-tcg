@@ -201,6 +201,9 @@ export function GameProvider({ children }: GameProviderProps) {
   // Animation queue for sequencing turn-transition animations
   const animationQueueRef = React.useRef<AnimationQueue>(new AnimationQueue());
 
+  // Guard against concurrent executeAITurn calls (race condition when gameState updates mid-turn)
+  const isExecutingAITurnRef = React.useRef(false);
+
   // Configure queue callbacks once
   useEffect(() => {
     animationQueueRef.current.setCallbacks(
@@ -402,12 +405,17 @@ export function GameProvider({ children }: GameProviderProps) {
     if (!state.gameEngine || !state.gameState) {
       return;
     }
-    
+
     const currentPlayer = state.gameEngine.getCurrentPlayer();
     if (!currentPlayer.isAI) {
       return;
     }
-    
+
+    if (isExecutingAITurnRef.current) {
+      return;
+    }
+    isExecutingAITurnRef.current = true;
+
     try {
       // Show AI is starting its turn
       dispatch({ type: 'SET_AI_STATUS', payload: { status: 'thinking', message: t('game.aiAction.planning') } });
@@ -558,24 +566,30 @@ export function GameProvider({ children }: GameProviderProps) {
       // Clear all AI visuals
       dispatch({ type: 'CLEAR_AI_VISUALS' });
 
-      // Prepend turn banner (plays before energy wave)
-      if (turnBannerEnabled) {
-        animationQueueRef.current.prepend({
-          type: 'turnBanner',
-          payload: true, // isPlayerTurn = true (AI turn just ended)
-          duration: TURN_TRANSITION_DURATION_MS,
-        });
-      }
+      const turnPassedToPlayer = !newGameState.players[newGameState.currentPlayerIndex].isAI;
 
-      // Play queued turn-transition animations (banner, then energy wave)
-      await animationQueueRef.current.flush();
+      if (turnPassedToPlayer) {
+        // Prepend turn banner (plays before energy wave)
+        if (turnBannerEnabled) {
+          animationQueueRef.current.prepend({
+            type: 'turnBanner',
+            payload: true, // isPlayerTurn = true (AI turn just ended)
+            duration: TURN_TRANSITION_DURATION_MS,
+          });
+        }
+
+        // Play queued turn-transition animations (banner, then energy wave)
+        await animationQueueRef.current.flush();
+      }
 
     } catch (error) {
       dispatch({ type: 'CLEAR_AI_VISUALS' });
-      dispatch({ 
-        type: 'SET_ERROR', 
-        payload: error instanceof Error ? error.message : 'AI turn failed' 
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'AI turn failed'
       });
+    } finally {
+      isExecutingAITurnRef.current = false;
     }
   };
 
