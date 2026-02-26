@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.26.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.4...v0.26.5) (2026-02-26)
+
+
+### Features
+
+* add Skia element-based attack effects ([604f789](https://github.com/Jondari/creature-nexus-tcg/commit/604f789d7998071239df758632a71d01b8906dca))
+
+
+### Bug Fixes
+
+* prevent spurious "Your Turn" banner during AI multi-action turns ([faa3c2a](https://github.com/Jondari/creature-nexus-tcg/commit/faa3c2a1944a51a70a676bcc2dc72bcb8c1db735))
+
 ### [0.26.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.3...v0.26.4) (2026-02-17)
 
 
