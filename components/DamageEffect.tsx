@@ -9,15 +9,19 @@ import Animated, {
   runOnJS,
   Easing,
 } from 'react-native-reanimated';
+import type { SharedValue } from 'react-native-reanimated';
 import { playImpactSound } from '../utils/game/soundManager';
 import { HITSTOP_DURATION_MS, ATTACK_EFFECT_DURATION_MS } from '../constants/animation';
 import { DamageNumber } from './Animation/DamageNumber';
 import type { Element } from '../types/game';
+import { hasSpritesheet } from './Animation/attackSprites';
+
+const LazyProceduralAttackEffect = React.lazy(() => import('./Animation/SkiaAttackEffect'));
 
 // Lazy-load Skia overlays so the Skia module is only evaluated after CanvasKit is ready
 const LazySkiaFlashOverlay = React.lazy(() => import('./Animation/SkiaFlashOverlay'));
 const LazySkiaDeathOverlay = React.lazy(() => import('./Animation/SkiaDeathOverlay'));
-const LazySkiaAttackEffect = React.lazy(() => import('./Animation/SkiaAttackEffect'));
+const LazyAttackEffectSprite = React.lazy(() => import('./Animation/AttackEffectSprite'));
 
 interface DamageEffectProps {
   children: React.ReactNode;
@@ -179,6 +183,8 @@ export function DamageEffect({
   const impactColor = getImpactColor(attackElement);
   const particleCount = isLethal ? 12 : 8;
 
+  const canUseSprite = attackElement != null && attackElement !== 'all' && hasSpritesheet(attackElement);
+
   return (
     <Animated.View style={shakeStyle}>
       <Animated.View style={isLethal ? deathStyle : undefined}>
@@ -193,14 +199,16 @@ export function DamageEffect({
             />
           </Suspense>
         )}
-        {isActive && attackElement && attackElement !== 'all' && (
-          <Suspense fallback={null}>
-            <LazySkiaAttackEffect
+        {isActive && canUseSprite ? (
+          <Suspense fallback={<FallbackProcedural progress={attackProgress} attackElement={attackElement} />}>
+            <LazyAttackEffectSprite
               progress={attackProgress}
-              attackElement={attackElement}
+              attackElement={attackElement as Element}
             />
           </Suspense>
-        )}
+        ) : isActive ? (
+          <FallbackProcedural progress={attackProgress} attackElement={attackElement} />
+        ) : null}
         {isActive && isLethal && (
           <Suspense fallback={null}>
             <LazySkiaDeathOverlay
@@ -224,6 +232,14 @@ function FallbackFlash({ color }: { color: string }) {
       style={[styles.fallbackOverlay, { backgroundColor: color }]}
       pointerEvents="none"
     />
+  );
+}
+
+function FallbackProcedural({ progress, attackElement }: { progress: SharedValue<number>; attackElement?: Element }) {
+  return (
+    <Suspense fallback={null}>
+      <LazyProceduralAttackEffect progress={progress} attackElement={attackElement} />
+    </Suspense>
   );
 }
 

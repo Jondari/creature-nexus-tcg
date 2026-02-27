@@ -7,7 +7,7 @@
 
 ## Overview
 
-The app uses a set of specialized animation components for game feedback, card reveals, and visual effects. Most use React Native's built-in `Animated` API; `PackOpeningAnimation` uses `react-native-reanimated`.
+The app uses a set of specialized animation components for game feedback, card reveals, and visual effects. Combat effects use Reanimated 3 + Skia (lazy-loaded overlays); pack/reward animations use the legacy `Animated` API.
 
 ---
 
@@ -72,10 +72,10 @@ Wraps a child component with hitstop freeze, horizontal shake, Skia flash overla
 | `attackElement?` | `Element` | Element for color theming (fire/water/earth/air) |
 | `onAnimationComplete?` | `() => void` | Called when animation finishes |
 
-Animation sequence (non-lethal): hitstop → Skia flash + particles + shake → damage number float.
-Animation sequence (lethal): hitstop → Skia flash + particles + shake → death dissolve (scale 1→0.8 + rotate 0→8° + Skia dissolution overlay + fade out).
+Animation sequence (non-lethal): hitstop → Skia flash + particles + shake + attack effect → damage number float.
+Animation sequence (lethal): hitstop → Skia flash + particles + shake + attack effect → death dissolve (scale 1→0.8 + rotate 0→8° + Skia dissolution overlay + fade out).
 
-Lazy-loaded Skia overlays: `SkiaFlashOverlay`, `SkiaDeathOverlay`.
+Lazy-loaded Skia overlays: `SkiaFlashOverlay`, `AttackEffectSprite`, `SkiaDeathOverlay` (in render order).
 
 ---
 
@@ -94,6 +94,33 @@ Pulsating glow border rendered behind the card using a Skia Canvas with a blurre
 | `color` | `string` | Glow color |
 | `isActive` | `boolean` | Show/hide the glow |
 | `borderRadius?` | `number` | Card border radius (default: 8) |
+
+---
+
+### AttackEffectSprite
+
+| | |
+|---|---|
+| **File** | `components/Animation/AttackEffectSprite.tsx` |
+| **Library** | Skia (native) / Reanimated AnimatedImage (web) |
+| **Used in** | `DamageEffect` (lazy-loaded) |
+
+Platform dispatcher for element-based attack spritesheet animations. Returns `null` if no spritesheet is registered for the given element (falls back to the procedural `SkiaAttackEffect`).
+
+Routing: `Platform.OS === 'web'` → `WebSpritesheetAttack`, otherwise → `SkiaSpritesheetAttack`.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `progress` | `SharedValue<number>` | Animation progress 0→1 |
+| `attackElement?` | `Element` | Element for spritesheet selection |
+
+Asset registry: `components/Animation/attackSprites.ts` — maps `fire`, `water`, `air`, `earth` to their PNG assets (`Fire.png`, `Water.png`, `Wind.png`, `Earth.png` in `assets/images/attack/`, 5 columns, square frames assumed). Use `hasSpritesheet(element)` to check availability.
+
+**Native** (`SkiaSpritesheetAttack`): Skia `Canvas` with a `Group` clip rect. The full spritesheet is translated to bring the current frame into view.
+
+**Web** (`WebSpritesheetAttack`): `AnimatedImage` scaled so one frame fills the container, then translated by `col × containerWidth` / `row × containerHeight`.
+
+> **Constraint:** `numRows` is derived from `image.height / frameWidth`, which assumes square frames. Document this when adding new spritesheets.
 
 ---
 
@@ -206,7 +233,8 @@ Test harness for previewing all animation components: energy, spells, rewards, d
 |-----------|--------|---------|---------|
 | PackOpeningAnimation | Card grid reveal with pagination | Reanimated | Pack opened |
 | RewardAnimation | Centered popup (scale + fade) | Animated | Promo code redeemed |
-| DamageEffect | Skia flash + shake + death dissolve | Reanimated + Skia | Card takes damage |
+| DamageEffect | Skia flash + shake + attack effect + death dissolve | Reanimated + Skia | Card takes damage |
+| AttackEffectSprite | Element spritesheet (fire/water/air/earth) or procedural fallback | Skia / AnimatedImage | During damage animation |
 | SkiaSelectionGlow | Pulsating glow border | Skia + Reanimated | Card selected/targeted |
 | SkiaDeathOverlay | Element-themed dissolution | Skia + Reanimated | Lethal hit |
 | SpellCastAnimation | Card flies to center + magic wave | Animated | Spell cast |
@@ -253,6 +281,7 @@ All timing constants are centralized in `constants/animation.ts`:
 |----------|-------|-------------|
 | `KILL_ANIM_MS` | 1200ms | Lethal hit: shake → dissolution → fade |
 | `NON_KILL_ANIM_MS` | 1000ms | Non-lethal hit feedback |
+| `ATTACK_EFFECT_DURATION_MS` | 480ms | Spritesheet / procedural attack effect duration |
 | `HITSTOP_DURATION_MS` | 80ms | Freeze frame before impact |
 | `CARD_ENTRY_DURATION_MS` | 350ms | Card appears on field (scale + opacity) |
 | `CARD_DEATH_DURATION_MS` | 600ms | Death dissolve/shrink |
