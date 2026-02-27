@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.26.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.5...v0.26.6) (2026-02-27)
+
+
+### Features
+
+* add element-based attack spritesheet overlays (fire/water/air/earth) ([75d0068](https://github.com/Jondari/creature-nexus-tcg/commit/75d006899b3d9bd3e592ccaa50c22c39d3f8e248))
+
 ### [0.26.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.4...v0.26.5) (2026-02-26)
 
 
