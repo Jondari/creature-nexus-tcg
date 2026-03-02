@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.26.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.6...v0.26.7) (2026-03-02)
+
+
+### Features
+
+* wire all SFX to game events (attack, card lifecycle, game flow) ([12de5d9](https://github.com/Jondari/creature-nexus-tcg/commit/12de5d998b0bdb98eebe19f66d2828fefcc52e34))
+
 ### [0.26.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.5...v0.26.6) (2026-02-27)
 
 
