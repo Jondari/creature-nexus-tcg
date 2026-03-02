@@ -3,6 +3,7 @@ import { View, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CardComponent } from '../CardComponent';
 import { Card } from '../../types/game';
+import { soundManager, SFX } from '../../utils/game/soundManager';
 
 interface SpellCastAnimationProps {
   spell: Card;
@@ -27,6 +28,8 @@ export const SpellCastAnimation: React.FC<SpellCastAnimationProps> = ({
   const waveOpacity = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
+    soundManager.playSound(SFX.SPELL_CAST);
+
     const cardAnimation = Animated.sequence([
       // Phase 1: Move card to center and scale up slightly
       Animated.parallel([

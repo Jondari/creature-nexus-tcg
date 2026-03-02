@@ -4,8 +4,7 @@ import { GameEngine } from '../modules/game';
 import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
-import { initializeSounds } from '../utils/game/soundManager';
-import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS, ENERGY_WAVE_DURATION_MS, TURN_TRANSITION_DURATION_MS } from '../constants/animation';
+import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS, ENERGY_WAVE_DURATION_MS, TURN_TRANSITION_DURATION_MS, CARD_RETIRE_DURATION_MS } from '../constants/animation';
 import { AnimationQueue } from '../utils/game/animationQueue';
 import { useSettings } from './SettingsContext';
 
@@ -15,6 +14,7 @@ interface GameContextState {
   actionLog: ActionLogEntry[];
   damageAnimations: DamageAnimation[];
   aiVisualState: AIVisualState;
+  aiRetiringCardId: string | null;
   energyWaveAnimation: { show: boolean; amount: number } | null;
   turnBannerAnimation: { show: boolean; isPlayerTurn: boolean } | null;
   spellCastAnimation: { show: boolean; spell: Card; startPosition: { x: number; y: number } } | null;
@@ -57,6 +57,8 @@ type GameAction_Context =
   | { type: 'SET_AI_STATUS'; payload: { status: AIStatus; message?: string } }
   | { type: 'SET_AI_HIGHLIGHT'; payload: { cardId?: string; targetCardId?: string } }
   | { type: 'CLEAR_AI_VISUALS' }
+  | { type: 'SET_AI_RETIRING_CARD'; payload: string }
+  | { type: 'CLEAR_AI_RETIRING_CARD' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'RESET_GAME' };
@@ -66,6 +68,7 @@ const initialState: GameContextState = {
   gameState: null,
   actionLog: [],
   damageAnimations: [],
+  aiRetiringCardId: null,
   aiVisualState: {
     status: 'idle',
     isActive: false,
@@ -168,6 +171,10 @@ function gameReducer(state: GameContextState, action: GameAction_Context): GameC
           isActive: false,
         },
       };
+    case 'SET_AI_RETIRING_CARD':
+      return { ...state, aiRetiringCardId: action.payload };
+    case 'CLEAR_AI_RETIRING_CARD':
+      return { ...state, aiRetiringCardId: null };
     case 'SET_LOADING':
       return {
         ...state,
@@ -224,11 +231,6 @@ export function GameProvider({ children }: GameProviderProps) {
         }
       },
     );
-  }, []);
-
-  // Initialize sounds when provider mounts
-  useEffect(() => {
-    initializeSounds();
   }, []);
 
   const createActionLogEntry = (
@@ -505,8 +507,18 @@ export function GameProvider({ children }: GameProviderProps) {
           }
         }
         
+        // For RETIRE_CARD: trigger animation first, wait, then execute
+        if (aiDecision.action.type === 'RETIRE_CARD' && aiDecision.action.cardId) {
+          dispatch({ type: 'SET_AI_RETIRING_CARD', payload: aiDecision.action.cardId });
+          await delay(CARD_RETIRE_DURATION_MS);
+        }
+
         const success = state.gameEngine.executeAction(aiDecision.action);
-        
+
+        if (aiDecision.action.type === 'RETIRE_CARD') {
+          dispatch({ type: 'CLEAR_AI_RETIRING_CARD' });
+        }
+
         // Log the AI action
         const logEntry = createActionLogEntry(
           aiDecision.action,
@@ -524,7 +536,7 @@ export function GameProvider({ children }: GameProviderProps) {
         
         if (success) {
           actionsPerformed++;
-          
+
           // Update game state after each action
           const newGameState = state.gameEngine.getGameState();
           dispatch({ type: 'UPDATE_GAME_STATE', payload: newGameState });

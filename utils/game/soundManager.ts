@@ -436,14 +436,22 @@ class SoundManager {
 // Create singleton instance
 export const soundManager = new SoundManager();
 
-// Initialize sounds — only loads assets that exist, missing SFX keys are silently skipped at play time
+// Initialize sounds — missing SFX keys are silently skipped at play time
 export const initializeSounds = (): void => {
   try {
-    soundManager.loadSound(SFX.IMPACT, require('../../assets/impact.wav'));
-    // Future SFX assets will be loaded here as they become available:
-    // soundManager.loadSound(SFX.CARD_PLAY, require('../../assets/audio/sfx/card_play.wav'));
-    // soundManager.loadSound(SFX.CARD_DEATH, require('../../assets/audio/sfx/card_death.wav'));
-    // etc.
+    soundManager.loadSound(SFX.IMPACT,        require('../../assets/audio/sfx/impact.wav'));
+    soundManager.loadSound(SFX.CARD_PLAY,     require('../../assets/audio/sfx/card_play.wav'));
+    soundManager.loadSound(SFX.CARD_DEATH,    require('../../assets/audio/sfx/card_death.wav'));
+    soundManager.loadSound(SFX.CARD_RETIRE,   require('../../assets/audio/sfx/card_retire.wav'));
+    soundManager.loadSound(SFX.VICTORY,       require('../../assets/audio/sfx/victory.wav'));
+    soundManager.loadSound(SFX.DEFEAT,        require('../../assets/audio/sfx/defeat.wav'));
+    soundManager.loadSound(SFX.TURN_END,      require('../../assets/audio/sfx/turn_end.wav'));
+    soundManager.loadSound(SFX.ENERGY_GAIN,   require('../../assets/audio/sfx/energy_gain.wav'));
+    soundManager.loadSound(SFX.SPELL_CAST,    require('../../assets/audio/sfx/spell_cast.wav'));
+    soundManager.loadSound(SFX.ATTACK_FIRE,   require('../../assets/audio/sfx/attack_fire.wav'));
+    soundManager.loadSound(SFX.ATTACK_WATER,  require('../../assets/audio/sfx/attack_water.wav'));
+    soundManager.loadSound(SFX.ATTACK_AIR,    require('../../assets/audio/sfx/attack_air.wav'));
+    soundManager.loadSound(SFX.ATTACK_EARTH,  require('../../assets/audio/sfx/attack_earth.wav'));
   } catch (error) {
     if (__DEV__) {
       console.warn('Failed to initialize sounds:', error);
@@ -454,4 +462,16 @@ export const initializeSounds = (): void => {
 // Convenience function to play impact sound
 export const playImpactSound = (): void => {
   soundManager.playSound(SFX.IMPACT);
+};
+
+// Play element-specific attack sound, falling back to generic impact
+export const playAttackSound = (element?: string): void => {
+  const elementMap: Record<string, string> = {
+    fire:  SFX.ATTACK_FIRE,
+    water: SFX.ATTACK_WATER,
+    air:   SFX.ATTACK_AIR,
+    earth: SFX.ATTACK_EARTH,
+  };
+  const sfx = (element && elementMap[element]) ? elementMap[element] : SFX.IMPACT;
+  soundManager.playSound(sfx);
 };

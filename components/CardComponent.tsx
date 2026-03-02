@@ -8,6 +8,7 @@ import { t } from '../utils/i18n';
 import Colors from '../constants/Colors';
 import { CardUtils } from '../modules/card';
 import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS, USE_SKIA_GLOW } from '../constants/animation';
+import { soundManager, SFX } from '../utils/game/soundManager';
 
 // Lazy-load Skia glow so the Skia module is only evaluated after CanvasKit is ready
 const LazySkiaSelectionGlow = React.lazy(() =>
@@ -54,8 +55,9 @@ interface CardComponentProps {
   isFirstPlayer?: boolean;
   // Entry animation when card first appears on battlefield
   entryAnimation?: boolean;
-  // Retire animation (fade out + slide down)
+  // Retire animation (fade out + slide). Direction depends on field position.
   isRetiring?: boolean;
+  retireUpward?: boolean;
 }
 
 const CardComponent = React.memo(({ 
@@ -76,7 +78,8 @@ const CardComponent = React.memo(({
   currentTurn = 1,
   isFirstPlayer = false,
   entryAnimation = false,
-  isRetiring = false
+  isRetiring = false,
+  retireUpward = false,
 }: CardComponentProps) => {
   // Dev guard to trace corrupted card prop sources
   if (__DEV__ && (typeof (card as any) !== 'object' || card === null)) {
@@ -147,6 +150,7 @@ const CardComponent = React.memo(({
 
   React.useEffect(() => {
     if (entryAnimation) {
+      soundManager.playSound(SFX.CARD_PLAY);
       entryOpacity.value = withTiming(1, { duration: CARD_ENTRY_DURATION_MS });
       entryScale.value = withSpring(1, { damping: 12, stiffness: 180 });
     }
@@ -158,8 +162,9 @@ const CardComponent = React.memo(({
 
   React.useEffect(() => {
     if (isRetiring) {
+      soundManager.playSound(SFX.CARD_RETIRE);
       retireOpacity.value = withTiming(0, { duration: CARD_RETIRE_DURATION_MS });
-      retireTranslateY.value = withTiming(30, { duration: CARD_RETIRE_DURATION_MS });
+      retireTranslateY.value = withTiming(retireUpward ? -30 : 30, { duration: CARD_RETIRE_DURATION_MS });
     }
   }, [isRetiring]);
 

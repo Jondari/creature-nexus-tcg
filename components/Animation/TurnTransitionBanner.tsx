@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { t } from '../../utils/i18n';
 import { TURN_TRANSITION_DURATION_MS, Z_INDEX } from '../../constants/animation';
+import { soundManager, SFX } from '../../utils/game/soundManager';
 
 interface TurnTransitionBannerProps {
   isPlayerTurn: boolean;
@@ -24,6 +25,7 @@ export function TurnTransitionBanner({ isPlayerTurn, visible, onComplete }: Turn
 
   useEffect(() => {
     if (visible) {
+      soundManager.playSound(SFX.TURN_END);
       // Fade in, hold, fade out
       opacity.value = withSequence(
         withTiming(1, { duration: 200 }),

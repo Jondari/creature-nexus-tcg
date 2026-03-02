@@ -12,6 +12,7 @@ import { DiscordIcon } from '@/components/DiscordIcon';
 import { isDemoMode } from '@/config/localMode';
 import { t } from '../../utils/i18n';
 import { GAME_OVER_ANIM_DURATION_MS, Z_INDEX } from '../../constants/animation';
+import { soundManager, SFX } from '../../utils/game/soundManager';
 import Colors from '../../constants/Colors';
 
 const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
@@ -35,6 +36,17 @@ export function GameOverAnimation({
   const subtextOpacity = useSharedValue(0);
   const buttonsOpacity = useSharedValue(0);
   const buttonsTranslateY = useSharedValue(20);
+
+  useEffect(() => {
+    // Duck music so the victory/defeat SFX is clearly heard
+    const { musicVolume } = soundManager.getSettings();
+    soundManager.setMusicVolume(0.15);
+    soundManager.playSound(isVictory ? SFX.VICTORY : SFX.DEFEAT);
+
+    return () => {
+      soundManager.setMusicVolume(musicVolume);
+    };
+  }, []);
 
   useEffect(() => {
     // Title: bounce in

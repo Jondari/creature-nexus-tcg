@@ -38,6 +38,7 @@ export function GameBoard() {
     gameEngine, 
     actionLog, 
     damageAnimations,
+    aiRetiringCardId,
     aiVisualState,
     energyWaveAnimation,
     turnBannerAnimation,
@@ -69,6 +70,12 @@ export function GameBoard() {
   const [turnBanner, setTurnBanner] = useState<{ visible: boolean; isPlayerTurn: boolean }>({ visible: false, isPlayerTurn: true });
   const publishEvent = useSceneEvents();
   const wasAITurnRef = useRef<boolean | null>(null);
+  // Ref so the turn-banner effect can read damageAnimations without adding them to deps
+  const damageAnimationsRef = useRef(damageAnimations);
+  useEffect(() => { damageAnimationsRef.current = damageAnimations; }, [damageAnimations]);
+  // Stable ref for the Player→AI banner delay timer (avoids effect-cleanup race)
+  const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current); }, []);
   const { shakeStyle, triggerShake } = useScreenShake();
 
   // Screen shake on damage impacts (respects user setting)
@@ -124,18 +131,28 @@ export function GameBoard() {
       return;
     }
 
+    // Update ref immediately so subsequent re-renders during AI turn don't retrigger
+    wasAITurnRef.current = isAITurn;
+
     if (!previous && isAITurn) {
       sceneManager.setFlag('ai_turn_completed', false);
     } else if (previous && !isAITurn) {
       sceneManager.setFlag('ai_turn_completed', true);
     }
 
-    // Show turn banner for player→AI transition (AI→player is handled by animation queue)
+    // Show turn banner for player→AI transition (AI→player is handled by animation queue).
+    // Delay banner if a damage animation is still playing to avoid visual overlap.
     if (turnBannerEnabled && !previous && isAITurn) {
-      setTurnBanner({ visible: true, isPlayerTurn: false });
+      const activeAnims = damageAnimationsRef.current;
+      const bannerDelay = activeAnims.length > 0
+        ? Math.max(...activeAnims.map(a => a.duration ?? NON_KILL_ANIM_MS)) + 150
+        : 0;
+      if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+      bannerTimerRef.current = setTimeout(() => {
+        bannerTimerRef.current = null;
+        setTurnBanner({ visible: true, isPlayerTurn: false });
+      }, bannerDelay);
     }
-
-    wasAITurnRef.current = isAITurn;
   }, [gameState?.currentPlayerIndex, gameState?.phase, gameState?.turnNumber, gameEngine, sceneManager]);
 
 
@@ -409,11 +426,11 @@ export function GameBoard() {
         showWarningAlert(t('combat.fieldFullTitle'), t('combat.fieldFullBody'));
         return;
       }
-      
+
       playCard(cardId);
       publishEvent({ type: 'card_played' });
     }
-    
+
     setSelectedCard(null);
   };
 
@@ -590,6 +607,7 @@ export function GameBoard() {
         }}
         aiHighlight={getCardHighlightType}
         damageAnimation={getDamageAnimationForCard}
+        retiringCardId={aiRetiringCardId}
         emptyLabel={t('game.noCreaturesOnField')}
         onCardPress={handleCardPress}
       />

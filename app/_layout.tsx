@@ -35,6 +35,7 @@ import { useAudio, MusicType } from '@/hooks/useAudio';
 import { AudioPermissionBanner } from '@/components/AudioPermissionBanner';
 import { t } from '@/utils/i18n';
 import { isDemoMode } from '@/config/localMode';
+import { initializeSounds } from '@/utils/game/soundManager';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -63,6 +64,11 @@ export default function RootLayout() {
 
   const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
   
+  // Initialize SFX once at app startup
+  useEffect(() => {
+    initializeSounds();
+  }, []);
+
   // Initialize background music
   const { playMusic } = useAudio();
   const pathname = usePathname();

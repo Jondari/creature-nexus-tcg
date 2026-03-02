@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { t } from '@/utils/i18n';
+import { soundManager, SFX } from '@/utils/game/soundManager';
 
 interface EnergyWaveAnimationProps {
   energyAmount: number;
@@ -21,6 +22,8 @@ export const EnergyWaveAnimation: React.FC<EnergyWaveAnimationProps> = ({
   const textRotate = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    soundManager.playSound(SFX.ENERGY_GAIN);
+
     const waveAnimation = Animated.parallel([
       Animated.timing(waveScale, {
         toValue: 3,

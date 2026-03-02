@@ -10,7 +10,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import type { SharedValue } from 'react-native-reanimated';
-import { playImpactSound } from '../utils/game/soundManager';
+import { playAttackSound, soundManager, SFX } from '../utils/game/soundManager';
 import { HITSTOP_DURATION_MS, ATTACK_EFFECT_DURATION_MS } from '../constants/animation';
 import { DamageNumber } from './Animation/DamageNumber';
 import type { Element } from '../types/game';
@@ -76,8 +76,8 @@ export function DamageEffect({
   useEffect(() => {
     if (!isActive || duration === 0) return;
 
-    // Play impact sound when damage animation starts
-    playImpactSound();
+    // Play element-specific attack sound (falls back to generic impact)
+    playAttackSound(attackElement);
 
     const shakeIntensity = isLethal ? 12 : 8;
     const stepMs = 40;
@@ -146,6 +146,14 @@ export function DamageEffect({
       );
     }
 
+    // Card death sound — timed to match the start of the dissolve animation
+    let deathSoundTimer: ReturnType<typeof setTimeout> | undefined;
+    if (isLethal) {
+      deathSoundTimer = setTimeout(() => {
+        soundManager.playSound(SFX.CARD_DEATH);
+      }, SHAKE_END_MS);
+    }
+
     const totalMs = HITSTOP_DURATION_MS + duration * 0.8;
     const timer = setTimeout(() => {
       onAnimationComplete?.();
@@ -153,6 +161,7 @@ export function DamageEffect({
 
     return () => {
       clearTimeout(timer);
+      clearTimeout(deathSoundTimer);
       shakeX.value = 0;
       flashProgress.value = 0;
       particleProgress.value = 0;

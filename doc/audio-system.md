@@ -34,11 +34,34 @@ Music transitions use a crossfade effect (800ms default) when switching between 
 
 ## Sound Effects
 
-| Sound | Asset | Trigger |
-|-------|-------|---------|
-| `impact` | `assets/impact.wav` | Card attack damage |
+| Key | Asset | Trigger | Co-located in |
+|-----|-------|---------|---------------|
+| `impact` | `assets/audio/sfx/impact.wav` | Element-less attack (fallback) | `DamageEffect` |
+| `card_play` | `assets/audio/sfx/card_play.wav` | Card placed on battlefield | `CardComponent` (`entryAnimation`) |
+| `card_death` | `assets/audio/sfx/card_death.wav` | Creature killed | `DamageEffect` (delayed to shake end) |
+| `card_retire` | `assets/audio/sfx/card_retire.wav` | Card retired from field | `CardComponent` (`isRetiring`) |
+| `victory` | `assets/audio/sfx/victory.wav` | Player wins | `GameOverAnimation` |
+| `defeat` | `assets/audio/sfx/defeat.wav` | Player loses | `GameOverAnimation` |
+| `turn_end` | `assets/audio/sfx/turn_end.wav` | Turn transition | `TurnTransitionBanner` |
+| `energy_gain` | `assets/audio/sfx/energy_gain.wav` | Energy granted at turn start | `EnergyWaveAnimation` |
+| `spell_cast` | `assets/audio/sfx/spell_cast.wav` | Spell cast | `SpellCastAnimation` |
+| `attack_fire` | `assets/audio/sfx/attack_fire.wav` | Fire attack | `DamageEffect` via `playAttackSound` |
+| `attack_water` | `assets/audio/sfx/attack_water.wav` | Water attack | `DamageEffect` via `playAttackSound` |
+| `attack_air` | `assets/audio/sfx/attack_air.wav` | Air attack | `DamageEffect` via `playAttackSound` |
+| `attack_earth` | `assets/audio/sfx/attack_earth.wav` | Earth attack | `DamageEffect` via `playAttackSound` |
 
-Sound effects are loaded at app startup via `initializeSounds()` and played with `playImpactSound()`.
+Sound effects are loaded at app startup via `initializeSounds()` (called in `app/_layout.tsx`) and played via `playAttackSound(element?)` or `soundManager.playSound(SFX.KEY)`.
+
+### SFX co-location principle
+
+SFX are triggered **from the animation component** they accompany, not from game logic (`GameBoard`, `GameContext`). This prevents duplicates and keeps sound and visuals in sync.
+
+| ❌ Avoid | ✅ Correct |
+|---------|----------|
+| `GameBoard.handleRetire()` plays `CARD_RETIRE` | `CardComponent` `isRetiring` useEffect plays `CARD_RETIRE` |
+| `GameContext.executeAITurn()` plays `CARD_PLAY` | `CardComponent` `entryAnimation` useEffect plays `CARD_PLAY` |
+
+Exception: `DamageEffect` hosts multiple sounds (`playAttackSound` + delayed `CARD_DEATH`) because it owns the entire hit sequence.
 
 ---
 
@@ -181,4 +204,4 @@ If no previous music is playing, a simple fade-in is performed instead.
 
 ---
 
-*Last updated: February 2026*
+*Last updated: March 2026*

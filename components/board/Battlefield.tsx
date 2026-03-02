@@ -135,6 +135,7 @@ export function Battlefield({
       damageAnimation: damageAnimation?.(card.id),
       entryAnimation: newCardIds.current.has(card.id),
       isRetiring: retiringCardId === card.id,
+      retireUpward: position === 'top',
       playerEnergy,
       currentTurn,
       isFirstPlayer,

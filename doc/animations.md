@@ -148,6 +148,7 @@ Element-themed dissolution overlay with growing dissolve circles and flying debr
 | **File** | `components/Animation/SpellCastAnimation.tsx` |
 | **Library** | `Animated` |
 | **Used in** | `GameBoard` |
+| **SFX** | `SPELL_CAST` on mount |
 
 A spell card flies from its starting position to center screen, pulses, then fades out. A purple magic wave expands from the center simultaneously.
 
@@ -166,6 +167,7 @@ A spell card flies from its starting position to center screen, pulses, then fad
 | **File** | `components/Animation/EnergyWaveAnimation.tsx` |
 | **Library** | `Animated` |
 | **Used in** | Energy gain phase |
+| **SFX** | `ENERGY_GAIN` on mount |
 
 A radiating green/cyan expanding circle with a bouncy text label showing energy gain amount.
 
@@ -216,34 +218,70 @@ Flipbook-style animation that cycles through monster images with increasing spee
 
 ---
 
+### CardComponent (entry & retire animations)
+
+| | |
+|---|---|
+| **File** | `components/CardComponent.tsx` |
+| **Library** | Reanimated 3 |
+| **Used in** | `Battlefield` (top and bottom) |
+
+Two animation hooks embedded in `CardComponent`, driven by props set in `Battlefield`:
+
+**Entry animation** (`entryAnimation` prop)
+Triggered when a card is detected as new on the field (`newCardIds` set in `Battlefield`). Fades in (opacity 0→1) and scales up (spring). Also plays `SFX.CARD_PLAY`.
+
+**Retire animation** (`isRetiring` + `retireUpward` props)
+Triggered by `retiringCardId === card.id` in `Battlefield`. Fades out and slides in the direction indicated by `retireUpward`. Also plays `SFX.CARD_RETIRE`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `entryAnimation` | `boolean` | `false` | Play the entry scale+fade animation |
+| `isRetiring` | `boolean` | `false` | Play the retire fade+slide animation |
+| `retireUpward` | `boolean` | `false` | Slide upward when retiring (AI field); downward when `false` (player field) |
+
+`retireUpward` is derived from `position === 'top'` in `Battlefield` and routed by `GameBoard`:
+- Top field (AI): `retiringCardId={aiRetiringCardId}` — upward slide
+- Bottom field (player): `retiringCardId={retiringCardId}` — downward slide
+
+The AI retire sequence in `GameContext.executeAITurn`:
+1. `dispatch(SET_AI_RETIRING_CARD)` — card becomes `isRetiring=true`
+2. `await delay(CARD_RETIRE_DURATION_MS)` — animation plays
+3. `gameEngine.executeAction(RETIRE_CARD)` — card removed from state
+4. `dispatch(CLEAR_AI_RETIRING_CARD)`
+
+---
+
 ### EnergyAnimationDemo
 
 | | |
 |---|---|
 | **File** | `components/Animation/EnergyAnimationDemo.tsx` |
-| **Used in** | Dev/test only |
+| **Used in** | Dev/test only (`/animation-demo` route) |
 
-Test harness for previewing all animation components: energy, spells, rewards, damage (normal/lethal per element), card entry, card retire, and selection glow.
+Test harness for previewing all animation components: energy, spells, rewards, damage (normal/lethal per element), card entry, card retire (player downward / AI upward), and selection glow.
 
 ---
 
 ## Summary
 
-| Component | Effect | Library | Trigger |
-|-----------|--------|---------|---------|
-| PackOpeningAnimation | Card grid reveal with pagination | Reanimated | Pack opened |
-| RewardAnimation | Centered popup (scale + fade) | Animated | Promo code redeemed |
-| DamageEffect | Skia flash + shake + attack effect + death dissolve | Reanimated + Skia | Card takes damage |
-| AttackEffectSprite | Element spritesheet (fire/water/air/earth) or procedural fallback | Skia / AnimatedImage | During damage animation |
-| SkiaSelectionGlow | Pulsating glow border | Skia + Reanimated | Card selected/targeted |
-| SkiaDeathOverlay | Element-themed dissolution | Skia + Reanimated | Lethal hit |
-| SpellCastAnimation | Card flies to center + magic wave | Animated | Spell cast |
-| EnergyWaveAnimation | Expanding circle + text | Animated | Energy gained |
-| EnergyOrbAnimation | Floating orb trajectory | Animated | Energy gained |
-| MonsterShowcaseAnimation | Flipbook creature reveal | Animated | Login screen |
-| TurnTransitionBanner | Slide in/out turn banner | Reanimated | Turn change |
-| GameOverAnimation | Victory/defeat with bounce + staggered fade-in | Reanimated | Game over |
-| useScreenShake | Screen shake on impacts | Reanimated | Damage dealt |
+| Component | Effect | Library | Trigger | SFX |
+|-----------|--------|---------|---------|-----|
+| PackOpeningAnimation | Card grid reveal with pagination | Reanimated | Pack opened | — |
+| RewardAnimation | Centered popup (scale + fade) | Animated | Promo code redeemed | — |
+| DamageEffect | Skia flash + shake + attack effect + death dissolve | Reanimated + Skia | Card takes damage | `attack_*` / `impact`, `card_death` |
+| AttackEffectSprite | Element spritesheet (fire/water/air/earth) or procedural fallback | Skia / AnimatedImage | During damage animation | — |
+| SkiaSelectionGlow | Pulsating glow border | Skia + Reanimated | Card selected/targeted | — |
+| SkiaDeathOverlay | Element-themed dissolution | Skia + Reanimated | Lethal hit | — |
+| SpellCastAnimation | Card flies to center + magic wave | Animated | Spell cast | `spell_cast` |
+| EnergyWaveAnimation | Expanding circle + text | Animated | Energy gained | `energy_gain` |
+| EnergyOrbAnimation | Floating orb trajectory | Animated | Energy gained | — |
+| MonsterShowcaseAnimation | Flipbook creature reveal | Animated | Login screen | — |
+| TurnTransitionBanner | Slide in/out turn banner | Reanimated | Turn change | `turn_end` |
+| GameOverAnimation | Victory/defeat with bounce + staggered fade-in + music duck | Reanimated | Game over | `victory` / `defeat` |
+| CardComponent (entry) | Scale + fade-in when placed on field | Reanimated | Card played | `card_play` |
+| CardComponent (retire) | Fade + slide up/down when retired | Reanimated | Card retired | `card_retire` |
+| useScreenShake | Screen shake on impacts | Reanimated | Damage dealt | — |
 
 ---
 
@@ -269,6 +307,7 @@ Centralized sequential queue for turn-transition animations. Prevents overlappin
 | SpellCast (AI) | No | Already sequenced by `await delay(SPELL_CAST_ENGINE_DELAY_MS)` |
 | SpellCast (player) | No | Triggered by user interaction |
 | Turn Banner (player→AI) | No | Triggered directly via local state in GameBoard |
+| AI Card Retire | No | `await delay(CARD_RETIRE_DURATION_MS)` in `executeAITurn` before `executeAction` |
 | Game Over (future) | **Yes** | Should wait for all animations to finish |
 
 ---
@@ -294,4 +333,4 @@ All timing constants are centralized in `constants/animation.ts`:
 
 ---
 
-*Last updated: February 2026*
+*Last updated: March 2026*

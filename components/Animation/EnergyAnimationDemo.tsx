@@ -52,7 +52,7 @@ export const EnergyAnimationDemo: React.FC = () => {
     setTimeout(() => setEntryDemoVisible(false), CARD_ENTRY_DURATION_MS + 800);
   }, []);
 
-  // State for card retire animation demo
+  // State for card retire animation demo (player — vers le bas)
   const [retireDemoVisible, setRetireDemoVisible] = useState(false);
   const [retireDemoRetiring, setRetireDemoRetiring] = useState(false);
   const [retireDemoKey, setRetireDemoKey] = useState(0);
@@ -69,6 +69,22 @@ export const EnergyAnimationDemo: React.FC = () => {
     setTimeout(() => setRetireDemoRetiring(true), 500);
     // Auto-dismiss after retire animation completes
     setTimeout(() => setRetireDemoVisible(false), 500 + CARD_RETIRE_DURATION_MS + 300);
+  }, []);
+
+  // State for AI retire animation demo (IA — vers le haut)
+  const [aiRetireDemoVisible, setAiRetireDemoVisible] = useState(false);
+  const [aiRetireDemoRetiring, setAiRetireDemoRetiring] = useState(false);
+  const [aiRetireDemoKey, setAiRetireDemoKey] = useState(0);
+
+  const triggerAIRetireDemo = useCallback(() => {
+    setAiRetireDemoVisible(false);
+    setAiRetireDemoRetiring(false);
+    setTimeout(() => {
+      setAiRetireDemoKey(k => k + 1);
+      setAiRetireDemoVisible(true);
+    }, 50);
+    setTimeout(() => setAiRetireDemoRetiring(true), 500);
+    setTimeout(() => setAiRetireDemoVisible(false), 500 + CARD_RETIRE_DURATION_MS + 300);
   }, []);
 
   // State for game over demo
@@ -238,7 +254,13 @@ export const EnergyAnimationDemo: React.FC = () => {
             style={styles.button}
             onPress={triggerRetireDemo}
           >
-            <Text style={styles.buttonText}>Card Retire</Text>
+            <Text style={styles.buttonText}>Card Retire (Player)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={triggerAIRetireDemo}
+          >
+            <Text style={styles.buttonText}>Card Retire (AI)</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
@@ -350,6 +372,18 @@ export const EnergyAnimationDemo: React.FC = () => {
               key={`retire-demo-${retireDemoKey}`}
               card={sampleCard}
               isRetiring={retireDemoRetiring}
+              size="small"
+            />
+          </View>
+        )}
+
+        {aiRetireDemoVisible && sampleCard && (
+          <View style={styles.damageOverlay}>
+            <CardComponent
+              key={`ai-retire-demo-${aiRetireDemoKey}`}
+              card={sampleCard}
+              isRetiring={aiRetireDemoRetiring}
+              retireUpward
               size="small"
             />
           </View>
