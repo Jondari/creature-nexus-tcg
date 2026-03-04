@@ -8,6 +8,12 @@ import { t } from '@/utils/i18n';
 import {isDemoMode} from "@/config/localMode";
 
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+const BATTLE_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+const BATTLE_GRADIENTS = {
+  tutorial: ['rgba(67, 69, 81, 0.78)', 'rgba(107, 110, 124, 0.50)'] as [string, string],
+  quick: ['rgba(177, 0, 227, 0.82)', 'rgba(211, 35, 255, 0.56)'] as [string, string],
+  story: ['rgba(32, 45, 143, 0.82)', 'rgba(54, 71, 172, 0.56)'] as [string, string],
+};
 
 export default function BattleScreen() {
   const { width } = useWindowDimensions();
@@ -25,8 +31,7 @@ export default function BattleScreen() {
     router.push('/(tabs)/battle-tutorial');
   };
 
-  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
-  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && BATTLE_ZOOM_SCALE !== 1;
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
@@ -37,7 +42,6 @@ export default function BattleScreen() {
         source={APP_BACKGROUND}
         style={[styles.background, backgroundViewportStyle]}
         resizeMode="cover"
-        imageStyle={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
@@ -63,7 +67,7 @@ export default function BattleScreen() {
               activeOpacity={0.8}
           >
             <LinearGradient
-                colors={[Colors.neutral[700], Colors.neutral[500]]}
+                colors={BATTLE_GRADIENTS.tutorial}
                 style={styles.optionGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -81,7 +85,7 @@ export default function BattleScreen() {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={[Colors.accent[700], Colors.accent[500]]}
+              colors={BATTLE_GRADIENTS.quick}
               style={styles.optionGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -101,7 +105,7 @@ export default function BattleScreen() {
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={[Colors.primary[700], Colors.primary[500]]}
+                colors={BATTLE_GRADIENTS.story}
                 style={styles.optionGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -165,14 +169,18 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 16,
     overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#000',
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    backgroundColor: Colors.glass.surfaceSoft,
+    shadowColor: Colors.glass.shadow,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 8,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 10,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(12px)' } as any) : null),
   },
   optionGradient: {
     flex: 1,

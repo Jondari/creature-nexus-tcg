@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
-import { AlertTriangle, CheckCircle, X } from 'lucide-react-native';
+import { AlertTriangle, CheckCircle } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 
 export interface AlertButton {
@@ -20,6 +20,25 @@ interface CustomAlertProps {
   showCancel?: boolean;
   buttons?: AlertButton[];
 }
+
+const ALERT_COLORS = {
+  // Green for success states
+  successIcon: 'rgba(34, 197, 94, 0.95)',
+  // Green tint for success primary action
+  successButton: 'rgba(34, 197, 94, 0.56)',
+  // Amber for warning states
+  warningIcon: 'rgba(245, 158, 11, 0.95)',
+  // Amber tint for warning primary action
+  warningButton: 'rgba(245, 158, 11, 0.56)',
+  // Red tint for error/destructive actions
+  errorButton: 'rgba(232, 75, 85, 0.56)',
+  // Stronger red for destructive button emphasis
+  destructiveButton: 'rgba(232, 75, 85, 0.6)',
+  // Soft white border for tinted actions
+  tintedBorder: 'rgba(255, 255, 255, 0.28)',
+  // Dark overlay behind the modal
+  overlay: 'rgba(0, 0, 0, 0.5)',
+};
 
 export default function CustomAlert({
   visible,
@@ -66,37 +85,37 @@ export default function CustomAlert({
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle size={32} color="#22c55e" />;
+        return <CheckCircle size={32} color={ALERT_COLORS.successIcon} />;
       case 'warning':
-        return <AlertTriangle size={32} color="#f59e0b" />;
+        return <AlertTriangle size={32} color={ALERT_COLORS.warningIcon} />;
       case 'error':
       default:
-        return <AlertTriangle size={32} color="#ef4444" />;
+        return <AlertTriangle size={32} color={Colors.error} />;
     }
   };
 
-  const getColors = () => {
+  const getTone = () => {
     switch (type) {
       case 'success':
         return {
-          button: '#22c55e',
-          text: Colors.text.primary
+          button: ALERT_COLORS.successButton,
+          border: ALERT_COLORS.tintedBorder,
         };
       case 'warning':
         return {
-          button: '#f59e0b',
-          text: Colors.text.primary
+          button: ALERT_COLORS.warningButton,
+          border: ALERT_COLORS.tintedBorder,
         };
       case 'error':
       default:
         return {
-          button: '#ef4444',
-          text: Colors.text.primary
+          button: ALERT_COLORS.errorButton,
+          border: ALERT_COLORS.tintedBorder,
         };
     }
   };
 
-  const colors = getColors();
+  const tone = getTone();
 
   // Platform-specific Modal wrapper - only for mobile
   const ModalWrapper = Platform.OS === 'web' 
@@ -133,8 +152,8 @@ export default function CustomAlert({
                     style={[
                       styles.button,
                       isCancel ? styles.cancelButton : styles.confirmButton,
-                      isDestructive ? { backgroundColor: '#ef4444' } : 
-                      !isCancel ? { backgroundColor: colors.button } : {},
+                      isDestructive ? styles.destructiveButton :
+                      !isCancel ? { backgroundColor: tone.button, borderColor: tone.border } : {},
                       isSingle && styles.singleButton
                     ]}
                     onPress={() => {
@@ -147,7 +166,7 @@ export default function CustomAlert({
                   >
                     <Text style={[
                       isCancel ? styles.cancelButtonText : styles.confirmButtonText,
-                      !isCancel ? { color: colors.text } : {}
+                      !isCancel ? { color: Colors.text.primary } : {}
                     ]}>
                       {button.text}
                     </Text>
@@ -169,18 +188,26 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: ALERT_COLORS.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   container: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Platform.OS === 'web' ? Colors.glass.surfaceSoft : Colors.glass.mobileSurfaceFallback,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 12,
     padding: 20,
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 10,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
   },
   header: {
     alignItems: 'center',
@@ -212,15 +239,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginHorizontal: 4,
+    borderWidth: 1,
   },
   singleButton: {
     marginHorizontal: 0,
   },
   cancelButton: {
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderColor: Colors.glass.borderSoft,
   },
   confirmButton: {
-    // backgroundColor set dynamically
+    borderColor: Colors.glass.borderStrong,
+  },
+  destructiveButton: {
+    backgroundColor: ALERT_COLORS.destructiveButton,
+    borderColor: ALERT_COLORS.tintedBorder,
   },
   cancelButtonText: {
     fontSize: 16,

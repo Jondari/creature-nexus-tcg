@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatList, ImageBackground, Platform, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Card, CardRarity } from '../models/Card';
+import { Card, CardRarity, RARITY_COLORS } from '../models/Card';
 import { ExtendedCard } from '@/models/cards-extended';
 import { CardComponent } from './CardComponent';
 import { Sidebar } from './Sidebar';
@@ -25,6 +25,7 @@ const DECK_SIZE_MIN = 20;
 const DECK_SIZE_MAX = 60;
 const MAX_COPIES_PER_CARD = 3;
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+const DECK_BUILDER_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
 export function DeckBuilder({ 
   availableCards, 
@@ -160,8 +161,7 @@ export function DeckBuilder({
   };
 
   const filterOptions: Array<CardRarity | 'all'> = ['all', 'common', 'rare', 'epic', 'legendary', 'mythic'];
-  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
-  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && DECK_BUILDER_ZOOM_SCALE !== 1;
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
@@ -172,7 +172,6 @@ export function DeckBuilder({
         source={APP_BACKGROUND}
         style={[styles.background, backgroundViewportStyle]}
         resizeMode="cover"
-        imageStyle={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
@@ -215,7 +214,8 @@ export function DeckBuilder({
             style={[
                 styles.deckButton,
               {
-                backgroundColor: Colors.background.primary,
+                backgroundColor: Colors.glass.surfaceStrong,
+                borderColor: Colors.glass.borderStrong,
                 padding: 8,
                 marginTop: 10,
                 alignSelf: 'flex-start'
@@ -242,7 +242,11 @@ export function DeckBuilder({
             {filterOptions.map((option) => (
               <TouchableOpacity
                 key={option}
-                style={[styles.filterButton, filter === option && styles.filterButtonActive]}
+                style={[
+                  styles.filterButton,
+                  filter === option && styles.filterButtonActive,
+                  filter === option && option !== 'all' && { backgroundColor: RARITY_COLORS[option as CardRarity] }
+                ]}
                 onPress={() => setFilter(option)}
               >
                 <Text style={[styles.filterText, filter === option && styles.filterTextActive]}>
@@ -276,6 +280,7 @@ export function DeckBuilder({
         onClose={() => setSidebarVisible(false)}
         title={t('decks.activeDeck')}
         width={400}
+        glass
       >
         <View style={styles.sidebarContent}>
           {/* Deck Name Input */}
@@ -338,6 +343,7 @@ export function DeckBuilder({
         onClose={() => setRulesVisible(false)}
         title={t('decks.rulesTitle')}
         width={420}
+        glass
       >
         <RulesContent context="deck" />
       </Sidebar>
@@ -383,7 +389,9 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   deckButton: {
-    backgroundColor: Colors.accent[600],
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -394,7 +402,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   saveButton: {
-    backgroundColor: Colors.primary[600],
+    backgroundColor: Colors.glass.accentGradientStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.24,
+    shadowRadius: 12,
+    elevation: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -409,7 +424,15 @@ const styles = StyleSheet.create({
   },
   deckInfo: {
     padding: 16,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 9,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     marginHorizontal: 16,
     marginVertical: 8,
     borderRadius: 8,
@@ -435,7 +458,18 @@ const styles = StyleSheet.create({
   },
   // Collection-style layout
   filterSection: {
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    borderRadius: 12,
+    marginHorizontal: 12,
+    marginBottom: 6,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     zIndex: 1,
   },
   filterContainer: {
@@ -449,12 +483,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
     height: 32,
     justifyContent: 'center',
   },
   filterButtonActive: {
-    backgroundColor: Colors.primary[600],
+    backgroundColor: Colors.primary[500],
   },
   filterText: {
     color: Colors.text.secondary,
@@ -483,7 +517,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: Colors.primary[600],
+    backgroundColor: Colors.glass.accentGradientSoft,
     borderRadius: 12,
     width: 24,
     height: 24,
@@ -520,16 +554,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   deckNameInput: {
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceStrong,
     borderWidth: 1,
-    borderColor: Colors.neutral[700],
+    borderColor: Colors.glass.borderStrong,
     borderRadius: 8,
     padding: 12,
     color: Colors.text.primary,
     fontSize: 14,
   },
   deckStats: {
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
@@ -557,7 +593,9 @@ const styles = StyleSheet.create({
   },
   sidebarDeckCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -579,7 +617,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   removeCardButton: {
-    backgroundColor: Colors.error,
+    backgroundColor: 'rgba(232, 75, 85, 0.42)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.24)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 4,

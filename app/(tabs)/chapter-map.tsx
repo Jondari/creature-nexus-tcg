@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, HelpCircle } from 'lucide-react-native';
@@ -207,7 +207,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -239,7 +247,15 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(12px)' } as any) : null),
   },
   headerContent: {
     flex: 1,

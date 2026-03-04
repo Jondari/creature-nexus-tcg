@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { PackageOpen, Box, User, Grid2x2 as Grid, Swords, Layers, ShoppingBag } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
@@ -14,9 +15,16 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors.background.secondary,
-          borderTopColor: Colors.background.secondary,
-          height: 60,
+          backgroundColor: Colors.glass.surfaceSoft,
+          borderTopColor: Colors.glass.borderSoft,
+          borderTopWidth: 1,
+          height: 64,
+          shadowColor: Colors.glass.shadow,
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.2,
+          shadowRadius: 12,
+          elevation: 10,
+          ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
         },
         tabBarActiveTintColor: Colors.accent[500],
         tabBarInactiveTintColor: Colors.neutral[400],

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, ImageBackground, Platform, Dimensions, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, ImageBackground, Platform, useWindowDimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,12 +19,20 @@ import { useAnchorRegister } from '@/context/AnchorsContext';
 import { COMMON_ANCHORS } from '@/types/scenes';
 import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
-const { width } = Dimensions.get('window');
-const isWideScreen = width >= 768; // Tablet/desktop breakpoint
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+const STORE_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+const toGlassGradient = (baseColor: string): [string, string] => {
+  // Expecting #RRGGBB from pack definitions.
+  if (/^#[0-9a-fA-F]{6}$/.test(baseColor)) {
+    return [`${baseColor}4D`, `${baseColor}1A`];
+  }
+  return [baseColor, baseColor];
+};
 
 export default function StoreScreen() {
   const { width: viewportWidth } = useWindowDimensions();
+  const isWideScreen = viewportWidth >= 768; // Tablet/desktop breakpoint
+  const isWideScreenWeb = Platform.OS === 'web' && isWideScreen;
   const { user, getCoins, spendCoins, addCoins, addCards } = useAuth();
   const sceneManager = useSceneManager();
   const coinRef = useRef<View | null>(null);
@@ -349,9 +357,9 @@ export default function StoreScreen() {
     const isFree = pack.nexusCoinPrice === 0;
     
     return (
-      <View key={pack.id} style={styles.packCard}>
+      <View key={pack.id} style={[styles.packCard, isWideScreenWeb && styles.packCardWide]}>
         <LinearGradient
-          colors={[pack.backgroundColor, `${pack.backgroundColor}88`]}
+          colors={toGlassGradient(pack.backgroundColor)}
           style={styles.packGradient}
         >
 
@@ -441,9 +449,15 @@ export default function StoreScreen() {
 
   const renderCategory = (category: 'standard' | 'elemental' | 'premium', title: string, icon: any) => {
     const isSelected = selectedCategory === category;
+    const selectedStyle =
+      category === 'standard'
+        ? styles.categoryButtonActiveStandard
+        : category === 'elemental'
+          ? styles.categoryButtonActiveElemental
+          : styles.categoryButtonActivePremium;
     return (
       <TouchableOpacity
-        style={[styles.categoryButton, isSelected && styles.categoryButtonActive]}
+        style={[styles.categoryButton, isSelected && selectedStyle]}
         onPress={() => setSelectedCategory(category)}
       >
         {icon}
@@ -459,15 +473,14 @@ export default function StoreScreen() {
     showSuccessAlert(t('store.purchaseSuccessTitle'), t('store.purchaseSuccessCards', { count: String(packResults.length), name: currentPackName }));
   };
 
-  if (loading) {
-    return <LoadingOverlay message={t('store.loading')} />;
-  }
-
-  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
-  const isWebZoomMode = Platform.OS === 'web' && viewportWidth < 768 && zoomScale !== 1;
+  const isWebZoomMode = Platform.OS === 'web' && viewportWidth < 768 && STORE_ZOOM_SCALE !== 1;
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
+
+  if (loading) {
+    return <LoadingOverlay message={t('store.loading')} />;
+  }
 
   return (
     <View style={styles.container}>
@@ -475,7 +488,6 @@ export default function StoreScreen() {
         source={APP_BACKGROUND}
         style={[styles.background, backgroundViewportStyle]}
         resizeMode="cover"
-        imageStyle={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
@@ -519,7 +531,7 @@ export default function StoreScreen() {
 
       {/* Pack Grid */}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.packsGrid} ref={packGridRef as any}>
+        <View style={[styles.packsGrid, isWideScreenWeb && styles.packsGridWide]} ref={packGridRef as any}>
           {PACK_CATEGORIES[selectedCategory].map(renderPackCard)}
         </View>
       </ScrollView>
@@ -552,8 +564,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.neutral[700],
   },
   title: {
     fontSize: 24,
@@ -563,7 +573,15 @@ const styles = StyleSheet.create({
   currencyDisplay: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -587,11 +605,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(12px)' } as any) : null),
     gap: 6,
   },
-  categoryButtonActive: {
-    backgroundColor: Colors.accent[500],
+  categoryButtonActiveStandard: {
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderColor: Colors.glass.borderStrong,
+  },
+  categoryButtonActiveElemental: {
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderColor: Colors.glass.borderStrong,
+  },
+  categoryButtonActivePremium: {
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderColor: Colors.glass.borderStrong,
   },
   categoryText: {
     fontSize: 14,
@@ -607,21 +637,28 @@ const styles = StyleSheet.create({
   packsGrid: {
     padding: 20,
     gap: 16,
-    // Apply row layout only on web AND wide screens
-    ...(Platform.OS === 'web' && isWideScreen && {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      alignItems: 'stretch',
-    }),
+  },
+  packsGridWide: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
   },
   packCard: {
     borderRadius: 12,
-    // Apply width constraints only on web AND wide screens
-    ...(Platform.OS === 'web' && isWideScreen && {
-      width: '32%',
-      minWidth: 300,
-    }),
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    backgroundColor: Colors.glass.surfaceSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 9,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
+  },
+  packCardWide: {
+    width: '32%',
+    minWidth: 300,
   },
   packGradient: {
     padding: 16,
@@ -671,15 +708,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   coinPurchaseButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.glass.surfaceSoft,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.glass.borderSoft,
   },
   moneyPurchaseButton: {
-    backgroundColor: Colors.accent[500],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -737,7 +776,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, Platform } from 'react-native';
 import { Volume2, VolumeX, Music, Minus, Plus } from 'lucide-react-native';
 import Colors from '../constants/Colors';
 import { t } from '@/utils/i18n';
@@ -173,10 +173,10 @@ export const MusicControls: React.FC<MusicControlsProps> = ({ showCurrentTrack =
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: 'transparent',
     borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
+    padding: 0,
+    marginVertical: 0,
   },
   title: {
     fontSize: 18,
@@ -206,13 +206,17 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   volumeButton: {
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 6,
     padding: 8,
     marginHorizontal: 4,
   },
   volumeDisplay: {
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -228,8 +232,15 @@ const styles = StyleSheet.create({
   currentTrack: {
     marginTop: 8,
     paddingTop: 12,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
     borderTopWidth: 1,
-    borderTopColor: Colors.neutral[700],
+    borderTopColor: Colors.glass.borderSoft,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(10px)' } as any) : null),
   },
   currentTrackLabel: {
     fontSize: 12,

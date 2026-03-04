@@ -72,11 +72,17 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background.card,
-    borderColor: Colors.accent[500],
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderColor: Colors.glass.borderStrong,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 10,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     // Remove external margins; container handles positioning
   },
   dismissButton: {
@@ -105,7 +111,9 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
   },
   button: {
-    backgroundColor: Colors.accent[500],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,

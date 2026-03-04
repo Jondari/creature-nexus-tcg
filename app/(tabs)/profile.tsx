@@ -24,6 +24,7 @@ import { t } from '@/utils/i18n';
 const packageJson = require('../../package.json');
 const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+const PROFILE_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
 export default function ProfileScreen() {
   const { width } = useWindowDimensions();
@@ -49,8 +50,7 @@ export default function ProfileScreen() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [pseudoLoading, setPseudoLoading] = useState(false);
   
-  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
-  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && PROFILE_ZOOM_SCALE !== 1;
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
@@ -206,7 +206,6 @@ export default function ProfileScreen() {
         source={APP_BACKGROUND}
         style={[styles.background, backgroundViewportStyle]}
         resizeMode="cover"
-        imageStyle={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
@@ -868,7 +867,15 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
   },
   card: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 20,
@@ -934,12 +941,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     minWidth: 70,
     alignItems: 'center',
   },
   settingButtonActive: {
-    backgroundColor: Colors.accent[600],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderColor: Colors.glass.borderStrong,
   },
   settingButtonText: {
     fontSize: 14,
@@ -970,7 +980,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.accent?.[500] || Colors.primary || '#007AFF',
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     borderRadius: 8,
     padding: 12,
     marginTop: 16,
@@ -985,7 +997,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 20,
@@ -1001,9 +1015,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(232, 75, 85, 0.28)',
     borderWidth: 1,
-    borderColor: Colors.error || '#ff4444',
+    borderColor: 'rgba(255, 255, 255, 0.24)',
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 20,
@@ -1012,7 +1026,7 @@ const styles = StyleSheet.create({
   deleteAccountText: {
     fontSize: 16,
     fontFamily: 'Inter-Medium',
-    color: Colors.error || '#ff4444',
+    color: Colors.text.primary,
     marginLeft: 8,
   },
   versionText: {
@@ -1026,7 +1040,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.accent[500],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     borderRadius: 8,
     padding: 12,
     marginTop: 12,
@@ -1038,9 +1054,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   googleSaveButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.glass.surfaceStrong,
     borderWidth: 1,
-    borderColor: '#dadce0',
+    borderColor: Colors.glass.borderSoft,
     marginTop: 8,
   },
   googleIcon: {
@@ -1052,7 +1068,7 @@ const styles = StyleSheet.create({
   googleSaveText: {
     fontSize: 14,
     fontFamily: 'Inter-Medium',
-    color: '#3c4043',
+    color: Colors.text.primary,
     marginLeft: 8,
   },
   modalOverlay: {
@@ -1063,7 +1079,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Platform.OS === 'web' ? Colors.glass.surfaceSoft : Colors.glass.mobileSurfaceFallback,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     borderRadius: 12,
     padding: 20,
     width: '100%',
@@ -1084,7 +1103,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
@@ -1104,11 +1125,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     marginRight: 8,
   },
   saveButton: {
-    backgroundColor: Colors.accent[500],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     marginLeft: 8,
   },
   cancelButtonText: {
@@ -1134,12 +1159,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 30,
     marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 12,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
   },
   changeAvatarButton: {
     marginTop: 16,
     paddingHorizontal: 24,
     paddingVertical: 10,
-    backgroundColor: Colors.accent[500],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     borderRadius: 20,
   },
   changeAvatarText: {
@@ -1159,10 +1197,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   changePseudoButton: {
-    backgroundColor: Colors.primary[600],
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderColor: Colors.glass.borderSoft,
   },
   changePseudoButtonDisabled: {
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderColor: Colors.glass.borderSoft,
   },
   changePseudoTextDisabled: {
     color: Colors.text.secondary,

@@ -9,9 +9,10 @@ interface SidebarProps {
   children: React.ReactNode;
   width?: number;
   maxWidth?: number;
+  glass?: boolean;
 }
 
-export function Sidebar({ visible, onClose, title, children, width = 350, maxWidth = 350 }: SidebarProps) {
+export function Sidebar({ visible, onClose, title, children, width = 350, maxWidth = 350, glass = false }: SidebarProps) {
   const screenWidth = Dimensions.get('window').width;
   const isMobile = screenWidth <= 768;
 
@@ -32,22 +33,23 @@ export function Sidebar({ visible, onClose, title, children, width = 350, maxWid
       <View 
         style={[
           styles.container,
+          glass && styles.containerGlass,
           isMobile ? styles.containerMobile : styles.containerDesktop,
           isMobile ? { width: '85%', maxWidth } : { width }
         ]}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, glass && styles.headerGlass]}>
           <View style={styles.headerContent}>
             <Text style={styles.title}>{title}</Text>
             <TouchableOpacity 
               onPress={onClose}
-              style={styles.closeButton}
+              style={[styles.closeButton, glass && styles.closeButtonGlass]}
             >
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.content}>
+        <View style={[styles.content, glass && styles.contentGlass]}>
           {children}
         </View>
       </View>
@@ -72,6 +74,12 @@ const styles = StyleSheet.create({
     elevation: 16,
     zIndex: 1000,
   },
+  containerGlass: {
+    backgroundColor: Platform.OS === 'web' ? Colors.glass.surfaceSoft : Colors.glass.mobileSurfaceFallback,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(16px)' } as any) : null),
+  },
   containerDesktop: {
     top: 20,
     right: 20,
@@ -86,6 +94,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary[600],
     paddingVertical: 16,
     paddingHorizontal: 20,
+  },
+  headerGlass: {
+    backgroundColor: Colors.glass.accentSurface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.glass.borderStrong,
   },
   headerContent: {
     flexDirection: 'row',
@@ -106,6 +119,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  closeButtonGlass: {
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+  },
   closeText: {
     color: Colors.text.primary,
     fontSize: 16,
@@ -114,5 +132,8 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: Colors.background.card,
+  },
+  contentGlass: {
+    backgroundColor: 'transparent',
   },
 });

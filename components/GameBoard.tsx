@@ -749,6 +749,7 @@ export function GameBoard() {
           visible={sidebarVisible}
           onClose={closeSidebar}
           title={t('battle.actionLog')}
+          glass
         >
           <ActionLog logs={actionLog} sidebarMode={true} />
         </Sidebar>
@@ -759,6 +760,7 @@ export function GameBoard() {
         visible={rulesVisible}
         onClose={() => setRulesVisible(false)}
         title={t('decks.rulesTitle')}
+        glass
       >
         <RulesContent context="battle" />
       </Sidebar>
@@ -875,18 +877,26 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   deckOption: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceSoft,
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
   },
   activeDeckOption: {
-    borderColor: Colors.primary[600],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderColor: Colors.glass.borderStrong,
   },
   demoDeckOption: {
-    borderColor: Colors.accent[600],
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderColor: Colors.glass.borderStrong,
   },
   deckOptionTitle: {
     fontSize: 18,
@@ -917,9 +927,16 @@ const styles = StyleSheet.create({
   },
   noDeckMessage: {
     fontSize: 14,
-    color: Colors.text.secondary,
+    color: Colors.text.primary,
     textAlign: 'center',
     marginTop: 24,
     fontStyle: 'italic',
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    overflow: 'hidden',
   },
 });

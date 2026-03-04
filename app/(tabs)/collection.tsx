@@ -19,6 +19,7 @@ import { COMMON_ANCHORS } from '@/types/scenes';
 import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+const COLLECTION_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
 export default function CollectionScreen() {
   const { width } = useWindowDimensions();
@@ -94,15 +95,14 @@ export default function CollectionScreen() {
     setFilter(newFilter);
   };
   
-  if (loading) {
-    return <LoadingOverlay message={t('collection.loading')} />;
-  }
-
-  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
-  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && COLLECTION_ZOOM_SCALE !== 1;
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
+
+  if (loading) {
+    return <LoadingOverlay message={t('collection.loading')} />;
+  }
   
   return (
     <View style={styles.container}>
@@ -110,7 +110,6 @@ export default function CollectionScreen() {
         source={APP_BACKGROUND}
         style={[styles.background, backgroundViewportStyle]}
         resizeMode="cover"
-        imageStyle={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
@@ -187,7 +186,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -212,7 +219,15 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
   },
   sizeToggle: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     borderRadius: 8,
     padding: 8,
     width: 40,

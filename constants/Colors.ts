@@ -58,6 +58,16 @@ export default {
     card: '#2E303A',
     overlayPrimaryStrong: 'rgba(11, 21, 96, 0.58)',
     overlayPrimarySoft: 'rgba(18, 22, 38, 0.74)',
-    overlayCard: 'rgba(46, 48, 58, 0.72)',
+  },
+  glass: {
+    mobileSurfaceFallback: 'rgba(0,0,0,0.5)',
+    surfaceStrong: 'rgba(255, 255, 255, 0.12)',
+    surfaceSoft: 'rgba(255, 255, 255, 0.1)',
+    borderStrong: 'rgba(255, 255, 255, 0.24)',
+    borderSoft: 'rgba(255, 255, 255, 0.2)',
+    shadow: '#000',
+    accentSurface: 'rgba(211, 35, 255, 0.32)',
+    accentGradientStrong: 'rgba(232, 62, 255, 0.62)',
+    accentGradientSoft: 'rgba(255, 64, 201, 0.52)',
   },
 };

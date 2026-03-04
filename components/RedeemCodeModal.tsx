@@ -6,7 +6,8 @@ import {
   TouchableOpacity, 
   Modal, 
   StyleSheet,
-  ActivityIndicator 
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { RedeemCodeService } from '@/services/redeemCodeService';
@@ -184,7 +185,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modal: {
-    backgroundColor: Colors.background?.card || '#1a1a1a',
+    backgroundColor: Platform.OS === 'web' ? Colors.glass.surfaceSoft : Colors.glass.mobileSurfaceFallback,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     borderRadius: 12,
     padding: 24,
     width: '100%',
@@ -213,14 +217,14 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.border || '#333',
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     color: Colors.text?.primary || '#ffffff',
     marginBottom: 20,
     textAlign: 'center',
-    backgroundColor: Colors.background?.input || 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.glass.surfaceStrong,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -230,7 +234,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: Colors.background?.secondary || '#333',
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     alignItems: 'center',
     marginRight: 8,
   },
@@ -243,7 +249,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: Colors.accent?.[500] || '#007AFF',
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 8,
@@ -255,6 +263,6 @@ const styles = StyleSheet.create({
     color: Colors.text?.primary || '#ffffff',
   },
   disabledButton: {
-    opacity: 0.5,
+    opacity: 0.6,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, TextInput, Modal, Linking } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, TextInput, Modal, Linking, Platform, ImageBackground, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,6 +26,8 @@ const PREMIUM_MONSTERS = {
   Stonelorn: require('../../assets/images/legendary/Stonelorn.png'),
   Zephun: require('../../assets/images/legendary/Zephun.png'),
 };
+const APP_BACKGROUND = require('../../assets/images/background/cosmic_nebula_vortex.png');
+const AUTH_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
 // Get 2 random different monsters for showcase
 const getRandomShowcaseMonsters = () => {
@@ -38,6 +40,7 @@ const getRandomShowcaseMonsters = () => {
 };
 
 export default function AuthScreen() {
+  const { width } = useWindowDimensions();
   const { user, loading, signInAnonymously, signInWithEmail, signInWithGoogle } = useAuth();
   const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -116,6 +119,11 @@ export default function AuthScreen() {
   const hideAnimation = () => {
     setShowAnimation(false);
   };
+
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && AUTH_ZOOM_SCALE !== 1;
+  const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
+    ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
+    : null;
   
   if (loading) {
     return <LoadingOverlay message={t('auth.preparing')} />;
@@ -123,11 +131,16 @@ export default function AuthScreen() {
   
   return (
     <View style={styles.container}>
+      <ImageBackground
+        source={APP_BACKGROUND}
+        style={[styles.background, backgroundViewportStyle]}
+        resizeMode="cover"
+      />
       <LinearGradient
-        colors={[Colors.background.primary, Colors.primary[900], Colors.background.primary]}
-        style={styles.background}
+        colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
+        style={[styles.background, backgroundViewportStyle]}
         start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
+        end={{ x: 0.5, y: 0.5 }}
       />
       
       
@@ -156,7 +169,7 @@ export default function AuthScreen() {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={[Colors.accent[700], Colors.accent[500]]}
+            colors={[Colors.glass.accentGradientStrong, Colors.glass.accentGradientSoft]}
             style={styles.buttonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -325,6 +338,13 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     overflow: 'hidden',
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 10,
   },
   buttonGradient: {
     flex: 1,
@@ -350,23 +370,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.glass.surfaceStrong,
     borderWidth: 1,
-    borderColor: Colors.accent[500],
+    borderColor: Colors.glass.borderStrong,
     borderRadius: 28,
     padding: 16,
     marginBottom: 16,
     width: '100%',
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(12px)' } as any) : null),
   },
   loginButtonText: {
     fontSize: 16,
     fontFamily: 'Inter-Medium',
-    color: Colors.accent[500],
+    color: Colors.text.primary,
     marginLeft: 8,
   },
   googleButton: {
-    backgroundColor: '#ffffff',
-    borderColor: '#dadce0',
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderColor: Colors.glass.borderSoft,
     marginBottom: 16,
   },
   googleIcon: {
@@ -378,7 +399,7 @@ const styles = StyleSheet.create({
   googleButtonText: {
     fontSize: 16,
     fontFamily: 'Inter-Medium',
-    color: '#3c4043',
+    color: Colors.text.primary,
     marginLeft: 8,
   },
   modalOverlay: {
@@ -389,11 +410,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Platform.OS === 'web' ? Colors.glass.surfaceSoft : Colors.glass.mobileSurfaceFallback,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 12,
     padding: 20,
     width: '100%',
     maxWidth: 400,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 10,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
   },
   modalTitle: {
     fontSize: 20,
@@ -410,7 +439,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
@@ -430,11 +461,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
     marginRight: 8,
   },
   signInButton: {
-    backgroundColor: Colors.accent[500],
+    backgroundColor: Colors.glass.accentGradientSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     marginLeft: 8,
   },
   cancelButtonText: {

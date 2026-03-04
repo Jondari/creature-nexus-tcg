@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Platform } from 'react-native';
 import { formatTimeRemaining } from '../utils/cardUtils';
 import Colors from '../constants/Colors';
 import { t } from '@/utils/i18n';
@@ -88,7 +88,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     marginBottom: 16,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 9,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(16px)' } as any) : null),
     borderRadius: 12,
     width: '90%',
     alignSelf: 'center',

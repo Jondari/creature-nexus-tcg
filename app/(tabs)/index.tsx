@@ -57,6 +57,7 @@ const sortInventoryPacks = (packs: InventoryPack[]): InventoryPack[] => {
 };
 
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+const HOME_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
 export default function OpenPackScreen() {
   const { width } = useWindowDimensions();
@@ -292,17 +293,16 @@ export default function OpenPackScreen() {
   const handleRefresh = () => {
     fetchUserData();
   };
-  
-  if (loading) {
-    return <LoadingOverlay message={t('home.loading')} />;
-  }
 
-  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
-  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && HOME_ZOOM_SCALE !== 1;
 
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
+
+  if (loading) {
+    return <LoadingOverlay message={t('home.loading')} />;
+  }
   
   return (
     <View style={styles.container}>
@@ -311,7 +311,6 @@ export default function OpenPackScreen() {
         source={APP_BACKGROUND}
         style={[styles.background, backgroundViewportStyle]}
         resizeMode="cover"
-        imageStyle={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
@@ -379,7 +378,7 @@ export default function OpenPackScreen() {
               ref={openPackRef as any}
             >
               <LinearGradient
-                colors={[Colors.accent[700], Colors.accent[500]]}
+                colors={[Colors.glass.accentGradientStrong, Colors.glass.accentGradientSoft]}
                 style={styles.packButtonGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -443,7 +442,7 @@ export default function OpenPackScreen() {
       )}
 
       {/* Packs Sidebar */}
-      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} title={t('home.myPacks')} width={380}>
+      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} title={t('home.myPacks')} width={380} glass>
         <ScrollView contentContainerStyle={styles.sidebarContent}>
           {inventoryPacks.length === 0 ? (
             <Text style={styles.emptySidebarText}>{t('home.noUnopenedPacks')}</Text>
@@ -490,7 +489,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -529,7 +536,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -559,6 +574,15 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.26,
+    shadowRadius: 18,
+    elevation: 10,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(18px)' } as any) : null),
     overflow: 'hidden',
     marginBottom: 16,
   },
@@ -587,7 +611,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   statCard: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 9,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(16px)' } as any) : null),
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -605,7 +637,15 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
   },
   infoContainer: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 9,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(16px)' } as any) : null),
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 20,
@@ -615,9 +655,25 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 10,
   },
+  emptySidebarText: {
+    color: Colors.text.primary,
+    opacity: 0.88,
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    textAlign: 'center',
+    paddingVertical: 14,
+  },
   packItem: {
     flexDirection: 'row',
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     borderRadius: 10,
     padding: 10,
     gap: 10,
@@ -645,7 +701,9 @@ const styles = StyleSheet.create({
   },
   openPackButton: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.accent[600],
+    backgroundColor: Colors.glass.accentSurface,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
     borderRadius: 6,
     paddingVertical: 6,
     paddingHorizontal: 12,

@@ -12,6 +12,7 @@ import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 import { ANCHOR_POLL_LONG_ATTEMPTS } from '@/constants/tutorial';
 
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+const QUICK_BATTLE_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
 function QuickBattleContent() {
   const { width } = useWindowDimensions();
@@ -25,8 +26,7 @@ function QuickBattleContent() {
 
   // Only show back button when no game is active (deck selection screen)
   const showBackButton = !gameState || gameState.isGameOver;
-  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
-  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && QUICK_BATTLE_ZOOM_SCALE !== 1;
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
@@ -45,7 +45,6 @@ function QuickBattleContent() {
         source={APP_BACKGROUND}
         style={[styles.background, backgroundViewportStyle]}
         resizeMode="cover"
-        imageStyle={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
@@ -96,6 +95,14 @@ const styles = StyleSheet.create({
     zIndex: 100,
     padding: 8,
     borderRadius: 8,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(12px)' } as any) : null),
   },
 });

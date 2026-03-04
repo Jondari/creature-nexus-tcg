@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import { StyleSheet, View, ScrollView, Text, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, View, ScrollView, Text, TouchableOpacity, FlatList, Platform } from 'react-native';
 import { CardComponent } from './CardComponent';
 import { CardRarity, RARITY_COLORS } from '../models/Card';
 import { CardGrouped } from '../utils/cardUtils';
@@ -104,7 +104,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   filterSection: {
-    backgroundColor: Colors.background.primary,
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    borderRadius: 12,
+    marginHorizontal: 12,
+    marginBottom: 6,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
     zIndex: 1, // Ensure filters stay on top
   },
   contentSection: {
@@ -121,7 +132,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
     height: 32, // Fixed height for consistent button size
     justifyContent: 'center', // Center text vertically
   },
