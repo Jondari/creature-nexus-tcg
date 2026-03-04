@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ImageBackground, Platform, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { GameProvider, useGame } from '@/context/GameContext';
@@ -10,7 +11,10 @@ import { COMMON_ANCHORS } from '@/types/scenes';
 import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 import { ANCHOR_POLL_LONG_ATTEMPTS } from '@/constants/tutorial';
 
+const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+
 function QuickBattleContent() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
   const { gameState } = useGame();
   const sceneTrigger = useSceneTrigger();
@@ -21,6 +25,11 @@ function QuickBattleContent() {
 
   // Only show back button when no game is active (deck selection screen)
   const showBackButton = !gameState || gameState.isGameOver;
+  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
+    ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
+    : null;
 
   useAnchorPolling(
     [COMMON_ANCHORS.FIELD_AREA, COMMON_ANCHORS.END_TURN_BUTTON],
@@ -32,6 +41,19 @@ function QuickBattleContent() {
 
   return (
     <View style={styles.container}>
+      <ImageBackground
+        source={APP_BACKGROUND}
+        style={[styles.background, backgroundViewportStyle]}
+        resizeMode="cover"
+        imageStyle={{ width: '100%', height: '100%' }}
+      />
+      <LinearGradient
+        colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
+        style={[styles.background, backgroundViewportStyle]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 0.5 }}
+      />
+
       {/* Back Button - only visible during deck selection */}
       {showBackButton && (
         <TouchableOpacity
@@ -59,7 +81,13 @@ export default function QuickBattleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background.primary,
+  },
+  background: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   backButton: {
     position: 'absolute',

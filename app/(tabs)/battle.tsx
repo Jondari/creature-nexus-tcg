@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ImageBackground, Platform, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Sword, BookOpen, GraduationCap } from 'lucide-react-native';
@@ -7,7 +7,10 @@ import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
 import {isDemoMode} from "@/config/localMode";
 
+const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+
 export default function BattleScreen() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
 
   const handleQuickBattle = () => {
@@ -22,11 +25,23 @@ export default function BattleScreen() {
     router.push('/(tabs)/battle-tutorial');
   };
 
+  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
+    ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
+    : null;
+
   return (
     <View style={styles.container}>
+      <ImageBackground
+        source={APP_BACKGROUND}
+        style={[styles.background, backgroundViewportStyle]}
+        resizeMode="cover"
+        imageStyle={{ width: '100%', height: '100%' }}
+      />
       <LinearGradient
-        colors={[Colors.primary[900], Colors.background.primary]}
-        style={styles.background}
+        colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
+        style={[styles.background, backgroundViewportStyle]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 0.5 }}
       />

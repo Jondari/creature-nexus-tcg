@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Modal, Linking } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Modal, Linking, ImageBackground, Platform, useWindowDimensions } from 'react-native';
 import { DiscordIcon } from '@/components/DiscordIcon';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -23,8 +23,10 @@ import { t } from '@/utils/i18n';
 
 const packageJson = require('../../package.json');
 const DISCORD_INVITE_URL = process.env.EXPO_PUBLIC_DISCORD_INVITE_URL;
+const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
 
 export default function ProfileScreen() {
+  const { width } = useWindowDimensions();
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins } = useAuth();
   const { cardSize, setCardSize, showBattleLog, setShowBattleLog, screenShake, setScreenShake, turnBanner, setTurnBanner, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
@@ -47,6 +49,11 @@ export default function ProfileScreen() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [pseudoLoading, setPseudoLoading] = useState(false);
   
+  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+  const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
+    ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
+    : null;
 
   
   const handleSignOut = async () => {
@@ -195,9 +202,15 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
+      <ImageBackground
+        source={APP_BACKGROUND}
+        style={[styles.background, backgroundViewportStyle]}
+        resizeMode="cover"
+        imageStyle={{ width: '100%', height: '100%' }}
+      />
       <LinearGradient
-        colors={[Colors.primary[900], Colors.background.primary]}
-        style={styles.background}
+        colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
+        style={[styles.background, backgroundViewportStyle]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 0.5 }}
       />

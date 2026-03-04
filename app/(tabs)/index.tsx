@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Image, ImageBackground, Platform, useWindowDimensions } from 'react-native';
 import { useAuth, type InventoryPack } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { canOpenNewPack, getTimeUntilNextPack } from '@/utils/cardUtils';
@@ -56,7 +56,10 @@ const sortInventoryPacks = (packs: InventoryPack[]): InventoryPack[] => {
   return [...packs].sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime());
 };
 
+const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
+
 export default function OpenPackScreen() {
+  const { width } = useWindowDimensions();
   const { user, getCards, addCards, getPacks, removePack: removePackFromInventory, getLastFreePack, setLastFreePack } = useAuth();
   const sceneTrigger = useSceneTrigger();
   const sceneManager = useSceneManager();
@@ -293,9 +296,30 @@ export default function OpenPackScreen() {
   if (loading) {
     return <LoadingOverlay message={t('home.loading')} />;
   }
+
+  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+  const isWebZoomMode = Platform.OS === 'web' && width < 768 && zoomScale !== 1;
+
+  const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
+    ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
+    : null;
   
   return (
     <View style={styles.container}>
+      <ImageBackground
+        testID="home-screen-background"
+        source={APP_BACKGROUND}
+        style={[styles.background, backgroundViewportStyle]}
+        resizeMode="cover"
+        imageStyle={{ width: '100%', height: '100%' }}
+      />
+      <LinearGradient
+        colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
+        style={[styles.background, backgroundViewportStyle]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 0.5 }}
+      />
+
       {/* Tutorial shortcut for the home screen. */}
       <View style={{ position: 'absolute', top: 12, right: 22, zIndex: 1000 }}>
         <TouchableOpacity
@@ -313,12 +337,6 @@ export default function OpenPackScreen() {
           <HelpCircle size={20} color={Colors.text.primary} />
         </TouchableOpacity>
       </View>
-      <LinearGradient
-        colors={[Colors.primary[900], Colors.background.primary]}
-        style={styles.background}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.5 }}
-      />
       
       
       <ScrollView contentContainerStyle={styles.scrollContent}>

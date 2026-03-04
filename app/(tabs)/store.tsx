@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Platform, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, ImageBackground, Platform, Dimensions, useWindowDimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,8 +21,10 @@ import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 
 const { width } = Dimensions.get('window');
 const isWideScreen = width >= 768; // Tablet/desktop breakpoint
+const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
 
 export default function StoreScreen() {
+  const { width: viewportWidth } = useWindowDimensions();
   const { user, getCoins, spendCoins, addCoins, addCards } = useAuth();
   const sceneManager = useSceneManager();
   const coinRef = useRef<View | null>(null);
@@ -461,8 +463,27 @@ export default function StoreScreen() {
     return <LoadingOverlay message={t('store.loading')} />;
   }
 
+  const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
+  const isWebZoomMode = Platform.OS === 'web' && viewportWidth < 768 && zoomScale !== 1;
+  const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
+    ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
+    : null;
+
   return (
     <View style={styles.container}>
+      <ImageBackground
+        source={APP_BACKGROUND}
+        style={[styles.background, backgroundViewportStyle]}
+        resizeMode="cover"
+        imageStyle={{ width: '100%', height: '100%' }}
+      />
+      <LinearGradient
+        colors={[Colors.background.overlayPrimaryStrong, Colors.background.overlayPrimarySoft]}
+        style={[styles.background, backgroundViewportStyle]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 0.5 }}
+      />
+
       {/* Tutorial shortcut for Store */}
       <View style={{ position: 'absolute', top: 14, left: 320, zIndex: 1000 }}>
         <TouchableOpacity
@@ -517,7 +538,13 @@ export default function StoreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background.primary,
+  },
+  background: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   header: {
     flexDirection: 'row',

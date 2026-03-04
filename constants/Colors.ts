@@ -56,5 +56,8 @@ export default {
     primary: '#121626',
     secondary: '#1E2035',
     card: '#2E303A',
+    overlayPrimaryStrong: 'rgba(11, 21, 96, 0.58)',
+    overlayPrimarySoft: 'rgba(18, 22, 38, 0.74)',
+    overlayCard: 'rgba(46, 48, 58, 0.72)',
   },
 };
