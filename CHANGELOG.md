@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.27.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.7...v0.27.0) (2026-03-05)
+
+
+### Features
+
+* add glassmorphism theme tokens and apply frosted surfaces across main screens ([51c4d8e](https://github.com/Jondari/creature-nexus-tcg/commit/51c4d8e03439c165c6c986ce384106dff14e39c6))
+* add nebula background + zoom-safe gradient overlay across main screens (web/mobile) ([1ec106c](https://github.com/Jondari/creature-nexus-tcg/commit/1ec106c2a2f5f39158166608f0884dac937019e4))
+
 ### [0.26.7](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.6...v0.26.7) (2026-03-02)
 
 
