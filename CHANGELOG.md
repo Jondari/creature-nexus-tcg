@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.27.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.0...v0.27.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* **web:** remove Skia startup gate that caused blank screen on load - Regression introduced in: 7401a2a (v0.26.1) ([b05d8d2](https://github.com/Jondari/creature-nexus-tcg/commit/b05d8d2c46050420f4c8b25b11275e046ca8c259))
+
 ## [0.27.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.26.7...v0.27.0) (2026-03-05)
 
 
