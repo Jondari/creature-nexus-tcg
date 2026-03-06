@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.27.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.1...v0.27.2) (2026-03-06)
+
+
+### Bug Fixes
+
+* **web:** cleanup layout startup effects and remove skiaReady dead code ([d5b3ea1](https://github.com/Jondari/creature-nexus-tcg/commit/d5b3ea1186a8a90edf0ea65beb08cd6e4eb0cd95))
+
 ### [0.27.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.0...v0.27.1) (2026-03-06)
 
 
