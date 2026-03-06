@@ -31,6 +31,15 @@ interface AudioHookReturn {
   };
 }
 
+const areSettingsEqual = (
+  a: AudioHookReturn['settings'],
+  b: AudioHookReturn['settings'],
+): boolean =>
+  a.musicEnabled === b.musicEnabled &&
+  a.musicVolume === b.musicVolume &&
+  a.soundEffectsEnabled === b.soundEffectsEnabled &&
+  a.soundEffectsVolume === b.soundEffectsVolume;
+
 export const useAudio = (options: UseAudioOptions = {}): AudioHookReturn => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentMusicType, setCurrentMusicType] = useState<MusicType | null>(null);
@@ -39,10 +48,15 @@ export const useAudio = (options: UseAudioOptions = {}): AudioHookReturn => {
 
   // Update state when sound manager changes
   const updateState = useCallback(() => {
-    setIsPlaying(soundManager.isMusicPlaying());
-    setCurrentMusicType(soundManager.getCurrentMusicType());
-    setHasUserInteracted(soundManager.hasUserInteracted());
-    setSettings(soundManager.getSettings());
+    const nextIsPlaying = soundManager.isMusicPlaying();
+    const nextMusicType = soundManager.getCurrentMusicType();
+    const nextHasUserInteracted = soundManager.hasUserInteracted();
+    const nextSettings = soundManager.getSettings();
+
+    setIsPlaying((prev) => (prev === nextIsPlaying ? prev : nextIsPlaying));
+    setCurrentMusicType((prev) => (prev === nextMusicType ? prev : nextMusicType));
+    setHasUserInteracted((prev) => (prev === nextHasUserInteracted ? prev : nextHasUserInteracted));
+    setSettings((prev) => (areSettingsEqual(prev, nextSettings) ? prev : nextSettings));
   }, []);
 
   const playMusic = useCallback(async (type: MusicType) => {

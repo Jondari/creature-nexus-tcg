@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
@@ -45,11 +45,12 @@ export default function RootLayout() {
 
   // Skia CanvasKit must be loaded before any Skia Canvas renders on web
   const isWeb = Platform.OS === 'web';
-  const [skiaReady, setSkiaReady] = useState(!isWeb);
+  const hasCheckedLocaleRef = useRef(false);
+  const lastMusicTypeRef = useRef<MusicType | null>(null);
 
   useEffect(() => {
     if (isWeb && LoadSkiaWeb) {
-      LoadSkiaWeb().then(() => setSkiaReady(true));
+      LoadSkiaWeb();
     }
   }, []);
 
@@ -74,35 +75,57 @@ export default function RootLayout() {
   const pathname = usePathname();
 
   const router = useRouter();
+
+  // Startup one-shot tasks: hide splash and run first-launch locale redirect once.
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-
-      // Determine music based on current route
-      // Support both with and without group segments in pathname
-      const battleRoutes = [
-        '/quick-battle',
-        '/story-battle',
-        '/(tabs)/quick-battle',
-        '/(tabs)/story-battle',
-      ];
-      const isBattle = battleRoutes.some((r) => pathname?.startsWith(r));
-
-      playMusic(isBattle ? MusicType.BATTLE : MusicType.GENERAL);
-      // First-run language selection
-      (async () => {
-        try {
-          const storedLocale = await AsyncStorage.getItem('@locale');
-          if (!storedLocale) {
-            router.replace('/language');
-          }
-        } catch (error) {
-          if (__DEV__) {
-            console.warn('Failed to check stored locale during first launch tutorial redirect:', error);
-          }
-        }
-      })();
+    if (!fontsLoaded && !fontError) {
+      return;
     }
+
+    if (hasCheckedLocaleRef.current) {
+      return;
+    }
+    hasCheckedLocaleRef.current = true;
+
+    SplashScreen.hideAsync();
+
+    (async () => {
+      try {
+        const storedLocale = await AsyncStorage.getItem('@locale');
+        if (!storedLocale) {
+          router.replace('/language');
+        }
+      } catch (error) {
+        if (__DEV__) {
+          console.warn('Failed to check stored locale during first launch tutorial redirect:', error);
+        }
+      }
+    })();
+  }, [fontsLoaded, fontError, router]);
+
+  // Route-driven music updates.
+  useEffect(() => {
+    if (!fontsLoaded && !fontError) {
+      return;
+    }
+
+    // Determine music based on current route
+    // Support both with and without group segments in pathname
+    const battleRoutes = [
+      '/quick-battle',
+      '/story-battle',
+      '/(tabs)/quick-battle',
+      '/(tabs)/story-battle',
+    ];
+    const isBattle = battleRoutes.some((r) => pathname?.startsWith(r));
+    const nextMusicType = isBattle ? MusicType.BATTLE : MusicType.GENERAL;
+
+    if (lastMusicTypeRef.current === nextMusicType) {
+      return;
+    }
+    lastMusicTypeRef.current = nextMusicType;
+
+    void playMusic(nextMusicType);
   }, [fontsLoaded, fontError, pathname, playMusic]);
 
   // Hide Android navigation bar
