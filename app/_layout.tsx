@@ -147,8 +147,8 @@ export default function RootLayout() {
     initializeRevenueCat();
   }, []);
 
-  // Return null to keep splash screen visible while fonts or Skia load
-  if ((!fontsLoaded && !fontError) || !skiaReady) {
+  // Return null to keep splash screen visible while fonts
+  if ((!fontsLoaded && !fontError)) {
     return null;
   }
 

@@ -11,5 +11,5 @@ export function useFrameworkReady() {
     if (typeof window !== 'undefined') {
       window.frameworkReady?.();
     }
-  });
+  }, []);
 }
