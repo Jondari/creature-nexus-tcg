@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Image, StyleSheet, Animated, Dimensions, Platform, TouchableOpacity, Text } from 'react-native';
+import { View, Image, StyleSheet, Animated, Platform, TouchableOpacity, Text, useWindowDimensions } from 'react-native';
 import { t } from '@/utils/i18n';
 
 // Import monster images from different rarities
@@ -51,9 +51,6 @@ const MOBILE_MONSTERS = [
   require('@/assets/images/mythic/Mythévor.png'), // Final frame
 ];
 
-// Select monsters based on platform
-const SHOWCASE_MONSTERS = Platform.OS === 'web' ? PC_MONSTERS : MOBILE_MONSTERS;
-
 interface MonsterShowcaseAnimationProps {
   style?: any;
   transitionDuration?: number; // Duration each image is visible (ms)
@@ -73,6 +70,9 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
   onAnimationComplete,
   onSkip,
 }) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const isWebMobile = Platform.OS === 'web' && windowWidth < 768;
+  const showcaseMonsters = isWebMobile ? MOBILE_MONSTERS : (Platform.OS === 'web' ? PC_MONSTERS : MOBILE_MONSTERS);
   const [visibleImages, setVisibleImages] = useState<number[]>([]); // Array of visible image indices
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
@@ -84,7 +84,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
   // Create animated values for each monster (initialize once)
   const imageAnimations = useRef<Array<{opacity: Animated.Value, scale: Animated.Value}> | null>(null);
   if (imageAnimations.current === null) {
-    imageAnimations.current = SHOWCASE_MONSTERS.map(() => ({
+    imageAnimations.current = showcaseMonsters.map(() => ({
       opacity: new Animated.Value(0),
       scale: new Animated.Value(0.8),
     }));
@@ -109,7 +109,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
   };
 
   const startAnimation = () => {
-    if (isAnimating || visibleImages.length >= SHOWCASE_MONSTERS.length) return;
+    if (isAnimating || visibleImages.length >= showcaseMonsters.length) return;
     
     setIsAnimating(true);
     
@@ -125,7 +125,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
   };
 
   const animateSequence = (imageIndex: number) => {
-    if (imageIndex >= SHOWCASE_MONSTERS.length) {
+    if (imageIndex >= showcaseMonsters.length) {
       // Animation complete
       setIsAnimating(false);
       setAnimationComplete(true);
@@ -174,7 +174,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
     });
     
     // Calculate accelerated duration - linear acceleration (0.5x speed)
-    const progress = imageIndex / (SHOWCASE_MONSTERS.length - 1); // 0 to 1
+    const progress = imageIndex / (showcaseMonsters.length - 1); // 0 to 1
     const accelerationFactor = progress; // Linear acceleration (simple progress)
     const currentDuration = (transitionDuration * 0.25) * (1 - accelerationFactor * 0.9); // 50% faster + 90% speed reduction at the end
     const minDuration = 25; // Minimum duration (halved)
@@ -225,9 +225,31 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
     };
   }, []);
 
-  const containerStyle = fullScreen ? styles.fullScreenContainer : styles.container;
-  const imageStyle = fullScreen ? styles.fullScreenImage : styles.monsterImage;
-  const glowStyle = fullScreen ? styles.fullScreenGlowEffect : styles.glowEffect;
+  const containerStyle = fullScreen
+    ? [styles.fullScreenContainer, Platform.OS === 'web' ? ({ position: 'fixed' } as any) : null]
+    : styles.container;
+  const imageStyle = fullScreen
+    ? styles.fullScreenImage
+    : {
+        width: Math.min(windowWidth * 0.6, 250),
+        height: Math.min(windowWidth * 0.8, 320),
+        borderRadius: 12,
+      };
+  const glowStyle = fullScreen
+    ? styles.fullScreenGlowEffect
+    : {
+        position: 'absolute' as const,
+        width: Math.min(windowWidth * 0.65, 270),
+        height: Math.min(windowWidth * 0.85, 340),
+        borderRadius: 12,
+        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+        shadowColor: '#FFD700',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 8,
+        zIndex: -1,
+      };
 
   // Hide the component completely after animation is done
   if (shouldHide) {
@@ -301,7 +323,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
             ]}
           >
             <Image
-              source={SHOWCASE_MONSTERS[imageIndex]}
+              source={showcaseMonsters[imageIndex]}
               style={imageStyle}
               resizeMode={fullScreen ? "cover" : "contain"}
             />
@@ -310,14 +332,12 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
       })}
       
       {/* Subtle glow effect for the final mythic creature */}
-      {visibleImages.length >= SHOWCASE_MONSTERS.length - 3 && (
+      {visibleImages.length >= showcaseMonsters.length - 3 && (
         <Animated.View style={[glowStyle, { opacity: containerFadeAnim }]} />
       )}
     </Animated.View>
   );
 };
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -330,8 +350,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   fullScreenOverlay: {
     position: 'absolute',
@@ -347,39 +370,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fullScreenImageContainer: {
-    width: screenWidth,
-    height: screenHeight,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
   },
-  monsterImage: {
-    width: Math.min(screenWidth * 0.6, 250),
-    height: Math.min(screenWidth * 0.8, 320),
-    borderRadius: 12,
-  },
   fullScreenImage: {
-    width: screenWidth,
-    height: screenHeight,
+    width: '100%',
+    height: '100%',
     borderRadius: 0,
-  },
-  glowEffect: {
-    position: 'absolute',
-    width: Math.min(screenWidth * 0.65, 270),
-    height: Math.min(screenWidth * 0.85, 340),
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)', // Golden glow
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 8,
-    zIndex: -1,
   },
   fullScreenGlowEffect: {
     position: 'absolute',
-    width: screenWidth,
-    height: screenHeight,
+    width: '100%',
+    height: '100%',
     backgroundColor: 'rgba(255, 215, 0, 0.05)', // Subtle golden glow
     shadowColor: '#FFD700',
     shadowOffset: { width: 0, height: 0 },
