@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.27.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.3...v0.27.4) (2026-03-16)
+
+
+### Bug Fixes
+
+* **auth:** remove black bars in MonsterShowcaseAnimation on mobile web fullscreen ([5a979b1](https://github.com/Jondari/creature-nexus-tcg/commit/5a979b18520e5beef7757e0e9bf9ab588f7547fc))
+
 ### [0.27.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.2...v0.27.3) (2026-03-16)
 
 
