@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.27.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.2...v0.27.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* **auth:** prevent background image overflow on mobile web ([064068f](https://github.com/Jondari/creature-nexus-tcg/commit/064068f3e6b8be482e43e1efd7d17f7d757ac0b5))
+
 ### [0.27.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.1...v0.27.2) (2026-03-06)
 
 
