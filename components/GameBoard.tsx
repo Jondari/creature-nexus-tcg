@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { showErrorAlert, showWarningAlert } from '@/utils/alerts';
 import { KILL_ANIM_MS, NON_KILL_ANIM_MS, CARD_RETIRE_DURATION_MS } from '../constants/animation';
 import { useGame } from '../context/GameContext';
@@ -31,6 +31,7 @@ import Animated from 'react-native-reanimated';
 import { useScreenShake } from '../hooks/useScreenShake';
 import { TurnTransitionBanner } from './Animation/TurnTransitionBanner';
 import { GameOverAnimation } from './Animation/GameOverAnimation';
+import { useEffectiveViewport } from '@/hooks/useEffectiveViewport';
 
 export function GameBoard() {
   const { 
@@ -108,10 +109,10 @@ export function GameBoard() {
   useAnchorRegister(COMMON_ANCHORS.TURN_STATUS, turnStatusRef);
 
   // Zoom configuration for GameBoard
-  const { width, height } = useWindowDimensions();
+  const { width, height, ready } = useEffectiveViewport();
   const globalZoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
   const gameboardZoomScale = parseFloat(process.env.EXPO_PUBLIC_GAMEBOARD_ZOOM_SCALE || '0.75');
-  const shouldZoom = Platform.OS === 'android' || (Platform.OS === 'web' && width < 768);
+  const shouldZoom = Platform.OS === 'android' || (Platform.OS === 'web' && ready && width < 768);
   // Calculate relative zoom: GameBoard wants to be at gameboardZoomScale of original (100%)
   // Parent already applies globalZoomScale, so we need: gameboardZoomScale / globalZoomScale
   const relativeZoom = gameboardZoomScale / globalZoomScale;

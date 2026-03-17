@@ -22,12 +22,13 @@ import ScenesRegistry from '@/components/ScenesRegistry';
 import { useFonts } from 'expo-font';
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
 import { Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { View, Text, StyleSheet, useWindowDimensions, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '@/constants/Colors';
 import { SplashScreen } from 'expo-router';
 import * as NavigationBar from 'expo-navigation-bar';
 import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
+import { useEffectiveViewport } from '@/hooks/useEffectiveViewport';
 // Conditionally load react-native-purchases to avoid native module issues on web/demo
 const Purchases = Platform.OS !== 'web' ? require('react-native-purchases').default : null;
 const LOG_LEVEL = Platform.OS !== 'web' ? require('react-native-purchases').LOG_LEVEL : null;
@@ -230,13 +231,13 @@ const SceneLayer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // Zoom wrapper that applies zoom on Android or Web responsive mode
 const ZoomWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { width, height } = useWindowDimensions();
+  const { width, height, ready } = useEffectiveViewport();
 
   // Get zoom scale from env or use 1 as default (no zoom)
   const zoomScale = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
   // Apply zoom on Android or Web with mobile-sized screen (< 768px)
-  const shouldZoom = Platform.OS === 'android' || (Platform.OS === 'web' && width < 768);
+  const shouldZoom = Platform.OS === 'android' || (Platform.OS === 'web' && ready && width < 768);
 
   // Calculate compensated dimensions in pixels
   const compensatedWidth = width / zoomScale;
