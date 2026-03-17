@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.27.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.4...v0.27.5) (2026-03-17)
+
+
+### Bug Fixes
+
+* **web:** defer zoom compensation to client viewport after static export ([1f29313](https://github.com/Jondari/creature-nexus-tcg/commit/1f293139fc4b333db70106e276acc50f5cd0deb9))
+
 ### [0.27.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.3...v0.27.4) (2026-03-16)
 
 
