@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.28.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.5...v0.28.0) (2026-03-19)
+
+
+### Features
+
+* improve battle energy display with icon-based indicators ([8b03d2b](https://github.com/Jondari/creature-nexus-tcg/commit/8b03d2bd7dcc28b14533827f0d0a71b2c16eb328))
+* replace the player point by a heart system ([059614c](https://github.com/Jondari/creature-nexus-tcg/commit/059614c038500e96bc44798e6e6f770a8d744d95))
+* show remaining deck cards instead of hand size in battle info and update related tutorial copy ([eae55c9](https://github.com/Jondari/creature-nexus-tcg/commit/eae55c9154c5e9c608533bd8f203e8893a8e1373))
+
+
+### Bug Fixes
+
+* **android:** render battle hearts separately to avoid missing empty heart glyph ([10eb4e1](https://github.com/Jondari/creature-nexus-tcg/commit/10eb4e1ad1a080b4ae42c1fda4dcfddadd71141b))
+
 ### [0.27.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.4...v0.27.5) (2026-03-17)
 
 
