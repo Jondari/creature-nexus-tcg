@@ -41,6 +41,24 @@ const renderHearts = (fullHearts: number, emptyHearts: number): string => {
   return '❤️'.repeat(Math.max(0, fullHearts)) + '🖤'.repeat(Math.max(0, emptyHearts));
 };
 
+const renderEnergy = (energy: number) => {
+  if (energy <= 0) {
+    return <Text style={styles.energyEmpty}> ϟ</Text>;
+  }
+
+  if (energy === 1) {
+    return <Text style={styles.energyFull}>⚡</Text>;
+  }
+
+  return (
+    <View style={styles.energyGroup}>
+      <Text style={styles.energyFull}>⚡</Text>
+      <Text style={styles.energyCount}>× {energy}</Text>
+    </View>
+  );
+};
+
+
 export function GameBoard() {
   const { 
     gameState, 
@@ -589,7 +607,7 @@ export function GameBoard() {
       <PlayerInfo
         name={playerAtTop.name}
         stats={[
-          { label: t('player.energy'), value: playerAtTop.energy },
+          { label: t('player.energy'), value: renderEnergy(playerAtTop.energy) },
           { label: '', value: renderHearts(POINTS_TO_WIN - playerAtBottom.points, playerAtBottom.points) },
           { label: t('player.hand'), value: playerAtTop.hand.length },
         ]}
@@ -700,7 +718,7 @@ export function GameBoard() {
       <PlayerInfo
         name={pseudo || playerAtBottom.name}
         stats={[
-          { label: t('player.energy'), value: playerAtBottom.energy },
+          { label: t('player.energy'), value: renderEnergy(playerAtBottom.energy) },
           { label: '', value: renderHearts(POINTS_TO_WIN - playerAtTop.points, playerAtTop.points) },
           { label: t('player.hand'), value: playerAtBottom.hand.length },
         ]}
@@ -866,6 +884,26 @@ const styles = StyleSheet.create({
   loadingText: {
     color: Colors.text.primary,
     fontSize: 16,
+  },
+  energyGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  energyFull: {
+    color: '#F7C948',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  energyEmpty: {
+    color: '#3A3A3A',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  energyCount: {
+    color: Colors.text.secondary,
+    fontSize: 12,
+    fontWeight: '600',
   },
   deckSelectionTitle: {
     fontSize: 24,

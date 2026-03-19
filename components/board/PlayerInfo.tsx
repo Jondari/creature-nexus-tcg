@@ -55,9 +55,14 @@ export function PlayerInfo({
 
       <View style={[styles.statsRow, showAvatar && styles.statsRowWithAvatar]}>
         {stats.map(({ label, value }, index) => (
-          <Text key={`${label}-${index}`} style={styles.statText}>
-            {label ? `${label}: ${value}` : value}
-          </Text>
+          <View key={`${label}-${index}`} style={styles.statItem}>
+            {label ? <Text style={styles.statText}>{label}: </Text> : null}
+            {typeof value === 'string' || typeof value === 'number' ? (
+              <Text style={styles.statText}>{value}</Text>
+            ) : (
+              value
+            )}
+          </View>
         ))}
       </View>
     </View>
@@ -116,9 +121,14 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   statsRowWithAvatar: {
     justifyContent: 'space-around',
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   statText: {
     color: Colors.text.secondary,
