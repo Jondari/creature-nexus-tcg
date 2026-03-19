@@ -666,8 +666,8 @@
     },
     "targets": {
       "creatureKill": "Versus creature: if target dies, attacker gains +1 point.",
-      "win": "Win at 4 points.",
-      "lose": "Lose on deck‑out or if your field is empty after global turn 2."
+      "win": "Win when your opponent has no lives left.",
+      "lose": "Lose if you have no lives left, if your deck runs out, or if your field is empty after global turn 2."
     },
     "deck": {
       "size": "Deck size: 20–60 cards.",
@@ -680,12 +680,12 @@
     "defeat": "Defeat!",
     "winner": "Winner",
     "reason": {
-      "points": "Reached 4 points",
+      "points": "Opponent has no lives left",
       "noCards": "Opponent has no cards left",
       "noMonsters": "Opponent has no monsters"
     },
     "defeat_reason": {
-      "points": "Opponent reached 4 points",
+      "points": "You have no lives left",
       "noCards": "You have no cards left",
       "noMonsters": "You have no monsters left"
     },
@@ -1009,8 +1009,8 @@
     },
     "battleIntro": {
       "welcome": "Welcome to your first battle! I'll walk you through the basics.",
-      "playerStatusBar": "This is your status bar. It shows your available energy, cards in hand, and points. Collect 4 points to claim victory.",
-      "enemyStatusBar": "This is your opponent's status bar. It displays the same info as yours. Keep an eye on their points - if they reach 4, the battle is lost!",
+      "playerStatusBar": "This is your status bar. It shows your available energy, cards in hand, and remaining lives. If you lose all your lives, the battle is lost.",
+      "enemyStatusBar": "This is your opponent's status bar. It shows the same information as yours. Reduce their lives to zero to win the battle!",
       "energy": "This panel shows your energy. You gain 1 energy at the start of each turn.",
       "hand": "These are the cards in your hand. Each creature shows its HP and attacks.",
       "cardsCost": "Playing a card is free - you'll spend energy only when using attacks or removing a creature from the field.",
