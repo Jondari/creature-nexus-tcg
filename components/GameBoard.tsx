@@ -37,8 +37,20 @@ import { useEffectiveViewport } from '@/hooks/useEffectiveViewport';
 const POINTS_TO_WIN = 4;
 
 // Render hearts display: full hearts (❤️) for remaining lives, empty hearts (🖤) for lost lives
-const renderHearts = (fullHearts: number, emptyHearts: number): string => {
-  return '❤️'.repeat(Math.max(0, fullHearts)) + '🖤'.repeat(Math.max(0, emptyHearts));
+const renderHearts = (fullHearts: number, emptyHearts: number) => {
+  const safeFullHearts = Math.max(0, fullHearts);
+  const safeEmptyHearts = Math.max(0, emptyHearts);
+
+  return (
+    <View style={styles.heartsGroup}>
+      {Array.from({ length: safeFullHearts }, (_, index) => (
+        <Text key={`full-${index}`} style={styles.heartFull}>❤️</Text>
+      ))}
+      {Array.from({ length: safeEmptyHearts }, (_, index) => (
+        <Text key={`empty-${index}`} style={styles.heartEmpty}>🖤</Text>
+      ))}
+    </View>
+  );
 };
 
 const renderEnergy = (energy: number) => {
@@ -893,6 +905,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  heartsGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  heartFull: {
+    fontSize: 14,
+  },
+  heartEmpty: {
+    fontSize: 14,
   },
   energyFull: {
     color: '#F7C948',
