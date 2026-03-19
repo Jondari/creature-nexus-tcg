@@ -554,6 +554,7 @@
     "hp": "PV",
     "deck": "Deck",
     "hand": "Main",
+    "remainingCards": "Cartes restantes",
     "field": "Terrain",
     "yourField": "Votre terrain",
     "opponentField": "Terrain adverse"
@@ -1009,7 +1010,7 @@
     },
     "battleIntro": {
       "welcome": "Bienvenue dans votre premier combat ! Je vais vous guider pas à pas.",
-      "playerStatusBar": "Voici votre barre d'état. Elle indique votre énergie disponible, le nombre de cartes dans votre main et vos vies restantes. Si vous perdez toutes vos vies, la partie est perdue.",
+      "playerStatusBar": "Voici votre barre d'état. Elle indique votre énergie disponible, vos vies restantes et le nombre de cartes qu'il vous reste dans votre deck. Si vous perdez toutes vos vies, ou si vous n'avez plus de cartes à piocher, la partie est perdue.",
       "enemyStatusBar": "Voici la barre d'état de votre adversaire. Elle affiche les mêmes informations que la vôtre. Réduisez ses vies à zéro pour remporter la partie !",
       "energy": "Ce panneau affiche votre énergie. Vous en gagnez 1 au début de chaque tour.",
       "hand": "Voici les cartes de votre main. Chaque créature indique ses PV et ses attaques.",

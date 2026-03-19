@@ -288,6 +288,13 @@ export class GameEngine {
     return this.gameState.players;
   }
 
+  getRemainingDeckCount(playerId: string): number {
+    const playerIndex = this.gameState.players.findIndex(p => p.id === playerId);
+    if (playerIndex === -1) return 0;
+
+    return this.playerDecks[playerIndex].size();
+  }
+
   isGameOver(): boolean {
     return this.gameState.isGameOver;
   }

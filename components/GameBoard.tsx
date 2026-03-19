@@ -537,6 +537,8 @@ export function GameBoard() {
   // Always show current player at bottom, opponent at top regardless of whose turn it is
   const playerAtBottom = gameEngine.getPlayers()[0]; // Player 1 (human)
   const playerAtTop = gameEngine.getPlayers()[1]; // Player 2 (opponent)
+  const playerTopRemainingDeck = gameEngine.getRemainingDeckCount(playerAtTop.id);
+  const playerBottomRemainingDeck = gameEngine.getRemainingDeckCount(playerAtBottom.id);
 
   const turnLabelText = t('game.turnLabel', {
     n: String(gameState.turnNumber),
@@ -609,7 +611,8 @@ export function GameBoard() {
         stats={[
           { label: t('player.energy'), value: renderEnergy(playerAtTop.energy) },
           { label: '', value: renderHearts(POINTS_TO_WIN - playerAtBottom.points, playerAtBottom.points) },
-          { label: t('player.hand'), value: playerAtTop.hand.length },
+          // { label: t('player.hand'), value: playerAtTop.hand.length },
+          { label: t('player.remainingCards'), value: playerTopRemainingDeck },
         ]}
         containerRef={topStatsRef as any}
         avatarCreature={null}
@@ -720,7 +723,8 @@ export function GameBoard() {
         stats={[
           { label: t('player.energy'), value: renderEnergy(playerAtBottom.energy) },
           { label: '', value: renderHearts(POINTS_TO_WIN - playerAtTop.points, playerAtTop.points) },
-          { label: t('player.hand'), value: playerAtBottom.hand.length },
+          // { label: t('player.hand'), value: playerAtBottom.hand.length },
+          { label: t('player.remainingCards'), value: playerBottomRemainingDeck },
         ]}
         containerRef={bottomStatsRef as any}
         avatarCreature={avatarCreature}

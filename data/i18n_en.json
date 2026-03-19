@@ -554,6 +554,7 @@
     "hp": "HP",
     "deck": "Deck",
     "hand": "Hand",
+    "remainingCards": "Cards Left",
     "field": "Field",
     "yourField": "Your Field",
     "opponentField": "Opponent Field"
@@ -1009,7 +1010,7 @@
     },
     "battleIntro": {
       "welcome": "Welcome to your first battle! I'll walk you through the basics.",
-      "playerStatusBar": "This is your status bar. It shows your available energy, cards in hand, and remaining lives. If you lose all your lives, the battle is lost.",
+      "playerStatusBar": "This is your status bar. It shows your available energy, your remaining lives, and how many cards are left in your deck. If you lose all your lives, or if you have no cards left to draw, the battle is lost.",
       "enemyStatusBar": "This is your opponent's status bar. It shows the same information as yours. Reduce their lives to zero to win the battle!",
       "energy": "This panel shows your energy. You gain 1 energy at the start of each turn.",
       "hand": "These are the cards in your hand. Each creature shows its HP and attacks.",
