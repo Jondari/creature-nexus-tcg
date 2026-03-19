@@ -7,9 +7,9 @@ import { useGameActions } from '../hooks/useGameActions';
 import { useDecks } from '../context/DeckContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
-import { CardComponent } from './CardComponent';
 import { CardActionButtons } from './CardActionButtons';
 import { Battlefield } from './board/Battlefield';
+import { PlayerHand } from './board/PlayerHand';
 import { PlayerInfo } from './board/PlayerInfo';
 import { StatusBar } from './board/StatusBar';
 import { ActionLog } from './ActionLog';
@@ -94,7 +94,7 @@ export function GameBoard() {
   } = useGame();
   const { activeDeck } = useDecks();
   const { avatarCreature, pseudo } = useAuth();
-  const { cardSize, setCardSize, showBattleLog, screenShake, turnBanner: turnBannerEnabled } = useSettings();
+  const { cardSize, setCardSize, handLayout, showBattleLog, screenShake, turnBanner: turnBannerEnabled } = useSettings();
   const sceneManager = useSceneManager();
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
@@ -744,32 +744,20 @@ export function GameBoard() {
       />
 
       {/* Bottom Player Hand */}
-      <View style={styles.hand} ref={bottomHandRef as any}>
-        <Text style={styles.fieldLabel}>{t('player.hand')}</Text>
-        <ScrollView horizontal style={styles.cardRow}>
-          {playerAtBottom.hand.map((card) => (
-            <View key={card.id} style={{ marginRight: 12, position: 'relative' }}>
-              <CardComponent
-                card={card}
-                selected={selectedCard === card.id}
-                onPress={() => setSelectedCard(card.id === selectedCard ? null : card.id!)}
-                disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
-                aiHighlight={getCardHighlightType(card.id!)}
-                size={cardSize}
-              />
-              
-              {/* Card Action Buttons */}
-              <CardActionButtons
-                visible={selectedCard === card.id && currentPlayer.id === playerAtBottom.id && isPlayerTurn}
-                showPlay={true}
-                onPlay={() => handlePlayCard(card.id!)}
-                cardSize={cardSize}
-                card={card}
-              />
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+      <PlayerHand
+        label={t('player.hand')}
+        cards={playerAtBottom.hand}
+        selectedCardId={selectedCard}
+        onSelectCard={(card) => setSelectedCard(card.id === selectedCard ? null : card.id!)}
+        onPlayCard={handlePlayCard}
+        disabled={currentPlayer.id !== playerAtBottom.id || !isPlayerTurn}
+        aiHighlight={getCardHighlightType}
+        cardSize={cardSize}
+        layout={handLayout}
+        viewportWidth={compensatedWidth}
+        containerRef={bottomHandRef as any}
+        canPlayCard={() => currentPlayer.id === playerAtBottom.id && isPlayerTurn}
+      />
 
       {/* Action buttons removed - now handled by CardActionButtons overlay */}
 
@@ -879,10 +867,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: Colors.text.secondary,
     padding: 20,
-  },
-  hand: {
-    margin: 8,
-    marginBottom: 16,
   },
   attackModeIndicator: {
     backgroundColor: '#FFC107',

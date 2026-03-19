@@ -29,7 +29,7 @@ const PROFILE_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1')
 export default function ProfileScreen() {
   const { width } = useWindowDimensions();
   const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins } = useAuth();
-  const { cardSize, setCardSize, showBattleLog, setShowBattleLog, screenShake, setScreenShake, turnBanner, setTurnBanner, locale, setLocale } = useSettings();
+  const { cardSize, setCardSize, handLayout, setHandLayout, showBattleLog, setShowBattleLog, screenShake, setScreenShake, turnBanner, setTurnBanner, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
 
@@ -360,6 +360,43 @@ export default function ProfileScreen() {
                   cardSize === 'normal' && styles.settingButtonTextActive
                 ]}>
                   {t('profile.cardSizeNormal')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>{t('profile.handLayout')}</Text>
+              <Text style={styles.settingDescription}>{t('profile.handLayoutDesc')}</Text>
+            </View>
+            <View style={styles.settingButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  handLayout === 'fan' && styles.settingButtonActive
+                ]}
+                onPress={() => setHandLayout('fan')}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  handLayout === 'fan' && styles.settingButtonTextActive
+                ]}>
+                  {t('profile.handLayoutFan')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.settingButton,
+                  handLayout === 'classic' && styles.settingButtonActive
+                ]}
+                onPress={() => setHandLayout('classic')}
+              >
+                <Text style={[
+                  styles.settingButtonText,
+                  handLayout === 'classic' && styles.settingButtonTextActive
+                ]}>
+                  {t('profile.handLayoutClassic')}
                 </Text>
               </TouchableOpacity>
             </View>

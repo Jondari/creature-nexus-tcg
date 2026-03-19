@@ -2,10 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type CardSize = 'small' | 'normal';
+export type HandLayout = 'fan' | 'classic';
 
 interface SettingsContextType {
   cardSize: CardSize;
   setCardSize: (size: CardSize) => void;
+  handLayout: HandLayout;
+  setHandLayout: (layout: HandLayout) => void;
   showBattleLog: boolean;
   setShowBattleLog: (show: boolean) => void;
   screenShake: boolean;
@@ -23,6 +26,7 @@ const SETTINGS_STORAGE_KEY = '@creature_nexus_settings';
 
 interface Settings {
   cardSize: CardSize;
+  handLayout: HandLayout;
   showBattleLog: boolean;
   screenShake: boolean;
   turnBanner: boolean;
@@ -31,6 +35,7 @@ interface Settings {
 
 const defaultSettings: Settings = {
   cardSize: 'small', // Default to small for better UX
+  handLayout: 'fan',
   showBattleLog: false, // Disabled by default
   screenShake: true, // Enabled by default
   turnBanner: true, // Enabled by default
@@ -87,6 +92,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveSettings(newSettings);
   };
 
+  const setHandLayout = (layout: HandLayout) => {
+    const newSettings = { ...settings, handLayout: layout };
+    saveSettings(newSettings);
+  };
+
   const setShowBattleLog = (show: boolean) => {
     const newSettings = { ...settings, showBattleLog: show };
     saveSettings(newSettings);
@@ -120,6 +130,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <SettingsContext.Provider value={{
       cardSize: settings.cardSize,
       setCardSize,
+      handLayout: settings.handLayout,
+      setHandLayout,
       showBattleLog: settings.showBattleLog,
       setShowBattleLog,
       screenShake: settings.screenShake,
