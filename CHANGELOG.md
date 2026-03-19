@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.29.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.28.0...v0.29.0) (2026-03-19)
+
+
+### Features
+
+* add hand layout setting with classic mode and cleaner fan view ([fed7126](https://github.com/Jondari/creature-nexus-tcg/commit/fed7126ef50c9dd67e2ebb776c01fd81002cac37))
+
 ## [0.28.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.27.5...v0.28.0) (2026-03-19)
 
 
