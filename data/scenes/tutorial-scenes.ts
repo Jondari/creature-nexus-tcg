@@ -8,6 +8,10 @@
 import type { SceneSpec } from '@/types/scenes';
 import { COMMON_ANCHORS, SCENE_TRIGGERS } from '@/types/scenes';
 
+const BATTLE_TUTORIAL_REMINDER_DELAY_MS = 3000;
+const DECK_BUILDER_TUTORIAL_OPEN_CHECK_DELAY_MS = 600;
+const DECK_BUILDER_TUTORIAL_REMINDER_DELAY_MS = 3000;
+
 // First Launch Tutorial - Overall game introduction
 export const SCENE_FIRST_LAUNCH: SceneSpec = {
   id: 'tutorial_first_launch',
@@ -96,7 +100,7 @@ export const SCENE_CHAPTER_MAP_INTRO: SceneSpec = {
 // Battle Screen Tutorial - Comprehensive battle mechanics
 export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
   id: 'tutorial_battle_basics',
-  version: 2,
+  version: 3,
   title: 'Battle Basics',
   description: 'Complete tutorial for battle mechanics',
   triggers: [
@@ -115,7 +119,7 @@ export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
     { type: 'maskInput', enabled: false },
     { type: 'if', flag: 'card_played', then: 'after_card_played', else: 'wait_for_card' },
     { type: 'label', name: 'wait_for_card' },
-    { type: 'wait', ms: 2000 },
+    { type: 'wait', ms: BATTLE_TUTORIAL_REMINDER_DELAY_MS },
     { type: 'if', flag: 'card_played', then: 'after_card_played', else: 'prompt_card_play' },
     { type: 'label', name: 'prompt_card_play' },
     { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.playReminder' },
@@ -125,7 +129,7 @@ export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
     { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.playMore' },
     { type: 'checkProgress', key: 'cards_in_play', min: 4, then: 'after_four_cards', else: 'wait_for_more_cards' },
     { type: 'label', name: 'wait_for_more_cards' },
-    { type: 'wait', ms: 2000 },
+    { type: 'wait', ms: BATTLE_TUTORIAL_REMINDER_DELAY_MS },
     { type: 'checkProgress', key: 'cards_in_play', min: 4, then: 'after_four_cards', else: 'prompt_more_cards' },
     { type: 'label', name: 'prompt_more_cards' },
     { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.playMoreReminder' },
@@ -139,7 +143,7 @@ export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
     { type: 'maskInput', enabled: false },
     { type: 'if', flag: 'turn_ended', then: 'after_turn_ended', else: 'wait_for_turn_end' },
     { type: 'label', name: 'wait_for_turn_end' },
-    { type: 'wait', ms: 2000 },
+    { type: 'wait', ms: BATTLE_TUTORIAL_REMINDER_DELAY_MS },
     { type: 'if', flag: 'turn_ended', then: 'after_turn_ended', else: 'prompt_turn_end' },
     { type: 'label', name: 'prompt_turn_end' },
     { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.endTurnReminder' },
@@ -158,7 +162,7 @@ export const SCENE_BATTLE_TUTORIAL: SceneSpec = {
     { type: 'maskInput', enabled: false },
     { type: 'if', flag: 'creature_selected', then: 'explain_attacks', else: 'wait_for_selection' },
     { type: 'label', name: 'wait_for_selection' },
-    { type: 'wait', ms: 2000 },
+    { type: 'wait', ms: BATTLE_TUTORIAL_REMINDER_DELAY_MS },
     { type: 'if', flag: 'creature_selected', then: 'explain_attacks', else: 'prompt_selection' },
     { type: 'label', name: 'prompt_selection' },
     { type: 'say', speaker: 'i18n:tutorial.speakers.battleGuide', text: 'i18n:tutorial.battleIntro.attackReminder' },
@@ -269,7 +273,7 @@ export const SCENE_COLLECTION_INTRO: SceneSpec = {
 // Deck Building Tutorial
 export const SCENE_DECK_BUILDER_INTRO: SceneSpec = {
   id: 'tutorial_deck_builder',
-  version: 1,
+  version: 2,
   title: 'Build Your Deck',
   description: 'Introduction to deck building mechanics',
   triggers: [
@@ -284,14 +288,14 @@ export const SCENE_DECK_BUILDER_INTRO: SceneSpec = {
     { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_BUILDER_ENTRY, text: 'i18n:tutorial.deckBuilderIntro.highlightEntry', maskInput: true, textPosition: 'top' },
     { type: 'maskInput', enabled: false },
     { type: 'label', name: 'wait_for_deck_builder' },
-    { type: 'wait', ms: 400 },
+    { type: 'wait', ms: DECK_BUILDER_TUTORIAL_REMINDER_DELAY_MS },
     { type: 'if', flag: 'deck_builder_open', then: 'deck_builder_opened', else: 'prompt_open_deck_builder' },
 
     { type: 'label', name: 'prompt_open_deck_builder' },
     { type: 'say', speaker: 'i18n:tutorial.speakers.deckMaster', text: 'i18n:tutorial.deckBuilderIntro.promptOpen' },
     { type: 'highlight', anchorId: COMMON_ANCHORS.DECK_BUILDER_ENTRY, text: 'i18n:tutorial.deckBuilderIntro.highlightEntry', maskInput: true, textPosition: 'top' },
     { type: 'maskInput', enabled: false },
-    { type: 'wait', ms: 600 },
+    { type: 'wait', ms: DECK_BUILDER_TUTORIAL_OPEN_CHECK_DELAY_MS },
     { type: 'goto', label: 'wait_for_deck_builder' },
 
     { type: 'label', name: 'deck_builder_opened' },
