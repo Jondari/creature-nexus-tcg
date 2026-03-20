@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.29.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.0...v0.29.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* **ai:** reduce battle turn pacing delays ([79141ae](https://github.com/Jondari/creature-nexus-tcg/commit/79141aee4a3105995eb2b5f368d5b3601902ca92))
+* **battle:** prevent illegal direct attacks without targets ([f7b929a](https://github.com/Jondari/creature-nexus-tcg/commit/f7b929aeb45e5c0d9310d6aeb9f7152c60898872))
+* **tutorial:** handle home tutorial when free pack is on cooldown ([74ffb7d](https://github.com/Jondari/creature-nexus-tcg/commit/74ffb7dafd7cbf6c4ce138520d8d13703fc24711))
+* **tutorial:** increase battle and deck tutorial reminder delays ([42fd03c](https://github.com/Jondari/creature-nexus-tcg/commit/42fd03c695ec5a34f561c2bf303219d424dbe56f))
+* **tutorial:** reset deck builder tutorial state on screen exit ([22199e4](https://github.com/Jondari/creature-nexus-tcg/commit/22199e4d57463f4468146b061bf5628f45f0eba7))
+
 ## [0.29.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.28.0...v0.29.0) (2026-03-19)
 
 
