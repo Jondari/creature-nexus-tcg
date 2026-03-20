@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.29.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.1...v0.29.2) (2026-03-20)
+
+
+### Bug Fixes
+
+* **tutorial:** reduce deck builder tutorial check and reminder delays ([167a9a4](https://github.com/Jondari/creature-nexus-tcg/commit/167a9a4e53fe7ed5d172108d1c865bf93d142602))
+
 ### [0.29.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.0...v0.29.1) (2026-03-20)
 
 
