@@ -220,7 +220,7 @@ export const SCENE_FIRST_VICTORY: SceneSpec = {
 // Home Screen Overview
 export const SCENE_HOME_INTRO: SceneSpec = {
   id: 'tutorial_home_intro',
-  version: 1,
+  version: 2,
   title: 'Welcome Home',
   description: 'Highlights key elements on the home screen',
   triggers: [
@@ -235,7 +235,13 @@ export const SCENE_HOME_INTRO: SceneSpec = {
   steps: [
     { type: 'showPortrait', side: 'left', uri: 'guide_portrait.png', animation: 'slideIn' },
     { type: 'say', speaker: 'i18n:tutorial.speakers.nexusGuide', text: 'i18n:tutorial.homeIntro.opening' },
+    { type: 'if', flag: 'home_free_pack_available', then: 'show_daily_pack_button', else: 'show_daily_pack_cooldown' },
+    { type: 'label', name: 'show_daily_pack_button' },
     { type: 'highlight', anchorId: COMMON_ANCHORS.OPEN_PACK_BUTTON, text: 'i18n:tutorial.homeIntro.dailyPack', maskInput: true },
+    { type: 'goto', label: 'show_pack_inventory' },
+    { type: 'label', name: 'show_daily_pack_cooldown' },
+    { type: 'highlight', anchorId: COMMON_ANCHORS.NEXT_FREE_PACK_TIMER, text: 'i18n:tutorial.homeIntro.nextFreePackTimer', maskInput: true },
+    { type: 'label', name: 'show_pack_inventory' },
     { type: 'highlight', anchorId: COMMON_ANCHORS.PACK_INVENTORY, text: 'i18n:tutorial.homeIntro.packInventory', maskInput: true },
     { type: 'say', speaker: 'i18n:tutorial.speakers.nexusGuide', text: 'i18n:tutorial.homeIntro.openPacks' },
     { type: 'setFlag', key: 'tutorial_home_completed', value: true },

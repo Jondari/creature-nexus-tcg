@@ -64,6 +64,7 @@ export default function OpenPackScreen() {
   const { user, getCards, addCards, getPacks, removePack: removePackFromInventory, getLastFreePack, setLastFreePack } = useAuth();
   const sceneTrigger = useSceneTrigger();
   const sceneManager = useSceneManager();
+  const { setFlag } = sceneManager;
   const [cards, setCards] = useState<Array<Card | ExtendedCard>>([]);
   const [loading, setLoading] = useState(true);
   const [opening, setOpening] = useState(false);
@@ -75,10 +76,16 @@ export default function OpenPackScreen() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const giftRef = useRef<TouchableOpacity | null>(null);
   const openPackRef = useRef<TouchableOpacity | null>(null);
+  const nextFreePackTimerRef = useRef<View | null>(null);
 
   // Register an anchor for the packs inventory (gift button)
   useAnchorRegister(COMMON_ANCHORS.PACK_INVENTORY, giftRef);
   useAnchorRegister(COMMON_ANCHORS.OPEN_PACK_BUTTON, openPackRef);
+  useAnchorRegister(COMMON_ANCHORS.NEXT_FREE_PACK_TIMER, nextFreePackTimerRef, [timeRemaining]);
+
+  useEffect(() => {
+    setFlag('home_free_pack_available', timeRemaining <= 0);
+  }, [timeRemaining, setFlag]);
 
   useEffect(() => {
     if (user) {
@@ -93,7 +100,9 @@ export default function OpenPackScreen() {
   }, []);
 
   useAnchorPolling(
-    [COMMON_ANCHORS.OPEN_PACK_BUTTON, COMMON_ANCHORS.PACK_INVENTORY],
+    timeRemaining > 0
+      ? [COMMON_ANCHORS.NEXT_FREE_PACK_TIMER, COMMON_ANCHORS.PACK_INVENTORY]
+      : [COMMON_ANCHORS.OPEN_PACK_BUTTON, COMMON_ANCHORS.PACK_INVENTORY],
     () => {
       sceneTrigger({ type: 'onEnterScreen', screen: 'home' });
     }
@@ -364,10 +373,12 @@ export default function OpenPackScreen() {
         </View>
         
         {timeRemaining > 0 ? (
-          <CountdownTimer 
-            timeRemaining={timeRemaining} 
-            onComplete={handleRefresh}
-          />
+          <View ref={nextFreePackTimerRef as any}>
+            <CountdownTimer 
+              timeRemaining={timeRemaining} 
+              onComplete={handleRefresh}
+            />
+          </View>
         ) : (
           <View style={styles.packContainer}>
             <TouchableOpacity

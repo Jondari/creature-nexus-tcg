@@ -975,6 +975,7 @@
     "homeIntro": {
       "opening": "This is your home base. From here you can access every feature of the Nexus.",
       "dailyPack": "Use this button to open your daily pack when it's ready.",
+      "nextFreePackTimer": "This timer shows how long remains before your next free daily pack is available.",
       "packInventory": "Any unopened packs will appear here.",
       "openPacks": "Tap on packs to open them and discover new creatures!"
     },

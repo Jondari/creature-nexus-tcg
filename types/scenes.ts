@@ -298,6 +298,7 @@ export const SCENE_TRIGGERS = {
 export const COMMON_ANCHORS = {
   // Home screen anchors
   OPEN_PACK_BUTTON: 'openPackBtn',
+  NEXT_FREE_PACK_TIMER: 'nextFreePackTimer',
   PACK_INVENTORY: 'packInventory',
 
   // Battle screen anchors

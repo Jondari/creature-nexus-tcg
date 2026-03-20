@@ -975,6 +975,7 @@
     "homeIntro": {
       "opening": "Voici votre base. D'ici, vous accédez à toutes les fonctionnalités du Nexus.",
       "dailyPack": "Utilisez ce bouton pour ouvrir votre pack quotidien lorsqu'il est prêt.",
+      "nextFreePackTimer": "Ce minuteur indique le temps restant avant que votre prochain pack quotidien gratuit soit disponible.",
       "packInventory": "Tous les packs non ouverts apparaîtront ici.",
       "openPacks": "Touchez un pack pour l'ouvrir et découvrir de nouvelles créatures !"
     },
