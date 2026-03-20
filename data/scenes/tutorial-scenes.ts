@@ -9,8 +9,8 @@ import type { SceneSpec } from '@/types/scenes';
 import { COMMON_ANCHORS, SCENE_TRIGGERS } from '@/types/scenes';
 
 const BATTLE_TUTORIAL_REMINDER_DELAY_MS = 3000;
-const DECK_BUILDER_TUTORIAL_OPEN_CHECK_DELAY_MS = 600;
-const DECK_BUILDER_TUTORIAL_REMINDER_DELAY_MS = 3000;
+const DECK_BUILDER_TUTORIAL_OPEN_CHECK_DELAY_MS = 250;
+const DECK_BUILDER_TUTORIAL_REMINDER_DELAY_MS = 1500;
 
 // First Launch Tutorial - Overall game introduction
 export const SCENE_FIRST_LAUNCH: SceneSpec = {
