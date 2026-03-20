@@ -100,6 +100,9 @@ export class GameEngine {
     const attackerPlayer = this.gameState.players[attackerPlayerIndex];
     const defenderPlayer = this.gameState.players[defenderPlayerIndex];
 
+    // Direct attacks are not part of this game's rules.
+    if (!targetCardId || defenderPlayer.field.length === 0) return false;
+
     const attackerCard = attackerPlayer.field.find(c => c.id === attackerCardId);
     if (!attackerCard) return false;
 
@@ -116,15 +119,14 @@ export class GameEngine {
 
     if (attackerPlayer.energy < attack.energy) return false;
 
-    let targetCard: Card | undefined;
-    if (targetCardId) {
-      targetCard = defenderPlayer.field.find(c => c.id === targetCardId);
-      if (!targetCard) return false;
-    }
+    const targetCard = defenderPlayer.field.find(c => c.id === targetCardId);
+    if (!targetCard) return false;
 
-    const finalDamage = targetCard 
-      ? AffinityCalculator.calculateFinalDamage(attack.damage, attackerCard.element, targetCard.element)
-      : attack.damage;
+    const finalDamage = AffinityCalculator.calculateFinalDamage(
+      attack.damage,
+      attackerCard.element,
+      targetCard.element
+    );
 
     const newPlayers: [Player, Player] = [...this.gameState.players] as [Player, Player];
 
@@ -146,18 +148,14 @@ export class GameEngine {
     // Track that this card has attacked this turn
     this.gameState.attackedThisTurn.add(attackerCardId);
 
-    if (targetCard) {
-      const damagedCard = CardUtils.takeDamage(targetCard, finalDamage);
-      newPlayers[defenderPlayerIndex] = PlayerUtils.updateFieldCard(
-        defenderPlayer, 
-        targetCardId!, 
-        damagedCard
-      );
+    const damagedCard = CardUtils.takeDamage(targetCard, finalDamage);
+    newPlayers[defenderPlayerIndex] = PlayerUtils.updateFieldCard(
+      defenderPlayer, 
+      targetCardId, 
+      damagedCard
+    );
 
-      if (!CardUtils.isAlive(damagedCard)) {
-        newPlayers[attackerPlayerIndex] = PlayerUtils.addPoints(newPlayers[attackerPlayerIndex], 1);
-      }
-    } else {
+    if (!CardUtils.isAlive(damagedCard)) {
       newPlayers[attackerPlayerIndex] = PlayerUtils.addPoints(newPlayers[attackerPlayerIndex], 1);
     }
 

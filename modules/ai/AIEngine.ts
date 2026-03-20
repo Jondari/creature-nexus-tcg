@@ -110,36 +110,27 @@ export class AIEngine {
   private static getAttackActions(gameState: GameState, player: Player, opponent: Player): AIDecision[] {
     const actions: AIDecision[] = [];
 
+    if (opponent.field.length === 0) {
+      return actions;
+    }
+
     for (const attackerCard of player.field) {
       if (!CardUtils.canAttack(attackerCard, gameState.turnNumber)) continue;
 
       for (const attack of attackerCard.attacks) {
         if (player.energy < attack.energy) continue;
 
-        if (opponent.field.length > 0) {
-          for (const targetCard of opponent.field) {
-            actions.push({
-              action: {
-                type: 'ATTACK',
-                playerId: player.id,
-                cardId: attackerCard.id,
-                targetCardId: targetCard.id,
-                attackName: attack.name,
-              },
-              priority: 8,
-              reasoning: `Attack ${targetCard.name} with ${attackerCard.name}`,
-            });
-          }
-        } else {
+        for (const targetCard of opponent.field) {
           actions.push({
             action: {
               type: 'ATTACK',
               playerId: player.id,
               cardId: attackerCard.id,
+              targetCardId: targetCard.id,
               attackName: attack.name,
             },
-            priority: 10,
-            reasoning: `Direct attack with ${attackerCard.name}`,
+            priority: 8,
+            reasoning: `Attack ${targetCard.name} with ${attackerCard.name}`,
           });
         }
       }
