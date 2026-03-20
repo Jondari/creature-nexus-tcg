@@ -5,6 +5,7 @@ import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
 import { AIEngine } from '../modules/ai';
 import { SPELL_CAST_ENGINE_DELAY_MS, KILL_ANIM_MS, NON_KILL_ANIM_MS, ENERGY_WAVE_DURATION_MS, TURN_TRANSITION_DURATION_MS, CARD_RETIRE_DURATION_MS } from '../constants/animation';
+import { AI_TURN_START_DELAY_MS, AI_ANALYZE_DELAY_MS, AI_POST_ACTION_DELAY_MS, AI_BETWEEN_ACTIONS_DELAY_MS } from '../constants/ai';
 import { AnimationQueue } from '../utils/game/animationQueue';
 import { useSettings } from './SettingsContext';
 
@@ -421,7 +422,7 @@ export function GameProvider({ children }: GameProviderProps) {
     try {
       // Show AI is starting its turn
       dispatch({ type: 'SET_AI_STATUS', payload: { status: 'thinking', message: t('game.aiAction.planning') } });
-      await delay(1700); // 1200 + 500
+      await delay(AI_TURN_START_DELAY_MS);
       
       let actionsPerformed = 0;
       const maxActions = 10;
@@ -436,7 +437,7 @@ export function GameProvider({ children }: GameProviderProps) {
         
         // AI analyzing phase
         dispatch({ type: 'SET_AI_STATUS', payload: { status: 'analyzing_hand', message: t('game.aiAction.analyzing') } });
-        await delay(1300); // 800 + 500
+        await delay(AI_ANALYZE_DELAY_MS);
 
         const aiDecision = AIEngine.makeDecision(currentState);
 
@@ -532,7 +533,7 @@ export function GameProvider({ children }: GameProviderProps) {
         
         // Clear highlights and show result
         dispatch({ type: 'CLEAR_AI_VISUALS' });
-        await delay(1300); // 800 + 500
+        await delay(AI_POST_ACTION_DELAY_MS);
         
         if (success) {
           actionsPerformed++;
@@ -546,7 +547,7 @@ export function GameProvider({ children }: GameProviderProps) {
           }
           
           // Small pause between actions
-          await delay(1000); // 500 + 500
+          await delay(AI_BETWEEN_ACTIONS_DELAY_MS);
         } else {
           const endTurnSuccess = state.gameEngine.executeAction({
             type: 'END_TURN',
