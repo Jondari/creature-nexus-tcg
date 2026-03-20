@@ -33,8 +33,13 @@ export default function DecksScreen() {
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const sceneTrigger = useSceneTrigger();
   const createButtonRef = useRef<TouchableOpacity | null>(null);
+  const sceneManagerRef = useRef(sceneManager);
 
   useAnchorRegister(COMMON_ANCHORS.DECK_BUILDER_ENTRY, createButtonRef);
+
+  useEffect(() => {
+    sceneManagerRef.current = sceneManager;
+  }, [sceneManager]);
 
   useEffect(() => {
     setFlag('deck_builder_open', showDeckBuilder);
@@ -58,6 +63,11 @@ export default function DecksScreen() {
       if (user && (now - lastFetchTime > 5000)) {
         fetchUserCards();
       }
+
+      return () => {
+        sceneManagerRef.current.setFlag('deck_builder_open', false);
+        sceneManagerRef.current.stopCurrentScene();
+      };
     }, [user, lastFetchTime])
   );
 
