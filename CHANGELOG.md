@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.29.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.2...v0.29.3) (2026-03-26)
+
+
+### Bug Fixes
+
+* **build:** run and document fix-web-build for Electron packaging ([8708da8](https://github.com/Jondari/creature-nexus-tcg/commit/8708da819bb44f3a196fccd0e848a46ae39ffaf6))
+
 ### [0.29.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.1...v0.29.2) (2026-03-20)
 
 
