@@ -15,7 +15,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "electron:dev": "cross-env ELECTRON_START_URL=http://localhost:19006 concurrently \"expo start --web\" \"wait-on http://localhost:19006 && electron electron/main.js\"",
-    "electron:build": "rimraf dist release && npm run build:web && electron-builder -c electron/electron-builder.yml",
+    "electron:build": "rimraf dist release && npm run build:web && node scripts/fix-web-build.js && electron-builder -c electron/electron-builder.yml",
     "release": "standard-version",
     "redeem-code": "node scripts/redeem-code.js",
     "eas-build-post-install": "bash scripts/postinstall-eas.sh",

@@ -63,7 +63,7 @@ To deploy the web version of the app:
 npm run build:web
 ```
 
-(Optional but required for itch.io) Run the post-processing script to make every asset path relative:
+(Optional but required for static hosting targets such as itch.io) Run the post-processing script to make every asset path relative and patch Expo's exported routing/assets:
 ```bash
 node scripts/fix-web-build.js
 ```
@@ -89,7 +89,7 @@ npm run electron:dev
 ```bash
 npm run electron:build
 ```
-This command first exports the Expo web bundle to `dist/`, then `electron-builder` produces Windows executables in `release/`.
+This command first exports the Expo web bundle to `dist/`, then runs `scripts/fix-web-build.js`, and finally `electron-builder` produces Windows executables in `release/`.
 
 ## Project Structure
 
