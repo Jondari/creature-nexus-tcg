@@ -2,6 +2,7 @@ export interface RedeemCodeRewards {
   nexusCoins?: number;
   packs?: string[]; // Pack IDs from BoosterPack system
   cards?: string[]; // Individual card IDs (future feature)
+  badges?: string[]; // Badge IDs to unlock
 }
 
 export interface RedeemCode {
@@ -28,6 +29,7 @@ export interface RedeemResult {
     coins?: number;
     packs?: any[]; // BoosterPack
     cards?: import('../models/cards-extended').ExtendedCard[];
+    badges?: string[];
   };
 }
 

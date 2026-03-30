@@ -31,6 +31,29 @@ const {
 } = require('firebase/firestore');
 const readline = require('readline');
 
+// Known valid badge IDs (keep in sync with utils/badgeUtils.ts)
+const VALID_BADGES = [
+  { id: 'backer', name: 'Backer' },
+  { id: 'beta_tester', name: 'Beta Tester' },
+];
+
+const VALID_BADGE_IDS = new Set(VALID_BADGES.map(b => b.id));
+
+function printValidBadges() {
+  console.log('Available Badge IDs:');
+  VALID_BADGES.forEach(b => console.log(`  - ${b.id} (${b.name})`));
+}
+
+function validateBadgeIds(badges) {
+  const unknown = badges.filter(b => !VALID_BADGE_IDS.has(b));
+  if (unknown.length) {
+    console.log(`❌ Unknown badge ID(s): ${unknown.join(', ')}`);
+    printValidBadges();
+    return false;
+  }
+  return true;
+}
+
 // Known valid pack IDs (keep in sync with data/boosterPacks.ts)
 const VALID_PACKS = [
   { id: 'standard_pack', name: 'Standard Pack' },
@@ -105,6 +128,7 @@ function formatRewards(rewards) {
   if (rewards.nexusCoins) parts.push(`${rewards.nexusCoins} coins`);
   if (rewards.packs?.length) parts.push(`${rewards.packs.length} pack(s)`);
   if (rewards.cards?.length) parts.push(`${rewards.cards.length} card(s)`);
+  if (rewards.badges?.length) parts.push(`badges: ${rewards.badges.join(', ')}`);
   return parts.join(', ') || 'No rewards';
 }
 
@@ -146,6 +170,14 @@ async function createCode(db) {
     const cardsInput = await question('Card IDs (comma-separated, empty for none): ');
     const cards = cardsInput.trim() ? cardsInput.split(',').map(c => c.trim()) : [];
 
+    printValidBadges();
+    const badgesInput = await question('Badge IDs (comma-separated, empty for none): ');
+    const badges = badgesInput.trim() ? badgesInput.split(',').map(b => b.trim()) : [];
+    if (badges.length && !validateBadgeIds(badges)) {
+      console.log('Aborting create — please use valid badge IDs.');
+      return;
+    }
+
     // Settings
     console.log('\n⚙️ Configure Settings:');
     const isMultiUse = (await question('Multi-use code? (y/N): ')).toLowerCase() === 'y';
@@ -175,7 +207,8 @@ async function createCode(db) {
       rewards: {
         ...(nexusCoins > 0 && { nexusCoins }),
         ...(packs.length > 0 && { packs }),
-        ...(cards.length > 0 && { cards })
+        ...(cards.length > 0 && { cards }),
+        ...(badges.length > 0 && { badges })
       },
       expiryDate,
       isActive: true,

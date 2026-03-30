@@ -45,6 +45,10 @@ interface AuthContextType {
   pseudo: string | null;
   pseudoChangeUsed: boolean;
   updatePseudo: (newPseudo: string) => Promise<void>;
+  unlockedBadges: string[];
+  selectedBadges: string[];
+  updateSelectedBadges: (badges: string[]) => Promise<void>;
+  refreshBadges: () => Promise<void>;
   // Data access methods (shared interface with AuthContextLocal)
   getCoins: () => Promise<number>;
   setCoins: (amount: number) => Promise<void>;
@@ -77,6 +81,10 @@ const AuthContext = createContext<AuthContextType>({
   pseudo: null,
   pseudoChangeUsed: false,
   updatePseudo: async () => {},
+  unlockedBadges: [],
+  selectedBadges: [],
+  updateSelectedBadges: async () => {},
+  refreshBadges: async () => {},
   getCoins: async () => 0,
   setCoins: async () => {},
   addCoins: async () => {},
@@ -112,6 +120,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [avatarCreature, setAvatarCreature] = useState<string | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
   const [pseudoChangeUsed, setPseudoChangeUsed] = useState(false);
+  const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -168,6 +178,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Load data from Firestore
           const userData = userDoc.data();
           setAvatarCreature(userData?.avatarCreature || null);
+          setUnlockedBadges(userData?.unlockedBadges || []);
+          setSelectedBadges(userData?.selectedBadges || []);
 
           // Migration for existing accounts without pseudo
           if (userData?.pseudo === undefined) {
@@ -189,6 +201,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAvatarCreature(null);
         setPseudo(null);
         setPseudoChangeUsed(false);
+        setUnlockedBadges([]);
+        setSelectedBadges([]);
       }
       setLoading(false);
     });
@@ -524,6 +538,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateSelectedBadges = async (badges: string[]) => {
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+    // Validate: only unlocked badges, no duplicates, max 3
+    const sanitized = [...new Set(badges.filter(id => unlockedBadges.includes(id)))].slice(0, 3);
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, { selectedBadges: sanitized });
+      setSelectedBadges(sanitized);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating selected badges:', error);
+      }
+      throw error;
+    }
+  };
+
+  const refreshBadges = async () => {
+    if (!user) return;
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setUnlockedBadges(data?.unlockedBadges || []);
+        setSelectedBadges(data?.selectedBadges || []);
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error refreshing badges:', error);
+      }
+    }
+  };
+
   // --- Data access methods (wrapping Firebase utilities) ---
 
   const getCoins = async (): Promise<number> => {
@@ -628,6 +677,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         pseudo,
         pseudoChangeUsed,
         updatePseudo,
+        unlockedBadges,
+        selectedBadges,
+        updateSelectedBadges,
+        refreshBadges,
         // Data access methods
         getCoins,
         setCoins: setCoinsValue,

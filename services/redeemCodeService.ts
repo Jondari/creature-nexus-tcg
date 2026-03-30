@@ -105,9 +105,9 @@ export class RedeemCodeService {
     }
   }
 
-  private static async processRewards(rewards: RedeemCodeRewards, userId: string): Promise<{ coins?: number; packs?: any[]; cards?: any[] }> {
+  private static async processRewards(rewards: RedeemCodeRewards, userId: string): Promise<{ coins?: number; packs?: any[]; cards?: any[]; badges?: string[] }> {
     const promises: Promise<any>[] = [];
-    const awarded = { coins: 0 as number | undefined, packs: [] as any[], cards: [] as any[] };
+    const awarded = { coins: 0 as number | undefined, packs: [] as any[], cards: [] as any[], badges: [] as string[] };
     
     // Award Nexus Coins
     if (rewards.nexusCoins && rewards.nexusCoins > 0) {
@@ -160,6 +160,17 @@ export class RedeemCodeService {
       }
     }
     
+    // Award Badges
+    if (rewards.badges && rewards.badges.length > 0) {
+      const { isValidBadgeId } = await import('@/utils/badgeUtils');
+      const validBadges = rewards.badges.filter(isValidBadgeId);
+      if (validBadges.length > 0) {
+        awarded.badges = validBadges;
+        const userRef = doc(db, 'users', userId);
+        promises.push(updateDoc(userRef, { unlockedBadges: arrayUnion(...validBadges) }));
+      }
+    }
+
     await Promise.all(promises);
     return awarded;
   }
@@ -201,7 +212,11 @@ export class RedeemCodeService {
     if (rewards.cards && rewards.cards.length > 0) {
       messages.push(`${rewards.cards.length} special card${rewards.cards.length > 1 ? 's' : ''}`);
     }
-    
+
+    if (rewards.badges && rewards.badges.length > 0) {
+      messages.push(`${rewards.badges.length} badge${rewards.badges.length > 1 ? 's' : ''}`);
+    }
+
     return `You received: ${messages.join(', ')}!`;
   }
 

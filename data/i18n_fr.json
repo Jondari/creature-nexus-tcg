@@ -361,6 +361,16 @@
       "unlockAllFailed": "Échec du déblocage des chapitres. Réessayez."
     }
   },
+  "badge": {
+    "changeBadges": "Badges",
+    "selectBadges": "Sélectionnez vos badges",
+    "selectBadgesDesc": "Choisissez jusqu'à {{max}} badges à afficher sur votre profil",
+    "updateFailed": "Échec de la mise à jour des badges. Veuillez réessayer.",
+    "name": {
+      "backer": "Soutien",
+      "beta_tester": "Beta Testeur"
+    }
+  },
   "avatar": {
     "title": "Avatar",
     "changeAvatar": "Changer d'avatar",
@@ -402,7 +412,8 @@
         "spellAI": "Lancer de sort (IA)",
         "rewardCoins": "Récompense : Coins",
         "rewardPack": "Récompense : Pack",
-        "rewardCard": "Récompense : Carte"
+        "rewardCard": "Récompense : Carte",
+        "rewardBadge": "Récompense : Badge"
       },
       "gameSubtitle": "Les animations apparaissent par-dessus le jeu sans le perturber",
       "genericPack": "Pack"
@@ -452,7 +463,8 @@
     "reward": {
       "coins": "Vous avez reçu {{amount}} Nexus Coins !",
       "pack": "Vous avez reçu {{name}} !",
-      "card": "Vous avez reçu {{name}} !"
+      "card": "Vous avez reçu {{name}} !",
+      "badge": "Vous avez débloqué le badge {{name}} !"
     }
   },
   "auth": {

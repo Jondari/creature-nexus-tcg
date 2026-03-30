@@ -57,6 +57,10 @@ export interface AuthContextType {
   pseudo: string | null;
   pseudoChangeUsed: boolean;
   updatePseudo: (newPseudo: string) => Promise<void>;
+  unlockedBadges: string[];
+  selectedBadges: string[];
+  updateSelectedBadges: (badges: string[]) => Promise<void>;
+  refreshBadges: () => Promise<void>;
   // Demo-specific: expose local data getters for components
   getCoins: () => Promise<number>;
   setCoins: (amount: number) => Promise<void>;
@@ -89,6 +93,10 @@ const AuthContext = createContext<AuthContextType>({
   pseudo: null,
   pseudoChangeUsed: false,
   updatePseudo: async () => {},
+  unlockedBadges: [],
+  selectedBadges: [],
+  updateSelectedBadges: async () => {},
+  refreshBadges: async () => {},
   getCoins: async () => 0,
   setCoins: async () => {},
   addCoins: async () => {},
@@ -111,6 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [avatarCreature, setAvatarCreature] = useState<string | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
   const [pseudoChangeUsed, setPseudoChangeUsed] = useState(false);
+  const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
   // Initialize: check for existing demo user or auto sign-in
   useEffect(() => {
@@ -136,6 +146,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setPseudo(profile.pseudo);
         setPseudoChangeUsed(profile.pseudoChangeUsed);
         setAvatarCreature(profile.avatarCreature);
+        setUnlockedBadges(profile.unlockedBadges || []);
+        setSelectedBadges(profile.selectedBadges || []);
       } catch (error) {
         if (__DEV__) {
           console.error('Error initializing demo auth:', error);
@@ -166,6 +178,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPseudo(profile.pseudo);
       setPseudoChangeUsed(false);
       setAvatarCreature(null);
+      setUnlockedBadges([]);
+      setSelectedBadges([]);
     } catch (error) {
       if (__DEV__) {
         console.error('Error signing in anonymously (demo):', error);
@@ -183,6 +197,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPseudo(null);
       setPseudoChangeUsed(false);
       setAvatarCreature(null);
+      setUnlockedBadges([]);
+      setSelectedBadges([]);
     } catch (error) {
       if (__DEV__) {
         console.error('Error signing out (demo):', error);
@@ -218,6 +234,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Delete account - clears demo data
   const deleteAccount = async () => {
     await handleSignOut();
+  };
+
+  const updateSelectedBadges = async (badges: string[]) => {
+    // Validate: only unlocked badges, no duplicates, max 3
+    const sanitized = [...new Set(badges.filter(id => unlockedBadges.includes(id)))].slice(0, 3);
+    await updateDemoUser({ selectedBadges: sanitized });
+    setSelectedBadges(sanitized);
+  };
+
+  const refreshBadges = async () => {
+    const profile = await getDemoUser();
+    if (profile) {
+      setUnlockedBadges(profile.unlockedBadges || []);
+      setSelectedBadges(profile.selectedBadges || []);
+    }
   };
 
   // Update avatar
@@ -286,6 +317,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         pseudo,
         pseudoChangeUsed,
         updatePseudo,
+        unlockedBadges,
+        selectedBadges,
+        updateSelectedBadges,
+        refreshBadges,
         // Demo-specific helpers
         getCoins: getDemoCoins,
         setCoins: setDemoCoins,

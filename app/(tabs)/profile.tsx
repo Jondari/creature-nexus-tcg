@@ -16,6 +16,8 @@ const RedeemCodeModal = isDemoMode
   ? null
   : require('@/components/RedeemCodeModal').RedeemCodeModal;
 import { AvatarSelector } from '@/components/AvatarSelector';
+import { BadgeDisplay } from '@/components/BadgeDisplay';
+import { BadgeSelector } from '@/components/BadgeSelector';
 import { MusicControls } from '@/components/MusicControls';
 import { getPseudoValidationError, PSEUDO_MIN_LENGTH, PSEUDO_MAX_LENGTH } from '@/utils/pseudoUtils';
 import Colors from '@/constants/Colors';
@@ -28,7 +30,7 @@ const PROFILE_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1')
 
 export default function ProfileScreen() {
   const { width } = useWindowDimensions();
-  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins } = useAuth();
+  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins, unlockedBadges, selectedBadges, updateSelectedBadges } = useAuth();
   const { cardSize, setCardSize, handLayout, setHandLayout, showBattleLog, setShowBattleLog, screenShake, setScreenShake, turnBanner, setTurnBanner, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
@@ -42,6 +44,7 @@ export default function ProfileScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [showBadgeSelector, setShowBadgeSelector] = useState(false);
   const [showPseudoModal, setShowPseudoModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -149,6 +152,17 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleBadgeSelect = async (badgeIds: string[]): Promise<void> => {
+    try {
+      await updateSelectedBadges(badgeIds);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating badges:', error);
+      }
+      showErrorAlert(t('common.error'), t('badge.updateFailed'));
+    }
+  };
+
   const handleAvatarSelect = async (creatureName: string | null) => {
     try {
       await updateAvatar(creatureName);
@@ -227,6 +241,7 @@ export default function ProfileScreen() {
             size="large"
           />
           <Text style={styles.pseudoDisplay}>{pseudo || t('pseudo.defaultPseudo')}</Text>
+          <BadgeDisplay selectedBadges={selectedBadges} />
           <View style={styles.avatarButtons}>
             <TouchableOpacity
               style={styles.changeAvatarButton}
@@ -235,6 +250,15 @@ export default function ProfileScreen() {
             >
               <Text style={styles.changeAvatarText}>{t('avatar.changeAvatar')}</Text>
             </TouchableOpacity>
+            {unlockedBadges.length > 0 && (
+              <TouchableOpacity
+                style={[styles.changeAvatarButton, styles.changePseudoButton]}
+                onPress={() => setShowBadgeSelector(true)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.changeAvatarText}>{t('badge.changeBadges')}</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={[
                 styles.changeAvatarButton,
@@ -822,6 +846,14 @@ export default function ProfileScreen() {
         currentAvatar={avatarCreature}
         onClose={() => setShowAvatarSelector(false)}
         onSelect={handleAvatarSelect}
+      />
+
+      <BadgeSelector
+        visible={showBadgeSelector}
+        unlockedBadges={unlockedBadges}
+        currentSelected={selectedBadges}
+        onClose={() => setShowBadgeSelector(false)}
+        onSelect={handleBadgeSelect}
       />
 
       <Modal

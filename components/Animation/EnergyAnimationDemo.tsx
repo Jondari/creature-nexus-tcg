@@ -12,6 +12,7 @@ import { CardLoader } from '../../utils/game/cardLoader';
 import { RewardAnimation } from './RewardAnimation';
 import { generateRandomCard } from '@/utils/cardUtils';
 import { STANDARD_PACK } from '@/data/boosterPacks';
+import { AVAILABLE_BADGES } from '@/utils/badgeUtils';
 import Colors from '@/constants/Colors';
 import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS, GAME_OVER_ANIM_DURATION_MS } from '@/constants/animation';
 import { t } from '@/utils/i18n';
@@ -132,6 +133,7 @@ export const EnergyAnimationDemo: React.FC = () => {
     { labelKey: 'demo.animation.buttons.rewardCoins', component: RewardAnimation, key: 'reward-coins' },
     { labelKey: 'demo.animation.buttons.rewardPack', component: RewardAnimation, key: 'reward-pack' },
     { labelKey: 'demo.animation.buttons.rewardCard', component: RewardAnimation, key: 'reward-card' },
+    { labelKey: 'demo.animation.buttons.rewardBadge', component: RewardAnimation, key: 'reward-badge' },
   ] as const;
 
   const damageAnimations = [
@@ -204,6 +206,17 @@ export const EnergyAnimationDemo: React.FC = () => {
             type="card"
             message={t('redeem.reward.card', { name: demoCard.name })}
             card={demoCard as any}
+            onComplete={onAnimationComplete}
+          />
+        );
+      }
+      case 'reward-badge': {
+        const demoBadge = AVAILABLE_BADGES[0];
+        return (
+          <RewardAnimation
+            type="badge"
+            message={t('redeem.reward.badge', { name: t(`badge.name.${demoBadge.id}`) })}
+            badgeId={demoBadge.id}
             onComplete={onAnimationComplete}
           />
         );

@@ -319,6 +319,16 @@
       "unlockAllFailed": "Failed to unlock chapters. Please try again."
     }
   },
+  "badge": {
+    "changeBadges": "Badges",
+    "selectBadges": "Select your badges",
+    "selectBadgesDesc": "Choose up to {{max}} badges to display on your profile",
+    "updateFailed": "Failed to update badges. Please try again.",
+    "name": {
+      "backer": "Backer",
+      "beta_tester": "Beta Tester"
+    }
+  },
   "avatar": {
     "title": "Avatar",
     "changeAvatar": "Change Avatar",
@@ -360,7 +370,8 @@
         "spellAI": "Spell Cast (AI)",
         "rewardCoins": "Reward: Coins",
         "rewardPack": "Reward: Pack",
-        "rewardCard": "Reward: Card"
+        "rewardCard": "Reward: Card",
+        "rewardBadge": "Reward: Badge"
       },
       "gameSubtitle": "Animations appear over gameplay without disruption",
       "genericPack": "Pack"
@@ -410,7 +421,8 @@
     "reward": {
       "coins": "You received {{amount}} Nexus Coins!",
       "pack": "You received a {{name}}!",
-      "card": "You received {{name}}!"
+      "card": "You received {{name}}!",
+      "badge": "You unlocked the {{name}} badge!"
     }
   },
   "auth": {

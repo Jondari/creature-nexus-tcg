@@ -8,8 +8,9 @@ import { CardComponent } from '@/components/CardComponent';
 import { BoosterPack } from '@/models/BoosterPack';
 import { Coins } from 'lucide-react-native';
 import { t } from '@/utils/i18n';
+import { getBadgeImage } from '@/utils/badgeUtils';
 
-type RewardType = 'card' | 'pack' | 'coins';
+type RewardType = 'card' | 'pack' | 'coins' | 'badge';
 
 interface RewardAnimationProps {
   type: RewardType;
@@ -17,6 +18,7 @@ interface RewardAnimationProps {
   card?: Card | ExtendedCard; // when type === 'card'
   pack?: BoosterPack; // when type === 'pack'
   coins?: number; // when type === 'coins'
+  badgeId?: string; // when type === 'badge'
   onComplete?: () => void;
   durationMs?: number;
 }
@@ -27,6 +29,7 @@ export const RewardAnimation: React.FC<RewardAnimationProps> = ({
   card,
   pack,
   coins,
+  badgeId,
   onComplete,
   durationMs = 1600,
 }) => {
@@ -99,6 +102,29 @@ export const RewardAnimation: React.FC<RewardAnimationProps> = ({
             </Text>
           </View>
         );
+      case 'badge': {
+        const badgeImage = badgeId ? getBadgeImage(badgeId) : null;
+        return (
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            {badgeImage ? (
+              <Image
+                source={badgeImage}
+                style={{ width: 120, height: 120 }}
+                resizeMode="contain"
+              />
+            ) : (
+              <LinearGradient
+                colors={[Colors.primary[700], Colors.primary[900]] as any}
+                style={{ width: 120, height: 120, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Text style={{ color: Colors.text.primary, fontFamily: 'Poppins-Bold' }}>
+                  {badgeId || 'Badge'}
+                </Text>
+              </LinearGradient>
+            )}
+          </View>
+        );
+      }
       default:
         return null;
     }

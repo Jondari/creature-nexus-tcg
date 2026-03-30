@@ -30,9 +30,9 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
 }) => {
   const [code, setCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
-  const [pendingAnims, setPendingAnims] = useState<Array<{ type: 'coins' | 'pack' | 'card'; payload: any }>>([]);
-  const [currentAnim, setCurrentAnim] = useState<{ type: 'coins' | 'pack' | 'card'; payload: any } | null>(null);
-  const { user } = useAuth();
+  const [pendingAnims, setPendingAnims] = useState<Array<{ type: 'coins' | 'pack' | 'card' | 'badge'; payload: any }>>([]);
+  const [currentAnim, setCurrentAnim] = useState<{ type: 'coins' | 'pack' | 'card' | 'badge'; payload: any } | null>(null);
+  const { user, refreshBadges } = useAuth();
 
   const handleRedeem = async () => {
     if (!user || !code.trim()) return;
@@ -43,8 +43,13 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
       const result = await RedeemCodeService.redeemCode(code, user.uid);
       
       if (result.success) {
-        // Queue reward animations: coins, packs, cards
-        const queue: Array<{ type: 'coins' | 'pack' | 'card'; payload: any }> = [];
+        // Refresh badges in context immediately so UI reflects unlocked badges
+        if (result.details?.badges?.length) {
+          await refreshBadges();
+        }
+
+        // Queue reward animations: coins, packs, cards, badges
+        const queue: Array<{ type: 'coins' | 'pack' | 'card' | 'badge'; payload: any }> = [];
         if (result.details?.coins) {
           queue.push({ type: 'coins', payload: { amount: result.details.coins } });
         }
@@ -56,6 +61,11 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
         if (result.details?.cards?.length) {
           for (const card of result.details.cards) {
             queue.push({ type: 'card', payload: { card } });
+          }
+        }
+        if (result.details?.badges?.length) {
+          for (const badgeId of result.details.badges) {
+            queue.push({ type: 'badge', payload: { badgeId } });
           }
         }
 
@@ -162,11 +172,14 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
                 ? t('redeem.reward.coins', { amount: String(currentAnim.payload.amount) })
                 : currentAnim.type === 'pack'
                 ? t('redeem.reward.pack', { name: String(currentAnim.payload.pack.name) })
+                : currentAnim.type === 'badge'
+                ? t('redeem.reward.badge', { name: t(`badge.name.${currentAnim.payload.badgeId}`) })
                 : t('redeem.reward.card', { name: String(currentAnim.payload.card.name) })
             }
             coins={currentAnim.type === 'coins' ? currentAnim.payload.amount : undefined}
             pack={currentAnim.type === 'pack' ? currentAnim.payload.pack : undefined}
             card={currentAnim.type === 'card' ? currentAnim.payload.card : undefined}
+            badgeId={currentAnim.type === 'badge' ? currentAnim.payload.badgeId : undefined}
             onComplete={handleAnimComplete}
             durationMs={1600}
           />
