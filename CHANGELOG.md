@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.31.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.30.0...v0.31.0) (2026-03-31)
+
+
+### Features
+
+* **avatar:** add avatar frame system with selector, profile and battle display ([84b881c](https://github.com/Jondari/creature-nexus-tcg/commit/84b881c2615aebf324560e6cad42c5ffdd54f9c7))
+* **redeem:** add avatar frame rewards with shared data pattern and animations ([33bac00](https://github.com/Jondari/creature-nexus-tcg/commit/33bac0018bedc10e06b34387b9f3c042c1245d19))
+
 ## [0.30.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.3...v0.30.0) (2026-03-31)
 
 
