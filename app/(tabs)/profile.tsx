@@ -16,6 +16,7 @@ const RedeemCodeModal = isDemoMode
   ? null
   : require('@/components/RedeemCodeModal').RedeemCodeModal;
 import { AvatarSelector } from '@/components/AvatarSelector';
+import { AvatarFrameSelector } from '@/components/AvatarFrameSelector';
 import { BadgeDisplay } from '@/components/BadgeDisplay';
 import { BadgeSelector } from '@/components/BadgeSelector';
 import { MusicControls } from '@/components/MusicControls';
@@ -30,7 +31,7 @@ const PROFILE_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1')
 
 export default function ProfileScreen() {
   const { width } = useWindowDimensions();
-  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins, unlockedBadges, selectedBadges, updateSelectedBadges } = useAuth();
+  const { user, signOut, linkWithEmail, linkWithGoogle, deleteAccount, isAnonymous, avatarCreature, updateAvatar, pseudo, pseudoChangeUsed, updatePseudo, addCoins, unlockedBadges, selectedBadges, updateSelectedBadges, unlockedFrames, selectedFrame, updateSelectedFrame } = useAuth();
   const { cardSize, setCardSize, handLayout, setHandLayout, showBattleLog, setShowBattleLog, screenShake, setScreenShake, turnBanner, setTurnBanner, locale, setLocale } = useSettings();
   const { resetProgress, unlockAllChapters } = useStoryMode();
   const router = useRouter();
@@ -44,6 +45,7 @@ export default function ProfileScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [showFrameSelector, setShowFrameSelector] = useState(false);
   const [showBadgeSelector, setShowBadgeSelector] = useState(false);
   const [showPseudoModal, setShowPseudoModal] = useState(false);
   const [email, setEmail] = useState('');
@@ -152,6 +154,17 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleFrameSelect = async (frameId: string | null): Promise<void> => {
+    try {
+      await updateSelectedFrame(frameId);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating frame:', error);
+      }
+      showErrorAlert(t('common.error'), t('avatarFrame.updateFailed'));
+    }
+  };
+
   const handleBadgeSelect = async (badgeIds: string[]): Promise<void> => {
     try {
       await updateSelectedBadges(badgeIds);
@@ -236,10 +249,13 @@ export default function ProfileScreen() {
 
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
-          <PlayerAvatar
-            creatureName={avatarCreature}
-            size="large"
-          />
+          <View style={selectedFrame ? { marginVertical: 16 } : undefined}>
+            <PlayerAvatar
+              creatureName={avatarCreature}
+              size="large"
+              frame={selectedFrame}
+            />
+          </View>
           <Text style={styles.pseudoDisplay}>{pseudo || t('pseudo.defaultPseudo')}</Text>
           <BadgeDisplay selectedBadges={selectedBadges} />
           <View style={styles.avatarButtons}>
@@ -250,6 +266,15 @@ export default function ProfileScreen() {
             >
               <Text style={styles.changeAvatarText}>{t('avatar.changeAvatar')}</Text>
             </TouchableOpacity>
+            {unlockedFrames.length > 0 && (
+              <TouchableOpacity
+                style={[styles.changeAvatarButton, styles.changePseudoButton]}
+                onPress={() => setShowFrameSelector(true)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.changeAvatarText}>{t('avatarFrame.changeFrame')}</Text>
+              </TouchableOpacity>
+            )}
             {unlockedBadges.length > 0 && (
               <TouchableOpacity
                 style={[styles.changeAvatarButton, styles.changePseudoButton]}
@@ -848,6 +873,15 @@ export default function ProfileScreen() {
         onSelect={handleAvatarSelect}
       />
 
+      <AvatarFrameSelector
+        visible={showFrameSelector}
+        unlockedFrames={unlockedFrames}
+        currentFrame={selectedFrame}
+        currentAvatar={avatarCreature}
+        onClose={() => setShowFrameSelector(false)}
+        onSelect={handleFrameSelect}
+      />
+
       <BadgeSelector
         visible={showBadgeSelector}
         unlockedBadges={unlockedBadges}
@@ -1262,6 +1296,8 @@ const styles = StyleSheet.create({
   },
   avatarButtons: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: 12,
     marginTop: 16,
   },

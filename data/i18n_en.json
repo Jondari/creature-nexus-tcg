@@ -319,6 +319,23 @@
       "unlockAllFailed": "Failed to unlock chapters. Please try again."
     }
   },
+  "avatarFrame": {
+    "changeFrame": "Frame",
+    "selectFrame": "Select your frame",
+    "selectFrameDesc": "Choose a frame to display around your avatar",
+    "noFrame": "None",
+    "updateFailed": "Failed to update frame. Please try again.",
+    "name": {
+      "backer": "Backer",
+      "beta_tester": "Beta Tester",
+      "beta_tester_golden": "Golden Beta Tester",
+      "fire": "Fire",
+      "water": "Water",
+      "earth": "Earth",
+      "ice": "Ice",
+      "vortex": "Vortex"
+    }
+  },
   "badge": {
     "changeBadges": "Badges",
     "selectBadges": "Select your badges",

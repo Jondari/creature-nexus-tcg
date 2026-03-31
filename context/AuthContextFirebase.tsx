@@ -49,6 +49,9 @@ interface AuthContextType {
   selectedBadges: string[];
   updateSelectedBadges: (badges: string[]) => Promise<void>;
   refreshBadges: () => Promise<void>;
+  unlockedFrames: string[];
+  selectedFrame: string | null;
+  updateSelectedFrame: (frameId: string | null) => Promise<void>;
   // Data access methods (shared interface with AuthContextLocal)
   getCoins: () => Promise<number>;
   setCoins: (amount: number) => Promise<void>;
@@ -85,6 +88,9 @@ const AuthContext = createContext<AuthContextType>({
   selectedBadges: [],
   updateSelectedBadges: async () => {},
   refreshBadges: async () => {},
+  unlockedFrames: [],
+  selectedFrame: null,
+  updateSelectedFrame: async () => {},
   getCoins: async () => 0,
   setCoins: async () => {},
   addCoins: async () => {},
@@ -122,6 +128,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [pseudoChangeUsed, setPseudoChangeUsed] = useState(false);
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [unlockedFrames, setUnlockedFrames] = useState<string[]>([]);
+  const [selectedFrame, setSelectedFrame] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -180,6 +188,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAvatarCreature(userData?.avatarCreature || null);
           setUnlockedBadges(userData?.unlockedBadges || []);
           setSelectedBadges(userData?.selectedBadges || []);
+          setUnlockedFrames(userData?.unlockedFrames || []);
+          setSelectedFrame(userData?.selectedFrame || null);
 
           // Migration for existing accounts without pseudo
           if (userData?.pseudo === undefined) {
@@ -556,6 +566,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateSelectedFrame = async (frameId: string | null) => {
+    if (!user) throw new Error('No user logged in');
+    const sanitized = frameId && unlockedFrames.includes(frameId) ? frameId : null;
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, { selectedFrame: sanitized });
+      setSelectedFrame(sanitized);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating selected frame:', error);
+      }
+      throw error;
+    }
+  };
+
   const refreshBadges = async () => {
     if (!user) return;
     try {
@@ -681,6 +706,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         selectedBadges,
         updateSelectedBadges,
         refreshBadges,
+        unlockedFrames,
+        selectedFrame,
+        updateSelectedFrame,
         // Data access methods
         getCoins,
         setCoins: setCoinsValue,

@@ -52,6 +52,8 @@ export interface DemoUserProfile {
   avatarCreature: string | null;
   unlockedBadges: string[];
   selectedBadges: string[];
+  unlockedFrames: string[];
+  selectedFrame: string | null;
   isAnonymous: true;
   createdAt: string;
 }
@@ -73,6 +75,8 @@ export const initializeDemoUser = async (): Promise<DemoUserProfile> => {
     avatarCreature: null,
     unlockedBadges: [],
     selectedBadges: [],
+    unlockedFrames: [],
+    selectedFrame: null,
     isAnonymous: true,
     createdAt: new Date().toISOString(),
   };

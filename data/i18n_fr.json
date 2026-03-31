@@ -361,6 +361,23 @@
       "unlockAllFailed": "Échec du déblocage des chapitres. Réessayez."
     }
   },
+  "avatarFrame": {
+    "changeFrame": "Cadre",
+    "selectFrame": "Sélectionnez votre cadre",
+    "selectFrameDesc": "Choisissez un cadre à afficher autour de votre avatar",
+    "noFrame": "Aucun",
+    "updateFailed": "Échec de la mise à jour du cadre. Veuillez réessayer.",
+    "name": {
+      "backer": "Soutien",
+      "beta_tester": "Beta Testeur",
+      "beta_tester_golden": "Beta Testeur Doré",
+      "fire": "Feu",
+      "water": "Eau",
+      "earth": "Terre",
+      "ice": "Glace",
+      "vortex": "Vortex"
+    }
+  },
   "badge": {
     "changeBadges": "Badges",
     "selectBadges": "Sélectionnez vos badges",

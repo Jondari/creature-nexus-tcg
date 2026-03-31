@@ -61,6 +61,9 @@ export interface AuthContextType {
   selectedBadges: string[];
   updateSelectedBadges: (badges: string[]) => Promise<void>;
   refreshBadges: () => Promise<void>;
+  unlockedFrames: string[];
+  selectedFrame: string | null;
+  updateSelectedFrame: (frameId: string | null) => Promise<void>;
   // Demo-specific: expose local data getters for components
   getCoins: () => Promise<number>;
   setCoins: (amount: number) => Promise<void>;
@@ -97,6 +100,9 @@ const AuthContext = createContext<AuthContextType>({
   selectedBadges: [],
   updateSelectedBadges: async () => {},
   refreshBadges: async () => {},
+  unlockedFrames: [],
+  selectedFrame: null,
+  updateSelectedFrame: async () => {},
   getCoins: async () => 0,
   setCoins: async () => {},
   addCoins: async () => {},
@@ -121,6 +127,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [pseudoChangeUsed, setPseudoChangeUsed] = useState(false);
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [unlockedFrames, setUnlockedFrames] = useState<string[]>([]);
+  const [selectedFrame, setSelectedFrame] = useState<string | null>(null);
 
   // Initialize: check for existing demo user or auto sign-in
   useEffect(() => {
@@ -148,6 +156,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAvatarCreature(profile.avatarCreature);
         setUnlockedBadges(profile.unlockedBadges || []);
         setSelectedBadges(profile.selectedBadges || []);
+        setUnlockedFrames(profile.unlockedFrames || []);
+        setSelectedFrame(profile.selectedFrame || null);
       } catch (error) {
         if (__DEV__) {
           console.error('Error initializing demo auth:', error);
@@ -180,6 +190,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAvatarCreature(null);
       setUnlockedBadges([]);
       setSelectedBadges([]);
+      setUnlockedFrames([]);
+      setSelectedFrame(null);
     } catch (error) {
       if (__DEV__) {
         console.error('Error signing in anonymously (demo):', error);
@@ -249,6 +261,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUnlockedBadges(profile.unlockedBadges || []);
       setSelectedBadges(profile.selectedBadges || []);
     }
+  };
+
+  const updateSelectedFrame = async (frameId: string | null) => {
+    const sanitized = frameId && unlockedFrames.includes(frameId) ? frameId : null;
+    await updateDemoUser({ selectedFrame: sanitized });
+    setSelectedFrame(sanitized);
   };
 
   // Update avatar
@@ -321,6 +339,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         selectedBadges,
         updateSelectedBadges,
         refreshBadges,
+        unlockedFrames,
+        selectedFrame,
+        updateSelectedFrame,
         // Demo-specific helpers
         getCoins: getDemoCoins,
         setCoins: setDemoCoins,

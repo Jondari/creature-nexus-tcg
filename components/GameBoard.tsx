@@ -93,7 +93,7 @@ export function GameBoard() {
     initializeGame
   } = useGame();
   const { activeDeck } = useDecks();
-  const { avatarCreature, pseudo } = useAuth();
+  const { avatarCreature, pseudo, selectedFrame } = useAuth();
   const { cardSize, setCardSize, handLayout, showBattleLog, screenShake, turnBanner: turnBannerEnabled } = useSettings();
   const sceneManager = useSceneManager();
   const { playCard, castSpell, attack, retireCard, endTurn, processAITurn } = useGameActions();
@@ -740,6 +740,7 @@ export function GameBoard() {
         ]}
         containerRef={bottomStatsRef as any}
         avatarCreature={avatarCreature}
+        avatarFrame={selectedFrame}
         avatarPosition="left"
       />
 

@@ -14,6 +14,7 @@ interface PlayerInfoProps {
   subtitle?: React.ReactNode;
   containerRef?: React.Ref<View>;
   avatarCreature?: string | null;
+  avatarFrame?: string | null;
   avatarPosition?: 'left' | 'right';
 }
 
@@ -23,6 +24,7 @@ export function PlayerInfo({
   subtitle,
   containerRef,
   avatarCreature,
+  avatarFrame,
   avatarPosition = 'left',
 }: PlayerInfoProps) {
   const showAvatar = avatarCreature !== undefined;
@@ -32,7 +34,7 @@ export function PlayerInfo({
     if (!showAvatar) return null;
     return (
       <View style={styles.avatarContainer}>
-        <PlayerAvatar creatureName={avatarCreature} size="small" />
+        <PlayerAvatar creatureName={avatarCreature} size="small" frame={avatarFrame} />
       </View>
     );
   };
