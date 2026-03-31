@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.30.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.3...v0.30.0) (2026-03-31)
+
+
+### Features
+
+* **profile:** add badge support and redeem rewards ([350ad9c](https://github.com/Jondari/creature-nexus-tcg/commit/350ad9c41ca4b570bf9d1565feea4d96080640e9))
+
 ### [0.29.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.29.2...v0.29.3) (2026-03-26)
 
 
