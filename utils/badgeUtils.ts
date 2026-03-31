@@ -2,10 +2,8 @@ import { BadgeDefinition } from '@/types/badge';
 
 export const MAX_DISPLAYED_BADGES = 3;
 
-export const AVAILABLE_BADGES: BadgeDefinition[] = [
-  { id: 'backer', name: 'backer' },
-  { id: 'beta_tester', name: 'beta_tester' },
-];
+// Shared with scripts/redeem-code.js — edit data/badges.shared.js to add new badges
+export const AVAILABLE_BADGES: BadgeDefinition[] = (require('../data/badges.shared') as { AVAILABLE_BADGES: BadgeDefinition[] }).AVAILABLE_BADGES;
 
 const BADGE_IDS = new Set(AVAILABLE_BADGES.map(b => b.id));
 

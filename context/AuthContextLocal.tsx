@@ -64,6 +64,7 @@ export interface AuthContextType {
   unlockedFrames: string[];
   selectedFrame: string | null;
   updateSelectedFrame: (frameId: string | null) => Promise<void>;
+  refreshFrames: () => Promise<void>;
   // Demo-specific: expose local data getters for components
   getCoins: () => Promise<number>;
   setCoins: (amount: number) => Promise<void>;
@@ -103,6 +104,7 @@ const AuthContext = createContext<AuthContextType>({
   unlockedFrames: [],
   selectedFrame: null,
   updateSelectedFrame: async () => {},
+  refreshFrames: async () => {},
   getCoins: async () => 0,
   setCoins: async () => {},
   addCoins: async () => {},
@@ -211,6 +213,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAvatarCreature(null);
       setUnlockedBadges([]);
       setSelectedBadges([]);
+      setUnlockedFrames([]);
+      setSelectedFrame(null);
     } catch (error) {
       if (__DEV__) {
         console.error('Error signing out (demo):', error);
@@ -260,6 +264,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (profile) {
       setUnlockedBadges(profile.unlockedBadges || []);
       setSelectedBadges(profile.selectedBadges || []);
+    }
+  };
+
+  const refreshFrames = async () => {
+    const profile = await getDemoUser();
+    if (profile) {
+      setUnlockedFrames(profile.unlockedFrames || []);
+      setSelectedFrame(profile.selectedFrame || null);
     }
   };
 
@@ -342,6 +354,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         unlockedFrames,
         selectedFrame,
         updateSelectedFrame,
+        refreshFrames,
         // Demo-specific helpers
         getCoins: getDemoCoins,
         setCoins: setDemoCoins,

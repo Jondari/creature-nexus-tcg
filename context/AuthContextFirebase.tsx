@@ -52,6 +52,7 @@ interface AuthContextType {
   unlockedFrames: string[];
   selectedFrame: string | null;
   updateSelectedFrame: (frameId: string | null) => Promise<void>;
+  refreshFrames: () => Promise<void>;
   // Data access methods (shared interface with AuthContextLocal)
   getCoins: () => Promise<number>;
   setCoins: (amount: number) => Promise<void>;
@@ -91,6 +92,7 @@ const AuthContext = createContext<AuthContextType>({
   unlockedFrames: [],
   selectedFrame: null,
   updateSelectedFrame: async () => {},
+  refreshFrames: async () => {},
   getCoins: async () => 0,
   setCoins: async () => {},
   addCoins: async () => {},
@@ -213,6 +215,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setPseudoChangeUsed(false);
         setUnlockedBadges([]);
         setSelectedBadges([]);
+        setUnlockedFrames([]);
+        setSelectedFrame(null);
       }
       setLoading(false);
     });
@@ -566,6 +570,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshFrames = async () => {
+    if (!user) return;
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setUnlockedFrames(data?.unlockedFrames || []);
+        setSelectedFrame(data?.selectedFrame || null);
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error refreshing frames:', error);
+      }
+    }
+  };
+
   const updateSelectedFrame = async (frameId: string | null) => {
     if (!user) throw new Error('No user logged in');
     const sanitized = frameId && unlockedFrames.includes(frameId) ? frameId : null;
@@ -709,6 +730,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         unlockedFrames,
         selectedFrame,
         updateSelectedFrame,
+        refreshFrames,
         // Data access methods
         getCoins,
         setCoins: setCoinsValue,

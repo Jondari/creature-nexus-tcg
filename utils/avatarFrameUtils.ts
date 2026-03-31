@@ -1,15 +1,7 @@
 import { AvatarFrameDefinition } from '@/types/avatarFrame';
 
-export const AVAILABLE_FRAMES: AvatarFrameDefinition[] = [
-  { id: 'backer', name: 'backer' },
-  { id: 'beta_tester', name: 'beta_tester' },
-  { id: 'beta_tester_golden', name: 'beta_tester_golden' },
-  { id: 'fire', name: 'fire' },
-  { id: 'water', name: 'water' },
-  { id: 'earth', name: 'earth' },
-  { id: 'ice', name: 'ice' },
-  { id: 'vortex', name: 'vortex' },
-];
+// Shared with scripts/redeem-code.js — edit data/frames.shared.js to add new frames
+export const AVAILABLE_FRAMES: AvatarFrameDefinition[] = (require('../data/frames.shared') as { AVAILABLE_FRAMES: AvatarFrameDefinition[] }).AVAILABLE_FRAMES;
 
 const FRAME_IMAGES: Record<string, ReturnType<typeof require>> = {
   backer: require('@/assets/images/frame/avatar/backer.png'),

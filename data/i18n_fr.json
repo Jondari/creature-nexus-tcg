@@ -430,7 +430,8 @@
         "rewardCoins": "Récompense : Coins",
         "rewardPack": "Récompense : Pack",
         "rewardCard": "Récompense : Carte",
-        "rewardBadge": "Récompense : Badge"
+        "rewardBadge": "Récompense : Badge",
+        "rewardAvatarFrame": "Récompense : Cadre"
       },
       "gameSubtitle": "Les animations apparaissent par-dessus le jeu sans le perturber",
       "genericPack": "Pack"
@@ -481,7 +482,8 @@
       "coins": "Vous avez reçu {{amount}} Nexus Coins !",
       "pack": "Vous avez reçu {{name}} !",
       "card": "Vous avez reçu {{name}} !",
-      "badge": "Vous avez débloqué le badge {{name}} !"
+      "badge": "Vous avez débloqué le badge {{name}} !",
+      "avatarFrame": "Vous avez débloqué le cadre {{name}} !"
     }
   },
   "auth": {

@@ -31,13 +31,14 @@ const {
 } = require('firebase/firestore');
 const readline = require('readline');
 
-// Known valid badge IDs (keep in sync with utils/badgeUtils.ts)
-const VALID_BADGES = [
-  { id: 'backer', name: 'Backer' },
-  { id: 'beta_tester', name: 'Beta Tester' },
-];
+const { AVAILABLE_BADGES } = require('../data/badges.shared');
+const { AVAILABLE_FRAMES } = require('../data/frames.shared');
 
+const VALID_BADGES = AVAILABLE_BADGES;
 const VALID_BADGE_IDS = new Set(VALID_BADGES.map(b => b.id));
+
+const VALID_FRAMES = AVAILABLE_FRAMES;
+const VALID_FRAME_IDS = new Set(VALID_FRAMES.map(f => f.id));
 
 function printValidBadges() {
   console.log('Available Badge IDs:');
@@ -49,6 +50,21 @@ function validateBadgeIds(badges) {
   if (unknown.length) {
     console.log(`❌ Unknown badge ID(s): ${unknown.join(', ')}`);
     printValidBadges();
+    return false;
+  }
+  return true;
+}
+
+function printValidFrames() {
+  console.log('Available Frame IDs:');
+  VALID_FRAMES.forEach(f => console.log(`  - ${f.id} (${f.name})`));
+}
+
+function validateFrameIds(frames) {
+  const unknown = frames.filter(f => !VALID_FRAME_IDS.has(f));
+  if (unknown.length) {
+    console.log(`❌ Unknown frame ID(s): ${unknown.join(', ')}`);
+    printValidFrames();
     return false;
   }
   return true;
@@ -129,6 +145,7 @@ function formatRewards(rewards) {
   if (rewards.packs?.length) parts.push(`${rewards.packs.length} pack(s)`);
   if (rewards.cards?.length) parts.push(`${rewards.cards.length} card(s)`);
   if (rewards.badges?.length) parts.push(`badges: ${rewards.badges.join(', ')}`);
+  if (rewards.avatarFrames?.length) parts.push(`frames: ${rewards.avatarFrames.join(', ')}`);
   return parts.join(', ') || 'No rewards';
 }
 
@@ -178,6 +195,14 @@ async function createCode(db) {
       return;
     }
 
+    printValidFrames();
+    const framesInput = await question('Avatar Frame IDs (comma-separated, empty for none): ');
+    const avatarFrames = framesInput.trim() ? framesInput.split(',').map(f => f.trim()) : [];
+    if (avatarFrames.length && !validateFrameIds(avatarFrames)) {
+      console.log('Aborting create — please use valid frame IDs.');
+      return;
+    }
+
     // Settings
     console.log('\n⚙️ Configure Settings:');
     const isMultiUse = (await question('Multi-use code? (y/N): ')).toLowerCase() === 'y';
@@ -208,7 +233,8 @@ async function createCode(db) {
         ...(nexusCoins > 0 && { nexusCoins }),
         ...(packs.length > 0 && { packs }),
         ...(cards.length > 0 && { cards }),
-        ...(badges.length > 0 && { badges })
+        ...(badges.length > 0 && { badges }),
+        ...(avatarFrames.length > 0 && { avatarFrames })
       },
       expiryDate,
       isActive: true,

@@ -9,8 +9,10 @@ import { BoosterPack } from '@/models/BoosterPack';
 import { Coins } from 'lucide-react-native';
 import { t } from '@/utils/i18n';
 import { getBadgeImage } from '@/utils/badgeUtils';
+import { getFrameImage } from '@/utils/avatarFrameUtils';
+import { PlayerAvatar } from '@/components/PlayerAvatar';
 
-type RewardType = 'card' | 'pack' | 'coins' | 'badge';
+type RewardType = 'card' | 'pack' | 'coins' | 'badge' | 'avatarFrame';
 
 interface RewardAnimationProps {
   type: RewardType;
@@ -19,6 +21,7 @@ interface RewardAnimationProps {
   pack?: BoosterPack; // when type === 'pack'
   coins?: number; // when type === 'coins'
   badgeId?: string; // when type === 'badge'
+  frameId?: string; // when type === 'avatarFrame'
   onComplete?: () => void;
   durationMs?: number;
 }
@@ -30,6 +33,7 @@ export const RewardAnimation: React.FC<RewardAnimationProps> = ({
   pack,
   coins,
   badgeId,
+  frameId,
   onComplete,
   durationMs = 1600,
 }) => {
@@ -119,6 +123,24 @@ export const RewardAnimation: React.FC<RewardAnimationProps> = ({
               >
                 <Text style={{ color: Colors.text.primary, fontFamily: 'Poppins-Bold' }}>
                   {badgeId || 'Badge'}
+                </Text>
+              </LinearGradient>
+            )}
+          </View>
+        );
+      }
+      case 'avatarFrame': {
+        const frameImage = frameId ? getFrameImage(frameId) : null;
+        return (
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <PlayerAvatar creatureName={null} size="large" frame={frameId} />
+            {!frameImage && (
+              <LinearGradient
+                colors={[Colors.primary[700], Colors.primary[900]] as any}
+                style={{ width: 120, height: 120, borderRadius: 60, alignItems: 'center', justifyContent: 'center', position: 'absolute' }}
+              >
+                <Text style={{ color: Colors.text.primary, fontFamily: 'Poppins-Bold' }}>
+                  {frameId || 'Frame'}
                 </Text>
               </LinearGradient>
             )}

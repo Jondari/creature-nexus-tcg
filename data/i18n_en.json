@@ -388,7 +388,8 @@
         "rewardCoins": "Reward: Coins",
         "rewardPack": "Reward: Pack",
         "rewardCard": "Reward: Card",
-        "rewardBadge": "Reward: Badge"
+        "rewardBadge": "Reward: Badge",
+        "rewardAvatarFrame": "Reward: Frame"
       },
       "gameSubtitle": "Animations appear over gameplay without disruption",
       "genericPack": "Pack"
@@ -439,7 +440,8 @@
       "coins": "You received {{amount}} Nexus Coins!",
       "pack": "You received a {{name}}!",
       "card": "You received {{name}}!",
-      "badge": "You unlocked the {{name}} badge!"
+      "badge": "You unlocked the {{name}} badge!",
+      "avatarFrame": "You unlocked the {{name}} frame!"
     }
   },
   "auth": {

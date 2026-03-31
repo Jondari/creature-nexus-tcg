@@ -105,9 +105,9 @@ export class RedeemCodeService {
     }
   }
 
-  private static async processRewards(rewards: RedeemCodeRewards, userId: string): Promise<{ coins?: number; packs?: any[]; cards?: any[]; badges?: string[] }> {
+  private static async processRewards(rewards: RedeemCodeRewards, userId: string): Promise<{ coins?: number; packs?: any[]; cards?: any[]; badges?: string[]; avatarFrames?: string[] }> {
     const promises: Promise<any>[] = [];
-    const awarded = { coins: 0 as number | undefined, packs: [] as any[], cards: [] as any[], badges: [] as string[] };
+    const awarded = { coins: 0 as number | undefined, packs: [] as any[], cards: [] as any[], badges: [] as string[], avatarFrames: [] as string[] };
     
     // Award Nexus Coins
     if (rewards.nexusCoins && rewards.nexusCoins > 0) {
@@ -171,6 +171,17 @@ export class RedeemCodeService {
       }
     }
 
+    // Award Avatar Frames
+    if (rewards.avatarFrames && rewards.avatarFrames.length > 0) {
+      const { isValidFrameId } = await import('@/utils/avatarFrameUtils');
+      const validFrames = rewards.avatarFrames.filter(isValidFrameId);
+      if (validFrames.length > 0) {
+        awarded.avatarFrames = validFrames;
+        const userRef = doc(db, 'users', userId);
+        promises.push(updateDoc(userRef, { unlockedFrames: arrayUnion(...validFrames) }));
+      }
+    }
+
     await Promise.all(promises);
     return awarded;
   }
@@ -215,6 +226,10 @@ export class RedeemCodeService {
 
     if (rewards.badges && rewards.badges.length > 0) {
       messages.push(`${rewards.badges.length} badge${rewards.badges.length > 1 ? 's' : ''}`);
+    }
+
+    if (rewards.avatarFrames && rewards.avatarFrames.length > 0) {
+      messages.push(`${rewards.avatarFrames.length} avatar frame${rewards.avatarFrames.length > 1 ? 's' : ''}`);
     }
 
     return `You received: ${messages.join(', ')}!`;

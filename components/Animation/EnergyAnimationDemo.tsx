@@ -13,6 +13,7 @@ import { RewardAnimation } from './RewardAnimation';
 import { generateRandomCard } from '@/utils/cardUtils';
 import { STANDARD_PACK } from '@/data/boosterPacks';
 import { AVAILABLE_BADGES } from '@/utils/badgeUtils';
+import { AVAILABLE_FRAMES } from '@/utils/avatarFrameUtils';
 import Colors from '@/constants/Colors';
 import { CARD_ENTRY_DURATION_MS, CARD_RETIRE_DURATION_MS, GAME_OVER_ANIM_DURATION_MS } from '@/constants/animation';
 import { t } from '@/utils/i18n';
@@ -134,6 +135,7 @@ export const EnergyAnimationDemo: React.FC = () => {
     { labelKey: 'demo.animation.buttons.rewardPack', component: RewardAnimation, key: 'reward-pack' },
     { labelKey: 'demo.animation.buttons.rewardCard', component: RewardAnimation, key: 'reward-card' },
     { labelKey: 'demo.animation.buttons.rewardBadge', component: RewardAnimation, key: 'reward-badge' },
+    { labelKey: 'demo.animation.buttons.rewardAvatarFrame', component: RewardAnimation, key: 'reward-avatarFrame' },
   ] as const;
 
   const damageAnimations = [
@@ -217,6 +219,17 @@ export const EnergyAnimationDemo: React.FC = () => {
             type="badge"
             message={t('redeem.reward.badge', { name: t(`badge.name.${demoBadge.id}`) })}
             badgeId={demoBadge.id}
+            onComplete={onAnimationComplete}
+          />
+        );
+      }
+      case 'reward-avatarFrame': {
+        const demoFrame = AVAILABLE_FRAMES[0];
+        return (
+          <RewardAnimation
+            type="avatarFrame"
+            message={t('redeem.reward.avatarFrame', { name: t(`avatarFrame.name.${demoFrame.id}`) })}
+            frameId={demoFrame.id}
             onComplete={onAnimationComplete}
           />
         );
