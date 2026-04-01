@@ -8,7 +8,9 @@
 |------|-------------|
 | [animations.md](animations.md) | Animation components: pack opening, damage, spells, energy, rewards |
 | [audio-system.md](audio-system.md) | Audio and sound management: SoundManager, crossfade, web permissions |
+| [avatar-frame-system.md](avatar-frame-system.md) | Avatar frame overlays: catalog, redeem flow, PlayerAvatar integration |
 | [avatar-system.md](avatar-system.md) | Avatar selection, display, and persistence |
+| [badge-system.md](badge-system.md) | Badge cosmetics: catalog, redeem flow, BadgeDisplay and BadgeSelector |
 | [battlefield-visuals.md](battlefield-visuals.md) | Battlefield themes and particle effects |
 | [billing-system.md](billing-system.md) | In-app purchases: RevenueCat integration, platform behavior |
 | [custom-alert.md](custom-alert.md) | Cross-platform alert system with global API |
