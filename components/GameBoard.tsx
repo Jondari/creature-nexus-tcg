@@ -32,6 +32,8 @@ import { useScreenShake } from '../hooks/useScreenShake';
 import { TurnTransitionBanner } from './Animation/TurnTransitionBanner';
 import { GameOverAnimation } from './Animation/GameOverAnimation';
 import { useEffectiveViewport } from '@/hooks/useEffectiveViewport';
+import { gameEventBus } from '@/utils/gameEventBus';
+import { useQuests } from '@/context/QuestContext';
 
 // TODO: Move to GameConfig when implementing configurable win conditions
 const POINTS_TO_WIN = 4;
@@ -72,6 +74,7 @@ const renderEnergy = (energy: number) => {
 
 
 export function GameBoard() {
+  const { setQuestRewardOverlayEnabled } = useQuests();
   const { 
     gameState, 
     gameEngine, 
@@ -117,6 +120,9 @@ export function GameBoard() {
   useEffect(() => () => { if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current); }, []);
   const { shakeStyle, triggerShake } = useScreenShake();
 
+  // Anti-doublon ref for quest battle result emission
+  const emittedGameOverRef = useRef<string | null>(null);
+
   // Screen shake on damage impacts (respects user setting)
   const prevDamageCountRef = useRef(damageAnimations.length);
   useEffect(() => {
@@ -126,6 +132,37 @@ export function GameBoard() {
     }
     prevDamageCountRef.current = damageAnimations.length;
   }, [damageAnimations.length, screenShake]);
+
+  // Emit quest event on battle result (anti-doublon guard)
+  useEffect(() => {
+    if (!gameState?.isGameOver || !gameState.winner) return;
+    const key = `${gameState.winner}-${gameState.turnNumber}`;
+    if (emittedGameOverRef.current === key) return;
+    emittedGameOverRef.current = key;
+    const playerAtBottomId = gameState?.players[0]?.id;
+    if (gameState.winner === playerAtBottomId) {
+      gameEventBus.emit('battle_won');
+    } else {
+      gameEventBus.emit('battle_lost');
+    }
+  }, [gameState?.isGameOver, gameState?.winner, gameState?.turnNumber]);
+
+  useEffect(() => {
+    if (!gameState?.isGameOver) {
+      emittedGameOverRef.current = null;
+    }
+  }, [gameState?.isGameOver]);
+
+  useEffect(() => {
+    if (gameState?.isGameOver) {
+      setQuestRewardOverlayEnabled(false);
+    } else {
+      setQuestRewardOverlayEnabled(true);
+    }
+    return () => {
+      setQuestRewardOverlayEnabled(true);
+    };
+  }, [gameState?.isGameOver, setQuestRewardOverlayEnabled]);
 
   // Anchor refs for tutorial highlights
   const topFieldRef = useRef<View | null>(null);

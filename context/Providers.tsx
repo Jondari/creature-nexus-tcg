@@ -10,6 +10,7 @@ import { isDemoMode } from '@/config/localMode';
 import type { AuthContextType } from '@/context/AuthContextLocal';
 import type { DeckContextType } from '@/context/DeckContextLocal';
 import type { StoryModeContextType } from '@/context/StoryModeContextLocal';
+import type { QuestContextType } from '@/context/QuestContextLocal';
 
 // Use require() for conditional loading to avoid static import side effects
 let AuthProvider: ComponentType<{ children: ReactNode }>;
@@ -18,12 +19,15 @@ let DeckProvider: ComponentType<{ children: ReactNode }>;
 let useDecks: () => DeckContextType;
 let StoryModeProvider: ComponentType<{ children: ReactNode }>;
 let useStoryMode: () => StoryModeContextType;
+let QuestProvider: ComponentType<{ children: ReactNode }>;
+let useQuests: () => QuestContextType;
 
 if (isDemoMode) {
   // Demo mode: load local providers (no Firebase)
   const AuthLocal = require('@/context/AuthContextLocal');
   const DeckLocal = require('@/context/DeckContextLocal');
   const StoryLocal = require('@/context/StoryModeContextLocal');
+  const QuestLocal = require('@/context/QuestContextLocal');
 
   AuthProvider = AuthLocal.AuthProvider;
   useAuth = AuthLocal.useAuth;
@@ -31,11 +35,14 @@ if (isDemoMode) {
   useDecks = DeckLocal.useDecks;
   StoryModeProvider = StoryLocal.StoryModeProvider;
   useStoryMode = StoryLocal.useStoryMode;
+  QuestProvider = QuestLocal.QuestProvider;
+  useQuests = QuestLocal.useQuests;
 } else {
   // Production mode: load Firebase providers
   const AuthFirebase = require('@/context/AuthContextFirebase');
   const DeckFirebase = require('@/context/DeckContextFirebase');
   const StoryFirebase = require('@/context/StoryModeContextFirebase');
+  const QuestFirebase = require('@/context/QuestContextFirebase');
 
   AuthProvider = AuthFirebase.AuthProvider;
   useAuth = AuthFirebase.useAuth;
@@ -43,6 +50,8 @@ if (isDemoMode) {
   useDecks = DeckFirebase.useDecks;
   StoryModeProvider = StoryFirebase.StoryModeProvider;
   useStoryMode = StoryFirebase.useStoryMode;
+  QuestProvider = QuestFirebase.QuestProvider;
+  useQuests = QuestFirebase.useQuests;
 }
 
 // Re-export SavedDeck interface from local (doesn't depend on Firebase)
@@ -54,7 +63,8 @@ export type { InventoryPack } from '@/utils/localStorageUtils';
 // Re-export getAIDeckForBattle from local (same implementation, doesn't depend on Firebase)
 export { getAIDeckForBattle } from '@/context/StoryModeContextLocal';
 
-export { AuthProvider, useAuth, DeckProvider, useDecks, StoryModeProvider, useStoryMode };
+export { AuthProvider, useAuth, DeckProvider, useDecks, StoryModeProvider, useStoryMode, QuestProvider, useQuests };
 export type { AuthContextType } from '@/context/AuthContextLocal';
 export type { DeckContextType } from '@/context/DeckContextLocal';
 export type { StoryModeContextType } from '@/context/StoryModeContextLocal';
+export type { QuestContextType } from '@/context/QuestContextLocal';

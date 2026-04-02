@@ -1078,5 +1078,22 @@
       "closing": "Voilà tout ce qu'il faut pour débuter !",
       "farewell": "Bonne chance, et que le Nexus vous guide !"
     }
+  },
+  "quests": {
+    "title": "Quêtes",
+    "daily": "Journalière",
+    "weekly": "Hebdomadaire",
+    "permanent": "Défi",
+    "event": "Événement",
+    "claim": "Réclamer",
+    "completed": "Terminée",
+    "rewardCompleted": "Quête terminée",
+    "claimed": "Réclamée",
+    "available": "En cours",
+    "expired": "Expirée",
+    "progress": "{{current}}/{{total}}",
+    "rewardCoins": "{{amount}} Nexus Coins",
+    "claimSuccess": "Récompense de quête réclamée !",
+    "claimError": "Impossible de réclamer la récompense."
   }
 }

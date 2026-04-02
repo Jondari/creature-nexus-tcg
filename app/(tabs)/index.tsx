@@ -20,6 +20,8 @@ import { useAnchorRegister } from '@/context/AnchorsContext';
 import { COMMON_ANCHORS } from '@/types/scenes';
 import { useSceneTrigger, useSceneManager } from '@/context/SceneManagerContext';
 import { useAnchorPolling } from '@/hooks/useAnchorPolling';
+import { gameEventBus } from '@/utils/gameEventBus';
+import { useQuests } from '@/context/QuestContext';
 
 // Helper: format a user-friendly relative time (e.g., "3 hours ago")
 const formatRelativeDate = (isoString: string): string => {
@@ -62,6 +64,7 @@ const HOME_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 export default function OpenPackScreen() {
   const { width } = useWindowDimensions();
   const { user, getCards, addCards, getPacks, removePack: removePackFromInventory, getLastFreePack, setLastFreePack } = useAuth();
+  const { setQuestRewardOverlayEnabled } = useQuests();
   const sceneTrigger = useSceneTrigger();
   const sceneManager = useSceneManager();
   const { setFlag } = sceneManager;
@@ -184,6 +187,7 @@ export default function OpenPackScreen() {
     try {
       if (!user) return;
 
+      setQuestRewardOverlayEnabled(false);
       setOpening(true);
 
       // Generate a new free daily pack using the booster system
@@ -192,6 +196,7 @@ export default function OpenPackScreen() {
       // Save cards and update last pack timestamp via context
       await addCards(newCards);
       await setLastFreePack(Date.now());
+      gameEventBus.emit('pack_opened');
 
       // Update local state
       setCards((prevCards) => [...prevCards, ...newCards]);
@@ -217,6 +222,7 @@ export default function OpenPackScreen() {
     try {
       if (!user) return;
 
+      setQuestRewardOverlayEnabled(false);
       setOpening(true);
 
       // Get pack definition
@@ -234,6 +240,7 @@ export default function OpenPackScreen() {
       // Save cards and remove pack via context
       await addCards(newCards);
       await removePackFromInventory(inventoryPack);
+      gameEventBus.emit('pack_opened');
 
       // Update local state
       setCards((prevCards) => [...prevCards, ...newCards]);
@@ -254,6 +261,7 @@ export default function OpenPackScreen() {
   
   const handlePackOpeningComplete = () => {
     setShowPackResults(false);
+    setQuestRewardOverlayEnabled(true);
   };
 
   // Helper function to handle notification permission and scheduling

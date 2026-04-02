@@ -16,6 +16,7 @@ type RewardType = 'card' | 'pack' | 'coins' | 'badge' | 'avatarFrame';
 
 interface RewardAnimationProps {
   type: RewardType;
+  eyebrow?: string;
   message: string;
   card?: Card | ExtendedCard; // when type === 'card'
   pack?: BoosterPack; // when type === 'pack'
@@ -28,6 +29,7 @@ interface RewardAnimationProps {
 
 export const RewardAnimation: React.FC<RewardAnimationProps> = ({
   type,
+  eyebrow,
   message,
   card,
   pack,
@@ -179,6 +181,20 @@ export const RewardAnimation: React.FC<RewardAnimationProps> = ({
             opacity: contentOpacity,
           }}
         >
+          {eyebrow ? (
+            <Text
+              style={{
+                color: '#FFD54F',
+                fontFamily: 'Inter-Bold',
+                fontSize: 12,
+                marginBottom: 4,
+                textTransform: 'uppercase',
+                letterSpacing: 1.2,
+              }}
+            >
+              {eyebrow}
+            </Text>
+          ) : null}
           <Text style={{ color: Colors.text.primary, fontFamily: 'Poppins-Bold', fontSize: 22, marginBottom: 12 }}>
             {message}
           </Text>

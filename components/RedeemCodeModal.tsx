@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { RedeemCodeService } from '@/services/redeemCodeService';
 import { showSuccessAlert, showErrorAlert } from '@/utils/alerts';
 import { RewardAnimation } from '@/components/Animation/RewardAnimation';
+import { buildRewardAnimQueue, AnimItem } from '@/utils/rewardAnimUtils';
 import { BoosterPack } from '@/models/BoosterPack';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
@@ -30,8 +31,8 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
 }) => {
   const [code, setCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
-  const [pendingAnims, setPendingAnims] = useState<Array<{ type: 'coins' | 'pack' | 'card' | 'badge' | 'avatarFrame'; payload: any }>>([]);
-  const [currentAnim, setCurrentAnim] = useState<{ type: 'coins' | 'pack' | 'card' | 'badge' | 'avatarFrame'; payload: any } | null>(null);
+  const [pendingAnims, setPendingAnims] = useState<AnimItem[]>([]);
+  const [currentAnim, setCurrentAnim] = useState<AnimItem | null>(null);
   const { user, refreshBadges, refreshFrames } = useAuth();
 
   const handleRedeem = async () => {
@@ -51,31 +52,12 @@ export const RedeemCodeModal: React.FC<RedeemCodeModalProps> = ({
           await refreshFrames();
         }
 
-        // Queue reward animations: coins, packs, cards, badges
-        const queue: Array<{ type: 'coins' | 'pack' | 'card' | 'badge' | 'avatarFrame'; payload: any }> = [];
-        if (result.details?.coins) {
-          queue.push({ type: 'coins', payload: { amount: result.details.coins } });
-        }
-        if (result.details?.packs?.length) {
-          for (const pack of result.details.packs as BoosterPack[]) {
-            queue.push({ type: 'pack', payload: { pack } });
-          }
-        }
-        if (result.details?.cards?.length) {
-          for (const card of result.details.cards) {
-            queue.push({ type: 'card', payload: { card } });
-          }
-        }
-        if (result.details?.badges?.length) {
-          for (const badgeId of result.details.badges) {
-            queue.push({ type: 'badge', payload: { badgeId } });
-          }
-        }
-        if (result.details?.avatarFrames?.length) {
-          for (const frameId of result.details.avatarFrames) {
-            queue.push({ type: 'avatarFrame', payload: { frameId } });
-          }
-        }
+        // Queue reward animations using shared builder
+        const rewards = result.rewards ?? {};
+        const queue = buildRewardAnimQueue(rewards, {
+          packs: result.details?.packs as BoosterPack[] | undefined,
+          cards: result.details?.cards,
+        });
 
         if (queue.length === 0) {
           showSuccessAlert(

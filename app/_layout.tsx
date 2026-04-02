@@ -13,6 +13,8 @@ const LoadSkiaWeb = Platform.OS === 'web'
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { DeckProvider } from '@/context/DeckContext';
 import { StoryModeProvider } from '@/context/StoryModeContext';
+import { QuestProvider } from '@/context/QuestContext';
+import { QuestRewardOverlay } from '@/components/QuestRewardOverlay';
 
 import { SettingsProvider } from '@/context/SettingsContext';
 import GlobalAlertProvider from '@/components/GlobalAlertProvider';
@@ -183,6 +185,7 @@ export default function RootLayout() {
           {/* Inject scenes + anchors using the signed-in user id */}
           <SceneLayer>
             <DeckProvider>
+              <QuestProvider>
               <StoryModeProvider>
                 {/* Audio Permission Banner */}
                 <AudioPermissionBanner />
@@ -208,6 +211,8 @@ export default function RootLayout() {
                   />
                 )}
               </StoryModeProvider>
+              <QuestRewardOverlay />
+              </QuestProvider>
             </DeckProvider>
           </SceneLayer>
         </AuthProvider>

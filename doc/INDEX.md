@@ -17,6 +17,7 @@
 | [demo-mode.md](demo-mode.md) | Offline demo mode: local providers, AsyncStorage, itch.io export |
 | [electron-integration.md](electron-integration.md) | Electron desktop build (experimental) |
 | [pseudo-system.md](pseudo-system.md) | Username generation, validation, and one-time change |
+| [quest-system.md](quest-system.md) | Quest system: templates, event bus, rewards, demo mode |
 | [push-notifications.md](push-notifications.md) | Push notifications: free pack scheduling, platform behavior |
 | [scene-engine.md](scene-engine.md) | Scene DSL, SceneManager, Anchors system |
 | [settings-system.md](settings-system.md) | User preferences: card size, battle log, locale |

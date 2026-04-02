@@ -42,6 +42,7 @@ export const DEMO_STORAGE_KEYS = {
   ACTIVE_DECK: '@demo_active_deck',
   STORY_PROGRESS: '@demo_story_progress',
   LAST_FREE_PACK: '@demo_last_free_pack',
+  QUEST_PROGRESS: '@demo_quest_progress',
 } as const;
 
 // Demo user profile interface

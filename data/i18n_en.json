@@ -1078,5 +1078,22 @@
       "closing": "That's all you need to start battling!",
       "farewell": "Good luck, and may the Nexus guide you!"
     }
+  },
+  "quests": {
+    "title": "Quests",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "permanent": "Challenge",
+    "event": "Event",
+    "claim": "Claim",
+    "completed": "Completed",
+    "rewardCompleted": "Quest completed",
+    "claimed": "Claimed",
+    "available": "In progress",
+    "expired": "Expired",
+    "progress": "{{current}}/{{total}}",
+    "rewardCoins": "{{amount}} Nexus Coins",
+    "claimSuccess": "Quest reward claimed!",
+    "claimError": "Failed to claim quest reward."
   }
 }
