@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.32.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.31.0...v0.32.0) (2026-04-03)
+
+
+### Features
+
+* add quest debug page and manual claim support ([0864650](https://github.com/Jondari/creature-nexus-tcg/commit/0864650f2680f6b7e0668b10bfeb408672867340))
+* implement quest system MVP with demo and firebase flows ([d51650c](https://github.com/Jondari/creature-nexus-tcg/commit/d51650c62da9b2780d2f0aa0ca8eba05016fc40f))
+
 ## [0.31.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.30.0...v0.31.0) (2026-03-31)
 
 
