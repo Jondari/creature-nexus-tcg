@@ -90,6 +90,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="quests"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="quick-battle"
         options={{
           href: null,

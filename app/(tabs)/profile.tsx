@@ -695,6 +695,14 @@ export default function ProfileScreen() {
               <TestTube size={20} color={'#00ff9f'} />
               <Text style={[styles.linkText, { color: '#00ff9f' }]}>{t('profile.animationDemo')}</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.linkButton}
+              onPress={() => router.push('/quests' as any)}
+            >
+              <TestTube size={20} color={Colors.accent[400]} />
+              <Text style={[styles.linkText, { color: Colors.accent[400] }]}>Quest Debug</Text>
+            </TouchableOpacity>
           </View>
         </View>
         )}
