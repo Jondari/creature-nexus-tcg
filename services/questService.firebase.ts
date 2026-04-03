@@ -175,7 +175,7 @@ export class QuestServiceFirebase implements QuestService {
           if (card) {
             grantedCards.push(card);
             try {
-              await addCardToCollection(userId, card);
+              await addCardToCollection(userId, card, 'Quest Reward');
             } catch (e) {
               if (__DEV__) console.warn('[QuestFirebase] Card grant failed:', e);
             }
