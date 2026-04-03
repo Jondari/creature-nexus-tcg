@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.32.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.32.0...v0.32.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* **quest:** pass missing reason arg to addCardToCollection in firebase service ([0fd21a8](https://github.com/Jondari/creature-nexus-tcg/commit/0fd21a8eebb6dbf3cbbc0e21b313aa29f9449cf6))
+
 ## [0.32.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.31.0...v0.32.0) (2026-04-03)
 
 
