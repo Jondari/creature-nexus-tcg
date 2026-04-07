@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.32.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.32.1...v0.32.2) (2026-04-07)
+
+
+### Features
+
+* **quest:** add player quest page, home entrypoint and i18n support ([9f7db1c](https://github.com/Jondari/creature-nexus-tcg/commit/9f7db1c4e55edd66f1b1679a90fccd2f36adb347))
+
 ### [0.32.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.32.0...v0.32.1) (2026-04-03)
 
 
