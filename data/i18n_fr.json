@@ -95,7 +95,10 @@
     "hourAgo": "il y a 1 heure",
     "hoursAgo": "il y a {{count}} heures",
     "yesterday": "hier",
-    "daysAgo": "il y a {{count}} jours"
+    "daysAgo": "il y a {{count}} jours",
+    "dayShort": "j",
+    "hourShort": "h",
+    "minuteShort": "m"
   },
   "home": {
     "title": "Creature Nexus",
@@ -1094,6 +1097,34 @@
     "progress": "{{current}}/{{total}}",
     "rewardCoins": "{{amount}} Nexus Coins",
     "claimSuccess": "Récompense de quête réclamée !",
-    "claimError": "Impossible de réclamer la récompense."
+    "claimError": "Impossible de réclamer la récompense.",
+    "blockTitle": "Quêtes",
+    "seeAll": "Voir tout",
+    "empty": "Aucune quête disponible",
+    "expiresIn": "Expire dans {{time}}",
+    "demo_first_pack": {
+      "title": "Premier pack (Démo)",
+      "description": "Ouvrez votre premier pack en mode démo."
+    },
+    "first_victory": {
+      "title": "Première victoire",
+      "description": "Gagnez votre premier combat."
+    },
+    "win_3_battles": {
+      "title": "Série gagnante",
+      "description": "Gagnez 3 combats."
+    },
+    "daily_open_pack": {
+      "title": "Pack quotidien",
+      "description": "Ouvrez 1 pack aujourd'hui."
+    },
+    "weekly_win_5": {
+      "title": "Guerrier hebdomadaire",
+      "description": "Gagnez 5 combats cette semaine."
+    },
+    "try_harder": {
+      "title": "Réessaie encore",
+      "description": "Perdez 10 combats."
+    }
   }
 }

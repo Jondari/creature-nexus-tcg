@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Image, ImageBackground, Platform, useWindowDimensions } from 'react-native';
 import { useAuth, type InventoryPack } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,7 +7,7 @@ import { generatePackCards } from '@/utils/boosterUtils';
 import { FREE_DAILY_PACK, getPackById } from '@/data/boosterPacks';
 import { Card } from '@/models/Card';
 import { ExtendedCard, isMonsterCard, isSpellCard } from '@/models/cards-extended';
-import { PackageOpen, Gift, HelpCircle } from 'lucide-react-native';
+import { PackageOpen, Gift, HelpCircle, ScrollText } from 'lucide-react-native';
 import { t } from '@/utils/i18n';
 import Colors from '@/constants/Colors';
 import CountdownTimer from '@/components/CountdownTimer';
@@ -22,6 +22,8 @@ import { useSceneTrigger, useSceneManager } from '@/context/SceneManagerContext'
 import { useAnchorPolling } from '@/hooks/useAnchorPolling';
 import { gameEventBus } from '@/utils/gameEventBus';
 import { useQuests } from '@/context/QuestContext';
+import { useRouter } from 'expo-router';
+import { getQuestDescription, getQuestTitle } from '@/utils/questText';
 
 // Helper: format a user-friendly relative time (e.g., "3 hours ago")
 const formatRelativeDate = (isoString: string): string => {
@@ -64,7 +66,8 @@ const HOME_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 export default function OpenPackScreen() {
   const { width } = useWindowDimensions();
   const { user, getCards, addCards, getPacks, removePack: removePackFromInventory, getLastFreePack, setLastFreePack } = useAuth();
-  const { setQuestRewardOverlayEnabled } = useQuests();
+  const { setQuestRewardOverlayEnabled, templates, playerQuests, claimQuest } = useQuests();
+  const router = useRouter();
   const sceneTrigger = useSceneTrigger();
   const sceneManager = useSceneManager();
   const { setFlag } = sceneManager;
@@ -77,9 +80,48 @@ export default function OpenPackScreen() {
   const [inventoryPacks, setInventoryPacks] = useState<InventoryPack[]>([]);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [claimingQuestId, setClaimingQuestId] = useState<string | null>(null);
   const giftRef = useRef<TouchableOpacity | null>(null);
   const openPackRef = useRef<TouchableOpacity | null>(null);
   const nextFreePackTimerRef = useRef<View | null>(null);
+
+  // Quests: map playerQuests by id and compute sorted home list (max 3, non-hidden)
+  const playerQuestMap = useMemo(
+    () => new Map(playerQuests.map((q) => [q.questId, q])),
+    [playerQuests]
+  );
+
+  const homeQuests = useMemo(() => {
+    const questPriority = (state: string) => {
+      if (state === 'completed') return 0;
+      if (state === 'available') return 1;
+      return 2;
+    };
+    return templates
+      .filter((tpl) => !tpl.hidden && tpl.enabled !== false)
+      .sort((a, b) => {
+        const stateA = playerQuestMap.get(a.id)?.state ?? 'available';
+        const stateB = playerQuestMap.get(b.id)?.state ?? 'available';
+        const diff = questPriority(stateA) - questPriority(stateB);
+        if (diff !== 0) return diff;
+        return (a.sortOrder ?? 999) - (b.sortOrder ?? 999);
+      })
+      .slice(0, 3);
+  }, [templates, playerQuestMap]);
+
+  const hasCompletedQuests = useMemo(
+    () => playerQuests.some((q) => q.state === 'completed'),
+    [playerQuests]
+  );
+
+  const handleClaimQuest = async (questId: string) => {
+    try {
+      setClaimingQuestId(questId);
+      await claimQuest(questId);
+    } finally {
+      setClaimingQuestId(null);
+    }
+  };
 
   // Register an anchor for the packs inventory (gift button)
   useAnchorRegister(COMMON_ANCHORS.PACK_INVENTORY, giftRef);
@@ -362,21 +404,38 @@ export default function OpenPackScreen() {
               <Text style={styles.title}>{t('home.title')}</Text>
               <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
             </View>
-            <TouchableOpacity
-              style={styles.giftButton}
-              onPress={() => setSidebarVisible(true)}
-              activeOpacity={0.8}
-              ref={giftRef as any}
-            >
-              <Gift size={22} color={Colors.text.primary} />
-              {inventoryPacks.length > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
-                    {inventoryPacks.length > 99 ? '99+' : inventoryPacks.length}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
+            <View style={{ alignItems: 'center', gap: 12 }}>
+              <TouchableOpacity
+                style={styles.giftButton}
+                onPress={() => setSidebarVisible(true)}
+                activeOpacity={0.8}
+                ref={giftRef as any}
+              >
+                <Gift size={22} color={Colors.text.primary} />
+                {inventoryPacks.length > 0 && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>
+                      {inventoryPacks.length > 99 ? '99+' : inventoryPacks.length}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              <View style={{ position: 'relative' }}>
+                <TouchableOpacity
+                  style={styles.giftButton}
+                  onPress={() => router.push('/(tabs)/quests')}
+                  activeOpacity={0.8}
+                >
+                  <ScrollText size={22} color={Colors.text.primary} />
+                </TouchableOpacity>
+                {hasCompletedQuests && (
+                  <View style={styles.badge} pointerEvents="none">
+                    <View style={styles.badgeDot} />
+                  </View>
+                )}
+              </View>
+            </View>
           </View>
         </View>
         
@@ -433,20 +492,86 @@ export default function OpenPackScreen() {
         )}
 
 
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoTitle}>{t('home.cardRarities')}</Text>
-          <View style={styles.rarityList}>
-            {['common', 'rare', 'epic', 'legendary', 'mythic'].map((rarity) => (
-              <View key={rarity} style={styles.rarityItem}>
-                <View 
-                  style={[
-                    styles.rarityDot, 
-                    { backgroundColor: Colors[rarity as keyof typeof Colors] as string }
-                  ]}
-                />
-                <Text style={styles.rarityText}>{t(`rarities.${rarity}`)}</Text>
+        {/* Quests + Rarity row */}
+        <View style={[styles.infoRow, width < 768 && styles.infoRowColumn]}>
+          {homeQuests.length > 0 && (
+            <View style={[styles.questsContainer, width < 768 && styles.infoCardFull]}>
+              <View style={styles.questsHeader}>
+                <Text style={styles.infoTitle}>{t('quests.blockTitle')}</Text>
+                <TouchableOpacity onPress={() => router.push('/(tabs)/quests')} activeOpacity={0.7}>
+                  <Text style={styles.seeAllText}>{t('quests.seeAll')}</Text>
+                </TouchableOpacity>
               </View>
-            ))}
+              {homeQuests.map((template, idx) => {
+                const playerQuest = playerQuestMap.get(template.id);
+                const questTitle = getQuestTitle(template);
+                const questDescription = getQuestDescription(template);
+                const state = playerQuest?.state ?? 'available';
+                const isDisabled = state === 'claimed' || state === 'expired';
+                const isCompleted = state === 'completed';
+                const isClaiming = claimingQuestId === template.id;
+                const isLast = idx === homeQuests.length - 1;
+
+                return (
+                  <View
+                    key={template.id}
+                    style={[styles.questCard, isDisabled && styles.questCardDisabled, isLast && { borderBottomWidth: 0 }]}
+                  >
+                    <View style={styles.questCardRow}>
+                      <View style={styles.questCardInfo}>
+                        <Text style={[styles.questCardTitle, isDisabled && styles.questCardTitleDisabled]} numberOfLines={1}>
+                          {questTitle}
+                        </Text>
+                        {template.conditions.slice(0, 1).map((cond) => {
+                          const current = playerQuest?.progressByCondition?.[cond.id] ?? 0;
+                          return (
+                            <Text key={cond.id} style={styles.questConditionText} numberOfLines={2}>
+                              {(questDescription || cond.event.replace(/_/g, ' '))}{' '}
+                              <Text style={styles.questProgressText}>{current}/{cond.count}</Text>
+                            </Text>
+                          );
+                        })}
+                      </View>
+                      <View style={styles.questCardRight}>
+                        {isCompleted ? (
+                          <TouchableOpacity
+                            style={[styles.questClaimButton, isClaiming && styles.questClaimButtonDisabled]}
+                            onPress={() => handleClaimQuest(template.id)}
+                            disabled={isClaiming}
+                            activeOpacity={0.8}
+                          >
+                            <Text style={styles.questClaimButtonText}>
+                              {isClaiming ? '…' : t('quests.claim')}
+                            </Text>
+                          </TouchableOpacity>
+                        ) : (
+                          <Text style={[styles.questStatePill, isDisabled && styles.questStatePillDisabled]}>
+                            {t(`quests.${state}` as any)}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
+          <View style={[styles.infoContainer, width < 768 && styles.infoCardFull]}>
+            <Text style={styles.infoTitle}>{t('home.cardRarities')}</Text>
+            <View style={styles.rarityList}>
+              {['common', 'rare', 'epic', 'legendary', 'mythic'].map((rarity) => (
+                <View key={rarity} style={styles.rarityItem}>
+                  <View
+                    style={[
+                      styles.rarityDot,
+                      { backgroundColor: Colors[rarity as keyof typeof Colors] as string }
+                    ]}
+                  />
+                  <Text style={styles.rarityText}>{t(`rarities.${rarity}`)}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -580,6 +705,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  badgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#fff',
+  },
   badgeText: {
     color: '#fff',
     fontSize: 10,
@@ -655,6 +786,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: Colors.text.secondary,
   },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'stretch',
+    marginVertical: 24,
+    paddingHorizontal: 20,
+  },
+  infoRowColumn: {
+    flexDirection: 'column',
+    gap: 24,
+  },
+  infoCardFull: {
+    width: '100%',
+  },
   infoContainer: {
     backgroundColor: Colors.glass.surfaceSoft,
     borderWidth: 1,
@@ -667,8 +812,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(16px)' } as any) : null),
     borderRadius: 12,
     padding: 16,
-    marginHorizontal: 20,
-    marginTop: 20,
+    width: '45%',
   },
   sidebarContent: {
     padding: 12,
@@ -755,6 +899,96 @@ const styles = StyleSheet.create({
   rarityText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+    color: Colors.text.secondary,
+  },
+  // Quests block
+  questsContainer: {
+    backgroundColor: Colors.glass.surfaceSoft,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderSoft,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 9,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(16px)' } as any) : null),
+    borderRadius: 12,
+    padding: 16,
+    width: '45%',
+  },
+  questsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  seeAllText: {
+    fontSize: 13,
+    fontFamily: 'Inter-Medium',
+    color: Colors.accent[300],
+  },
+  questCard: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.glass.borderSoft,
+  },
+  questCardDisabled: {
+    opacity: 0.45,
+  },
+  questCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  questCardInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  questCardTitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
+    color: Colors.text.primary,
+  },
+  questCardTitleDisabled: {
+    color: Colors.text.secondary,
+  },
+  questConditionText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: Colors.text.secondary,
+  },
+  questProgressText: {
+    fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+  },
+  questCardRight: {
+    alignItems: 'flex-end',
+  },
+  questClaimButton: {
+    backgroundColor: Colors.accent[500],
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  questClaimButtonDisabled: {
+    opacity: 0.6,
+  },
+  questClaimButtonText: {
+    color: Colors.text.primary,
+    fontFamily: 'Inter-Bold',
+    fontSize: 12,
+  },
+  questStatePill: {
+    fontSize: 11,
+    fontFamily: 'Inter-Bold',
+    textTransform: 'uppercase',
+    color: Colors.accent[300],
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  questStatePillDisabled: {
     color: Colors.text.secondary,
   },
 });

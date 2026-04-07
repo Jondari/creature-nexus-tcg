@@ -698,7 +698,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity 
               style={styles.linkButton}
-              onPress={() => router.push('/quests' as any)}
+              onPress={() => router.push('/dev-quests' as any)}
             >
               <TestTube size={20} color={Colors.accent[400]} />
               <Text style={[styles.linkText, { color: Colors.accent[400] }]}>Quest Debug</Text>

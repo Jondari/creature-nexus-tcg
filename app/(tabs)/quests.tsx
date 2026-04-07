@@ -6,13 +6,32 @@ import { ArrowLeft } from 'lucide-react-native';
 import { useQuests } from '@/context/QuestContext';
 import Colors from '@/constants/Colors';
 import { t } from '@/utils/i18n';
+import { getQuestDescription, getQuestTitle } from '@/utils/questText';
+import type { QuestTemplate } from '@/types/quest';
 
 const APP_BACKGROUND = require('@/assets/images/background/cosmic_nebula.png');
 const HOME_ZOOM_SCALE = parseFloat(process.env.EXPO_PUBLIC_ZOOM_SCALE || '1');
 
-export default function QuestsDebugScreen() {
+const formatTimeRemaining = (expiresAt: string): string => {
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return '';
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const d = t('time.dayShort');
+  const h = t('time.hourShort');
+  const m = t('time.minuteShort');
+  if (days > 0) return `${days}${d} ${hours}${h}`;
+  if (hours > 0) return `${hours}${h} ${minutes}${m}`;
+  return `${minutes}${m}`;
+};
+
+const isTimeLimited = (template: QuestTemplate): boolean =>
+  template.type === 'event' || !!template.expiresAt;
+
+export default function QuestsScreen() {
   const router = useRouter();
-  const { templates, playerQuests, isLoading, claimQuest } = useQuests();
+  const { templates, playerQuests, claimQuest } = useQuests();
   const { width } = useWindowDimensions();
   const [claimingQuestId, setClaimingQuestId] = useState<string | null>(null);
 
@@ -25,7 +44,6 @@ export default function QuestsDebugScreen() {
   const backgroundViewportStyle = Platform.OS === 'web' && !isWebZoomMode
     ? ({ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh' } as any)
     : null;
-  const isDebugMode = __DEV__;
 
   const handleClaimQuest = async (questId: string) => {
     try {
@@ -35,6 +53,23 @@ export default function QuestsDebugScreen() {
       setClaimingQuestId(null);
     }
   };
+
+  const visibleTemplates = useMemo(() => {
+    const questPriority = (state: string) => {
+      if (state === 'completed') return 0;
+      if (state === 'available') return 1;
+      return 2;
+    };
+    return templates
+      .filter((tpl) => !tpl.hidden && tpl.enabled !== false)
+      .sort((a, b) => {
+        const stateA = playerQuestMap.get(a.id)?.state ?? 'available';
+        const stateB = playerQuestMap.get(b.id)?.state ?? 'available';
+        const diff = questPriority(stateA) - questPriority(stateB);
+        if (diff !== 0) return diff;
+        return (a.sortOrder ?? 999) - (b.sortOrder ?? 999);
+      });
+  }, [templates, playerQuestMap]);
 
   return (
     <View style={styles.container}>
@@ -51,113 +86,69 @@ export default function QuestsDebugScreen() {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {isDebugMode ? (
-          <View style={styles.debugHeader}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.push('/(tabs)/profile')}
-              activeOpacity={0.7}
-            >
-              <ArrowLeft size={22} color={Colors.text.primary} />
-            </TouchableOpacity>
-          </View>
-        ) : null}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.canGoBack() ? router.back() : router.push('/(tabs)')}
+            activeOpacity={0.7}
+          >
+            <ArrowLeft size={22} color={Colors.text.primary} />
+          </TouchableOpacity>
+          <Text style={styles.title}>{t('quests.title')}</Text>
+        </View>
 
-        <Text style={styles.title}>{t('quests.title')}</Text>
-        <Text style={styles.subtitle}>
-          {isDebugMode
-            ? isLoading
-              ? 'Loading quest state...'
-              : `${templates.length} template(s) • ${playerQuests.length} player quest doc(s)`
-            : 'Quest page MVP'}
-        </Text>
-
-        {templates.map((template) => {
+        {visibleTemplates.map((template) => {
           const playerQuest = playerQuestMap.get(template.id);
+          const state = playerQuest?.state ?? 'available';
+          const isDisabled = state === 'claimed' || state === 'expired';
+          const isCompleted = state === 'completed';
+          const isClaiming = claimingQuestId === template.id;
+          const questTitle = getQuestTitle(template);
+          const questDescription = getQuestDescription(template);
+          const timeLimited = isTimeLimited(template);
+          const timeStr = timeLimited && template.expiresAt ? formatTimeRemaining(template.expiresAt) : null;
 
           return (
-            <View key={template.id} style={styles.card}>
-              <Text style={styles.questTitle}>{template.title}</Text>
-              {isDebugMode ? <Text style={styles.questId}>{template.id}</Text> : null}
-
-              <View style={styles.metaRow}>
-                <Text style={styles.metaPill}>{template.type}</Text>
-                {isDebugMode ? (
-                  <>
-                    <Text style={styles.metaPill}>{template.rewardMode ?? 'manual_claim'}</Text>
-                    {template.hidden ? <Text style={styles.metaPill}>hidden</Text> : null}
-                    {template.repeatable ? <Text style={styles.metaPill}>repeatable</Text> : null}
-                  </>
-                ) : null}
-              </View>
-
-              <Text style={styles.sectionTitle}>{isDebugMode ? 'Player state' : 'State'}</Text>
-              <Text style={styles.line}>
-                state: <Text style={styles.value}>{playerQuest?.state ?? 'missing'}</Text>
-              </Text>
-              {isDebugMode ? (
-                <>
-                  <Text style={styles.line}>
-                    completedAt: <Text style={styles.value}>{playerQuest?.completedAt ?? '-'}</Text>
+            <View key={template.id} style={[styles.card, isDisabled && styles.cardDisabled]}>
+              <View style={styles.cardRow}>
+                <View style={styles.cardInfo}>
+                  <Text style={[styles.questTitle, isDisabled && styles.textDisabled]} numberOfLines={1}>
+                    {questTitle}
                   </Text>
-                  <Text style={styles.line}>
-                    claimedAt: <Text style={styles.value}>{playerQuest?.claimedAt ?? '-'}</Text>
-                  </Text>
-                  <Text style={styles.line}>
-                    lastResetAt: <Text style={styles.value}>{playerQuest?.lastResetAt ?? '-'}</Text>
-                  </Text>
-                </>
-              ) : null}
-
-              {playerQuest?.state === 'completed' ? (
-                <TouchableOpacity
-                  style={[
-                    styles.claimButton,
-                    claimingQuestId === template.id && styles.claimButtonDisabled,
-                  ]}
-                  onPress={() => handleClaimQuest(template.id)}
-                  disabled={claimingQuestId === template.id}
-                >
-                  <Text style={styles.claimButtonText}>
-                    {claimingQuestId === template.id ? 'Claiming...' : t('quests.claim')}
-                  </Text>
-                </TouchableOpacity>
-              ) : null}
-
-              <Text style={styles.sectionTitle}>Conditions</Text>
-              {template.conditions.map((condition) => {
-                const current = playerQuest?.progressByCondition?.[condition.id] ?? 0;
-                return (
-                  <Text key={condition.id} style={styles.line}>
-                    {condition.event}
-                    {isDebugMode ? ` [${condition.id}]` : ''}:{' '}
-                    <Text style={styles.value}>
-                      {current}/{condition.count}
+                  {template.conditions.slice(0, 1).map((cond) => {
+                    const current = playerQuest?.progressByCondition?.[cond.id] ?? 0;
+                    return (
+                      <Text key={cond.id} style={styles.conditionText} numberOfLines={2}>
+                        {questDescription || cond.event.replace(/_/g, ' ')}{' '}
+                        <Text style={styles.progressText}>{current}/{cond.count}</Text>
+                      </Text>
+                    );
+                  })}
+                  {timeLimited && timeStr ? (
+                    <Text style={styles.expiryText}>
+                      {t('quests.expiresIn', { time: timeStr })}
                     </Text>
-                  </Text>
-                );
-              })}
-
-              {isDebugMode ? (
-                <>
-                  <Text style={styles.sectionTitle}>Rewards</Text>
-                  <Text style={styles.line}>
-                    coins: <Text style={styles.value}>{template.rewards.nexusCoins ?? 0}</Text>
-                  </Text>
-                  <Text style={styles.line}>
-                    packs: <Text style={styles.value}>{(template.rewards.packs ?? []).join(', ') || '-'}</Text>
-                  </Text>
-                  <Text style={styles.line}>
-                    badges: <Text style={styles.value}>{(template.rewards.badges ?? []).join(', ') || '-'}</Text>
-                  </Text>
-                  <Text style={styles.line}>
-                    frames: <Text style={styles.value}>{(template.rewards.avatarFrames ?? []).join(', ') || '-'}</Text>
-                  </Text>
-                  <Text style={styles.line}>
-                    cards: <Text style={styles.value}>{(template.rewards.cards ?? []).join(', ') || '-'}</Text>
-                  </Text>
-                </>
-              ) : null}
+                  ) : null}
+                </View>
+                <View style={styles.cardRight}>
+                  {isCompleted ? (
+                    <TouchableOpacity
+                      style={[styles.claimButton, isClaiming && styles.claimButtonDisabled]}
+                      onPress={() => handleClaimQuest(template.id)}
+                      disabled={isClaiming}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.claimButtonText}>
+                        {isClaiming ? '…' : t('quests.claim')}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={[styles.statePill, isDisabled && styles.statePillDisabled]}>
+                      {t(`quests.${state}` as any)}
+                    </Text>
+                  )}
+                </View>
+              </View>
             </View>
           );
         })}
@@ -182,89 +173,90 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 32,
   },
-  debugHeader: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 12,
+    marginBottom: 20,
   },
   backButton: {
-    padding: 8,
+    width: 36,
+    height: 36,
     borderRadius: 8,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.glass.surfaceStrong,
+    borderWidth: 1,
+    borderColor: Colors.glass.borderStrong,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(14px)' } as any) : null),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     color: Colors.text.primary,
     fontFamily: 'Poppins-Bold',
     fontSize: 28,
-    marginBottom: 4,
-  },
-  subtitle: {
-    color: Colors.text.secondary,
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    marginBottom: 16,
   },
   card: {
     backgroundColor: Colors.glass.surfaceSoft,
     borderWidth: 1,
     borderColor: Colors.glass.borderSoft,
-    borderRadius: 16,
+    shadowColor: Colors.glass.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 9,
+    ...(Platform.OS === 'web' ? ({ backdropFilter: 'blur(16px)' } as any) : null),
+    borderRadius: 12,
     padding: 14,
-    marginBottom: 12,
-  },
-  questTitle: {
-    color: Colors.text.primary,
-    fontFamily: 'Poppins-Bold',
-    fontSize: 18,
-  },
-  questId: {
-    color: Colors.text.secondary,
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    marginTop: 2,
     marginBottom: 10,
   },
-  metaRow: {
+  cardDisabled: {
+    opacity: 0.45,
+  },
+  cardRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
+    alignItems: 'center',
+    gap: 10,
   },
-  metaPill: {
-    color: Colors.accent[300],
-    fontFamily: 'Inter-Bold',
-    fontSize: 11,
-    textTransform: 'uppercase',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
+  cardInfo: {
+    flex: 1,
+    gap: 4,
   },
-  sectionTitle: {
+  questTitle: {
+    fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
     color: Colors.text.primary,
-    fontFamily: 'Inter-Bold',
-    fontSize: 13,
-    marginTop: 6,
-    marginBottom: 6,
   },
-  line: {
+  textDisabled: {
     color: Colors.text.secondary,
-    fontFamily: 'Inter-Regular',
-    fontSize: 13,
-    marginBottom: 4,
   },
-  value: {
-    color: Colors.text.primary,
+  conditionText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: Colors.text.secondary,
+  },
+  progressText: {
     fontFamily: 'Inter-Medium',
+    color: Colors.text.primary,
+  },
+  expiryText: {
+    fontSize: 11,
+    fontFamily: 'Inter-Medium',
+    color: Colors.accent[300],
+    marginTop: 2,
+  },
+  cardRight: {
+    alignItems: 'flex-end',
   },
   claimButton: {
-    alignSelf: 'flex-start',
-    marginTop: 10,
-    marginBottom: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
     backgroundColor: Colors.accent[500],
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
   claimButtonDisabled: {
     opacity: 0.6,
@@ -272,6 +264,19 @@ const styles = StyleSheet.create({
   claimButtonText: {
     color: Colors.text.primary,
     fontFamily: 'Inter-Bold',
-    fontSize: 13,
+    fontSize: 12,
+  },
+  statePill: {
+    fontSize: 11,
+    fontFamily: 'Inter-Bold',
+    textTransform: 'uppercase',
+    color: Colors.accent[300],
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  statePillDisabled: {
+    color: Colors.text.secondary,
   },
 });

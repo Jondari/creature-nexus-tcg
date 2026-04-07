@@ -42,8 +42,11 @@ The system is designed so that gameplay emits canonical quest events and the que
 | `context/QuestContext.tsx` | Façade — re-exports from `Providers.tsx` |
 | `context/Providers.tsx` | Conditional loader: injects Local or Firebase implementation |
 | `utils/gameEventBus.ts` | Lightweight gameplay pub/sub used to emit canonical quest events |
+| `utils/questText.ts` | Resolves quest `title` and `description` with i18n key fallback (`titleKey` / `descriptionKey`) |
 | `utils/rewardAnimUtils.ts` | Shared helper that converts rewards into `RewardAnimation` queue items |
 | `components/QuestRewardOverlay.tsx` | Global reward animation layer for quest rewards |
+| `app/(tabs)/quests.tsx` | Player-facing quest list screen (accessible from home CTA, not in tab bar) |
+| `app/dev-quests.tsx` | Dev-only debug screen showing full quest state, conditions, rewards and manual claim. Accessible from Profile in `__DEV__`. |
 | `scripts/push-quests.js` | Admin script to push `SHARED_QUESTS` to Firestore `quests/` collection |
 
 ### Live vs Demo
@@ -89,16 +92,18 @@ The runtime is split into four layers:
 ```ts
 interface QuestTemplate {
   id: string;           // Unique identifier, e.g. "daily_open_pack"
-  title: string;        // Display title
+  title: string;        // Display title (fallback if titleKey is absent or unresolved)
+  titleKey?: string;    // i18n key — resolved via getQuestTitle() in utils/questText.ts
   type: QuestType;      // 'permanent' | 'daily' | 'weekly' | 'event'
-  description?: string;
+  description?: string;    // Fallback description
+  descriptionKey?: string; // i18n key — resolved via getQuestDescription() in utils/questText.ts
   conditions: QuestCondition[];  // All conditions must be satisfied
   rewards: QuestRewards;         // nexusCoins, packs, cards, badges, avatarFrames
   rewardMode?: QuestRewardMode;  // 'manual_claim' | 'auto_claim'
   hidden?: boolean;              // optional hidden/secret quest
   expiresAt?: string | null;     // ISO UTC — for 'event' type only
   repeatable?: boolean;          // true for daily/weekly
-  enabled?: boolean;             // false = disabled
+  enabled?: boolean;             // false = quest fully disabled: no progress, no player UI
   sortOrder?: number;
 }
 
@@ -342,14 +347,35 @@ Firestore path: `users/{uid}/quests/{questId}`
 
 Each document is a `PlayerQuest` object. Upserted via `setDoc` with `{ merge: true }`.
 
+## Player UI
+
+### Home block (`app/(tabs)/index.tsx`)
+
+Displays up to 3 quests in the home screen alongside the rarity block. Filtering and sorting rules:
+
+- excludes `hidden: true` and `enabled: false` templates
+- sorted by: `completed` (unclaimed) → `available` → `sortOrder`
+- capped at 3 entries
+- shows: title, first condition description + progress `x/y`, claim button or state pill
+- `claimed` / `expired` quests are grayed out (opacity 0.45)
+- a badge dot appears on the quest CTA button if at least one quest is `completed`
+
+### Quest page (`app/(tabs)/quests.tsx`)
+
+Full quest list, accessible via the floating CTA on home (not in the tab bar). Same filtering and sorting rules as the home block (no cap). Additionally:
+
+- time-limited quests (`type: 'event'` or `expiresAt` set) show a localized countdown (e.g. `2d 3h`, `45m`)
+- time unit abbreviations are i18n keys: `time.dayShort`, `time.hourShort`, `time.minuteShort`
+
+### Dev debug page (`app/dev-quests.tsx`)
+
+Accessible from Profile in `__DEV__` only. Shows full quest state: template ID, reward mode, flags, all conditions with IDs, rewards breakdown, raw player state (completedAt, claimedAt, lastResetAt). Back button navigates to Profile.
+
 ## Known MVP Limitations
 
+- player UI shows only the first condition of a quest — multi-condition quests will appear to have a single progress indicator
 - partial multi-reward quest claims are not fully idempotent at the sub-reward level
 - if a later sub-reward fails after an earlier one succeeded, retry behaviour is not fully hardened yet
 - demo pack rewards currently support only the `standard` pack ID
 
-These are intentional MVP tradeoffs and are tracked in:
-
-```text
-.internal.md/quest-system-known-limitations.md
-```
+These are intentional MVP tradeoffs.

@@ -53,7 +53,10 @@
     "hourAgo": "1 hour ago",
     "hoursAgo": "{{count}} hours ago",
     "yesterday": "yesterday",
-    "daysAgo": "{{count}} days ago"
+    "daysAgo": "{{count}} days ago",
+    "dayShort": "d",
+    "hourShort": "h",
+    "minuteShort": "m"
   },
   "home": {
     "title": "Creature Nexus",
@@ -1094,6 +1097,34 @@
     "progress": "{{current}}/{{total}}",
     "rewardCoins": "{{amount}} Nexus Coins",
     "claimSuccess": "Quest reward claimed!",
-    "claimError": "Failed to claim quest reward."
+    "claimError": "Failed to claim quest reward.",
+    "blockTitle": "Quests",
+    "seeAll": "See all",
+    "empty": "No quests available",
+    "expiresIn": "Expires in {{time}}",
+    "demo_first_pack": {
+      "title": "First Pack (Demo)",
+      "description": "Open your first pack in demo mode."
+    },
+    "first_victory": {
+      "title": "First Victory",
+      "description": "Win your first battle."
+    },
+    "win_3_battles": {
+      "title": "Winning Streak",
+      "description": "Win 3 battles."
+    },
+    "daily_open_pack": {
+      "title": "Daily Pack",
+      "description": "Open 1 pack today."
+    },
+    "weekly_win_5": {
+      "title": "Weekly Warrior",
+      "description": "Win 5 battles this week."
+    },
+    "try_harder": {
+      "title": "Try Harder",
+      "description": "Lose 10 battles."
+    }
   }
 }

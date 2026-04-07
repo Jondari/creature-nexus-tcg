@@ -33,8 +33,10 @@ export type QuestRewards = RedeemCodeRewards;
 export interface QuestTemplate {
   id: string;
   title: string;
+  titleKey?: string;
   type: QuestType;
   description?: string;
+  descriptionKey?: string;
   conditions: QuestCondition[];
   rewards: QuestRewards;
   rewardMode?: QuestRewardMode; // default 'manual_claim'
