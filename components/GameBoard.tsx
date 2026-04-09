@@ -35,9 +35,6 @@ import { useEffectiveViewport } from '@/hooks/useEffectiveViewport';
 import { gameEventBus } from '@/utils/gameEventBus';
 import { useQuests } from '@/context/QuestContext';
 
-// TODO: Move to GameConfig when implementing configurable win conditions
-const POINTS_TO_WIN = 4;
-
 // Render hearts display: full hearts (❤️) for remaining lives, empty hearts (🖤) for lost lives
 const renderHearts = (fullHearts: number, emptyHearts: number) => {
   const safeFullHearts = Math.max(0, fullHearts);
@@ -604,9 +601,10 @@ export function GameBoard() {
     const handlePlayAgain = () => {
       const humanPlayer = playerAtBottom;
       const aiPlayer = playerAtTop;
+      const currentConfig = gameState.config;
       resetGame();
       setTimeout(() => {
-        initializeGame(humanPlayer.name, humanPlayer.deck, aiPlayer.deck);
+        initializeGame(humanPlayer.name, humanPlayer.deck, aiPlayer.deck, currentConfig);
       }, 100);
     };
 
@@ -643,6 +641,8 @@ export function GameBoard() {
     );
   }
 
+  const pointsToWin = gameState.config.pointsToWin;
+
   const zoomWrapperStyle = shouldZoom ? {
     width: compensatedWidth,
     height: compensatedHeight,
@@ -659,7 +659,7 @@ export function GameBoard() {
         name={playerAtTop.name}
         stats={[
           { label: t('player.energy'), value: renderEnergy(playerAtTop.energy) },
-          { label: '', value: renderHearts(POINTS_TO_WIN - playerAtBottom.points, playerAtBottom.points) },
+          { label: '', value: renderHearts(pointsToWin - playerAtBottom.points, playerAtBottom.points) },
           // { label: t('player.hand'), value: playerAtTop.hand.length },
           { label: t('player.remainingCards'), value: playerTopRemainingDeck },
         ]}
@@ -771,7 +771,7 @@ export function GameBoard() {
         name={pseudo || playerAtBottom.name}
         stats={[
           { label: t('player.energy'), value: renderEnergy(playerAtBottom.energy) },
-          { label: '', value: renderHearts(POINTS_TO_WIN - playerAtTop.points, playerAtTop.points) },
+          { label: '', value: renderHearts(pointsToWin - playerAtTop.points, playerAtTop.points) },
           // { label: t('player.hand'), value: playerAtBottom.hand.length },
           { label: t('player.remainingCards'), value: playerBottomRemainingDeck },
         ]}

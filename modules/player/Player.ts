@@ -130,8 +130,8 @@ export class PlayerUtils {
     return false;
   }
 
-  static hasWon(player: Player): boolean {
-    return player.points >= 4;
+  static hasWon(player: Player, pointsToWin: number): boolean {
+    return player.points >= pointsToWin;
   }
 
   static canCastSpell(player: Player, spell: SpellCard): boolean {

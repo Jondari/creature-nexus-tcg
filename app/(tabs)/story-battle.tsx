@@ -154,7 +154,9 @@ function StoryBattleContent() {
       // Always clear any previous engine before starting a new battle (important on replay)
       resetGame(); // ensure a clean engine/context
       // Initialize the game with player deck vs AI deck
-      initializeGame(t('player.you'), activeDeck.cards, aiDeck);
+      initializeGame(t('player.you'), activeDeck.cards, aiDeck, {
+        pointsToWin: foundBattle.pointsToWin,
+      });
       
     } catch (error) {
       console.error('Error initializing story battle:', error);

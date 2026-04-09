@@ -9,6 +9,7 @@ A cross-platform digital trading card game featuring mythical creatures, built w
 - PvE battles against AI with elemental affinity system
 - Story mode with 6 elemental chapters and 30+ battles
 - Card collection with 5 rarities (common, rare, epic, legendary, mythic)
+- Configurable win conditions (`3` points by default, overridable per mode/battle)
 - Deck builder (20–60 cards, max 3 copies per model)
 - Shop with packs, promo codes, and Nexus Coins economy
 - 5 battlefield themes with animated particle effects

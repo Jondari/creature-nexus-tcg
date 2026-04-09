@@ -41,15 +41,16 @@ export class TurnManager {
   static checkWinConditions(gameState: GameState, playerDecks: [Deck, Deck]): GameState {
     const [player1, player2] = gameState.players;
     const [deck1, deck2] = playerDecks;
+    const { pointsToWin } = gameState.config;
 
     let winner: string | undefined;
     let winReason: WinReason | undefined;
 
-    // Check points victory (4 points)
-    if (PlayerUtils.hasWon(player1)) {
+    // Check points victory using the active match config
+    if (PlayerUtils.hasWon(player1, pointsToWin)) {
       winner = player1.id;
       winReason = 'points';
-    } else if (PlayerUtils.hasWon(player2)) {
+    } else if (PlayerUtils.hasWon(player2, pointsToWin)) {
       winner = player2.id;
       winReason = 'points';
     }

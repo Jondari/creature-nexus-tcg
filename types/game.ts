@@ -1,6 +1,20 @@
 export type Element = 'fire' | 'water' | 'air' | 'earth' | 'all';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic';
 
+export interface GameConfig {
+  pointsToWin: number;
+}
+
+export const DEFAULT_GAME_CONFIG: GameConfig = Object.freeze({
+  pointsToWin: 3,
+});
+
+export function resolveGameConfig(config?: Partial<GameConfig>): GameConfig {
+  return {
+    pointsToWin: config?.pointsToWin ?? DEFAULT_GAME_CONFIG.pointsToWin,
+  };
+}
+
 export interface Attack {
   name: string;
   damage: number;
@@ -43,6 +57,7 @@ export interface GameState {
   winReason?: WinReason;
   isGameOver: boolean;
   attackedThisTurn: Set<string>; // Card IDs that have attacked this turn
+  config: GameConfig;
 }
 
 export interface AffinityMatrix {

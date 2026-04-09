@@ -213,6 +213,7 @@ export class AIEngine {
 
     const attack = attackerCard.attacks.find(a => a.name === action.attackName);
     if (!attack) return 0;
+    const pointsToWin = gameState.config.pointsToWin;
 
     let score = 100;
 
@@ -224,6 +225,10 @@ export class AIEngine {
       score += finalDamage * 3;
 
       if (finalDamage >= targetCard.hp) {
+        const reachesVictory = aiPlayer.points + 1 >= pointsToWin;
+        if (reachesVictory) {
+          score += 200;
+        }
         score += 50;
       }
 
@@ -238,7 +243,7 @@ export class AIEngine {
       score += 80;
     }
 
-    if (aiPlayer.points >= 3) {
+    if (aiPlayer.points + 1 >= pointsToWin) {
       score += 100;
     }
 

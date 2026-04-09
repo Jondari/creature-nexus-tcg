@@ -20,9 +20,9 @@
 | [quest-system.md](quest-system.md) | Quest system: templates, event bus, rewards, demo mode |
 | [push-notifications.md](push-notifications.md) | Push notifications: free pack scheduling, platform behavior |
 | [scene-engine.md](scene-engine.md) | Scene DSL, SceneManager, Anchors system |
-| [settings-system.md](settings-system.md) | User preferences: card size, battle log, locale |
-| [story-mode.md](story-mode.md) | Story mode: chapters, progression, scene engine |
-| [tutorial-system.md](tutorial-system.md) | Tutorial system: anchors, scene commands, persistence |
+| [settings-system.md](settings-system.md) | User preferences: card size, hand layout, battle log, locale |
+| [story-mode.md](story-mode.md) | Story mode: chapters, progression, scene engine, configurable battle rules |
+| [tutorial-system.md](tutorial-system.md) | Tutorial system: anchors, scene commands, persistence, tutorial battle flow |
 | [zoom-system.md](zoom-system.md) | Two-tier zoom system (global + GameBoard) |
 
 ## Guides

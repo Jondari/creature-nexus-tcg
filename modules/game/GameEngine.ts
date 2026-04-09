@@ -1,4 +1,4 @@
-import { GameState, Player, Card, Attack, GameAction } from '../../types/game';
+import { GameState, Player, Card, Attack, GameAction, GameConfig } from '../../types/game';
 import { CardUtils } from '../card';
 import { PlayerUtils } from '../player';
 import { TurnManager } from '../turn';
@@ -11,7 +11,13 @@ export class GameEngine {
   private playerDecks: [Deck, Deck];
   private onPlayerEnergyGain?: (playerId: string, amount: number) => void;
 
-  constructor(player1: Player, player2: Player, deck1: Card[], deck2: Card[]) {
+  constructor(
+    player1: Player,
+    player2: Player,
+    deck1: Card[],
+    deck2: Card[],
+    config: GameConfig
+  ) {
     this.playerDecks = [new Deck(deck1), new Deck(deck2)];
     this.playerDecks[0].shuffle();
     this.playerDecks[1].shuffle();
@@ -23,6 +29,7 @@ export class GameEngine {
       phase: 'draw',
       isGameOver: false,
       attackedThisTurn: new Set<string>(),
+      config: { ...config },
     };
 
     this.initializeGame();

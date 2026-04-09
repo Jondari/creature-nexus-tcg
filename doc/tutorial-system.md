@@ -10,6 +10,8 @@
 
 The tutorial system guides new players through the app using auto-triggered interactive scenes. It relies on the Scene Engine (see [scene-engine.md](scene-engine.md)) for execution, and the Anchors system for highlighting UI elements. Tutorials are defined as `SceneSpec` objects and registered at app startup.
 
+The battle tutorial uses the same match engine as standard battles, but with a custom game configuration: it is won at `1` point instead of the default `3`.
+
 ---
 
 ## Architecture
@@ -144,4 +146,4 @@ Progress includes completed scene IDs, flags, numeric progress counters, and tim
 
 ---
 
-*Last updated: February 2026*
+*Last updated: April 2026*

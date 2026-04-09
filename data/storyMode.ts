@@ -10,6 +10,7 @@ export interface StoryBattle {
   isCompleted: boolean;
   isAccessible: boolean;
   isBoss: boolean;
+  pointsToWin?: number;
 }
 
 export interface StoryChapter {

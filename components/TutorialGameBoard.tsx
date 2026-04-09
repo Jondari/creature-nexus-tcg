@@ -3,7 +3,7 @@ import { View, StyleSheet, BackHandler } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useGame } from '@/context/GameContext';
 import { useSceneManager } from '@/context/SceneManagerContext';
-import type { Card } from '@/types/game';
+import type { Card, GameConfig } from '@/types/game';
 import { GameBoard } from './GameBoard';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from './LoadingOverlay';
@@ -14,6 +14,7 @@ export interface TutorialGameBoardProps {
   playerDeck: Card[];
   aiDeck: Card[];
   onExit?: () => void;
+  gameConfig?: Partial<GameConfig>;
   /**
    * Called once the game state is initialised and the GameBoard is displayed.
    */
@@ -30,6 +31,7 @@ export const TutorialGameBoard: React.FC<TutorialGameBoardProps> = ({
   aiDeck,
   onExit,
   onReady,
+  gameConfig,
 }) => {
   const { gameState, initializeGame, resetGame, isLoading, error } = useGame();
   const sceneManager = useSceneManager();
@@ -70,15 +72,15 @@ export const TutorialGameBoard: React.FC<TutorialGameBoardProps> = ({
   useEffect(() => {
     if (!hasBootstrappedRef.current) {
       hasBootstrappedRef.current = true;
-      initializeGame(t('player.you'), playerDeck, aiDeck);
+      initializeGame(t('player.you'), playerDeck, aiDeck, gameConfig);
       return;
     }
 
     // When the gameState becomes null (for example after reset), restart the tutorial encounter
     if (!gameState && playerDeck.length > 0 && aiDeck.length > 0) {
-      initializeGame(t('player.you'), playerDeck, aiDeck);
+      initializeGame(t('player.you'), playerDeck, aiDeck, gameConfig);
     }
-  }, [gameState, playerDeck, aiDeck, initializeGame]);
+  }, [gameState, playerDeck, aiDeck, initializeGame, gameConfig]);
 
   useEffect(() => {
     if (gameState && !readyFired) {

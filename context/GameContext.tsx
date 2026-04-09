@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { GameState, Player, Card, GameAction, ActionLogEntry, DamageAnimation, AIVisualState, AIStatus, Element } from '../types/game';
+import { GameState, Player, Card, GameAction, ActionLogEntry, DamageAnimation, AIVisualState, AIStatus, Element, GameConfig, resolveGameConfig } from '../types/game';
 import { GameEngine } from '../modules/game';
 import { t } from '../utils/i18n';
 import { PlayerUtils } from '../modules/player';
@@ -24,7 +24,7 @@ interface GameContextState {
 }
 
 interface GameContextActions {
-  initializeGame: (playerName: string, playerDeck: Card[], aiDeck: Card[]) => void;
+  initializeGame: (playerName: string, playerDeck: Card[], aiDeck: Card[], config?: Partial<GameConfig>) => void;
   executeAction: (action: GameAction) => void;
   executeAITurn: () => void;
   resetGame: () => void;
@@ -313,14 +313,15 @@ export function GameProvider({ children }: GameProviderProps) {
     }
   };
 
-  const initializeGame = (playerName: string, playerDeck: Card[], aiDeck: Card[]) => {
+  const initializeGame = (playerName: string, playerDeck: Card[], aiDeck: Card[], config?: Partial<GameConfig>) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     
     try {
       const player1 = PlayerUtils.createPlayer('player1', playerName, playerDeck, false);
       const player2 = PlayerUtils.createPlayer('player2', t('player.ai'), aiDeck, true);
+      const resolvedConfig = resolveGameConfig(config);
       
-      const gameEngine = new GameEngine(player1, player2, playerDeck, aiDeck);
+      const gameEngine = new GameEngine(player1, player2, playerDeck, aiDeck, resolvedConfig);
       
       // Set up energy gain callback — enqueue instead of triggering directly
       // so the animation waits for AI turn animations to finish

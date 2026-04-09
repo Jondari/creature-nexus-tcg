@@ -81,6 +81,7 @@ interface StoryBattle {
   isCompleted: boolean;
   isAccessible: boolean;
   isBoss: boolean;
+  pointsToWin?: number;           // Optional override for battle-specific win condition
 }
 ```
 
@@ -132,6 +133,8 @@ Decks are generated per chapter with difficulty-based rarity weights and seeded 
 ### Battle Completion Flow
 
 ```
+Default battle config: 3 points to win
+
 Player wins battle
   → handleBattleComplete() in story-battle.tsx
   → completeBattle(chapterId, battleId) in StoryModeContext
@@ -141,6 +144,10 @@ Player wins battle
   → Victory alert with win reason (points/deckout/fieldwipe)
   → Navigate back to chapter-map
 ```
+
+Story battles use the shared configurable win-condition system:
+- default match rule: `3` points to win
+- optional per-battle override: `StoryBattle.pointsToWin`
 
 ### Validation Before Battle
 

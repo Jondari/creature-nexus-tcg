@@ -9,6 +9,7 @@ import { useSceneManager, useSceneTrigger } from '@/context/SceneManagerContext'
 import Colors from '@/constants/Colors';
 
 const BATTLE_SCENE_ID = 'tutorial_battle_basics';
+const TUTORIAL_GAME_CONFIG = { pointsToWin: 1 };
 
 function BattleTutorialContent() {
   const router = useRouter();
@@ -74,6 +75,7 @@ function BattleTutorialContent() {
       <TutorialGameBoard
         playerDeck={battleTutorialPlayerDeck}
         aiDeck={battleTutorialAIDeck}
+        gameConfig={TUTORIAL_GAME_CONFIG}
         onExit={handleExit}
         onReady={() => setBoardReady(true)}
       />
