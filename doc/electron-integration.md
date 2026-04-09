@@ -1,7 +1,7 @@
 # Electron Desktop Integration
 
 > Technical documentation for the Electron desktop build of Creature Nexus TCG.
-> Added in v0.24.0 (February 4, 2026). Status: **WIP** — window opens but app content does not load.
+> Added in v0.24.0 (February 4, 2026). Status: **experimental / WIP** — Electron shell, packaging, and post-export patch flow are in place.
 
 ---
 
@@ -13,12 +13,13 @@ The Electron integration wraps the Expo web export into a native desktop applica
 
 | Area | Status |
 |------|--------|
-| Electron configuration (main.js, preload.js, builder) | Done |
-| NPM scripts (electron:dev, electron:build) | Done |
+| Electron configuration (`main.js`, `preload.js`, builder) | Done |
+| NPM scripts (`electron:dev`, `electron:build`) | Done |
+| Static export post-processing (`scripts/fix-web-build.js`) | Done |
 | Dependencies installed | Done |
-| Build process completes (~308 MB installer) | Done |
-| Window opens with correct background (#121626) | Done |
-| **App content loads** | **Not working** |
+| Build process completes and produces Windows artifacts | Done |
+| Window opens with correct background (`#121626`) | Done |
+| App runtime status | Experimental — requires validation on a real packaged build |
 
 ---
 
@@ -42,7 +43,7 @@ electron/
 ```
 
 - **Development**: Electron loads from the live Expo web dev server (port 19006)
-- **Production**: Electron loads the static export from `dist/index.html` via `file://` protocol
+- **Production**: Electron loads the static export from `dist/index.html` via `file://`, after Expo output is patched for relative assets and route-aware navigation
 
 ---
 
@@ -68,8 +69,9 @@ npm run electron:build
 
 1. Cleans `dist/` and `release/` directories (`rimraf`)
 2. Runs `expo export --platform web` → static files in `dist/`
-3. Runs `electron-builder` with `electron-builder.yml`
-4. Outputs installer to `release/`
+3. Runs `node scripts/fix-web-build.js` to rewrite asset paths and patch Expo's web output for static file loading
+4. Runs `electron-builder` with `electron/electron-builder.yml`
+5. Outputs installer and unpacked app to `release/`
 
 ---
 
@@ -128,6 +130,24 @@ Currently not actively used by the app, but available for future platform-specif
 
 ---
 
+## Static Export Patch
+
+The Electron production build depends on the same post-processing step used for static hosting targets such as itch.io:
+
+| File | Role |
+|------|------|
+| `scripts/fix-web-build.js` | Rewrites exported HTML and bundle loader logic so asset URLs and route resolution work from static files |
+
+### Why This Step Exists
+
+- Expo web export assumes server-style absolute paths in several places
+- Electron production loads the app through `file://`
+- Absolute asset paths and default route resolution can break when the app is opened directly from local files
+
+The patch script adds relative base handling, route restoration helpers, and bundle-loader fixes before packaging.
+
+---
+
 ## Build Configuration (`electron/electron-builder.yml`)
 
 ```yaml
@@ -182,7 +202,7 @@ release/
 | `wait-on` | ^8.0.2 | Wait for dev server before launching Electron |
 | `rimraf` | ^6.0.1 | Clean build directories |
 
-All are devDependencies — not included in the production build.
+All are `devDependencies` — not included in the packaged application runtime.
 
 ---
 
@@ -195,24 +215,17 @@ All are devDependencies — not included in the production build.
 
 ---
 
-## Known Issue: App Content Not Loading
+## Validation Notes
 
-The Electron window opens with the correct background color but the Expo app does not render.
+This integration should still be treated as experimental.
 
-### Possible Root Causes
+Recommended validation after changes affecting routing, assets, or startup:
 
-1. **Routing issue**: Expo Router may not initialize correctly with `file://` protocol
-2. **Path resolution**: `dist/index.html` asset paths may be incorrect for local file loading
-3. **CSP issue**: Content Security Policy may block inline scripts
-4. **Base URL**: Expo web export may expect a server-based base URL
-
-### Investigation Steps
-
-1. Launch app and press F12 to check console errors in DevTools
-2. Check Network tab to verify all assets load correctly
-3. Test with a simple HTML file to isolate the issue
-4. Consider using `electron-serve` for proper static file serving
-5. Configure Expo web output for Electron compatibility (custom base URL)
+1. Run `npm run electron:dev` and verify the app boots inside Electron
+2. Run `npm run electron:build`
+3. Launch the packaged app from `release/win-unpacked/`
+4. Verify initial load, route changes, and static assets
+5. If startup regresses, inspect Electron DevTools and re-check `scripts/fix-web-build.js`
 
 ---
 
@@ -236,4 +249,4 @@ The Electron window opens with the correct background color but the Expo app doe
 
 ---
 
-*Last updated: February 2026*
+*Last updated: April 2026*

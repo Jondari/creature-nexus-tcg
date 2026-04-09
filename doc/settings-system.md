@@ -1,13 +1,13 @@
 # Settings System
 
 > Technical documentation for the user preferences system in Creature Nexus TCG.
-> Built progressively from v0.2.1 to v0.13.0.
+> Built progressively from v0.2.1 to v0.29.0.
 
 ---
 
 ## Overview
 
-The settings system manages user preferences (card size, battle log visibility, language) via a React context with AsyncStorage persistence. Settings are loaded on app startup and saved immediately on change.
+The settings system manages user preferences (card size, hand layout, battle log visibility, combat feedback, language) via a React context with AsyncStorage persistence. Settings are loaded on app startup, merged with defaults, and saved immediately on change.
 
 ---
 
@@ -26,6 +26,7 @@ The settings UI is rendered in the profile screen (`app/(tabs)/profile.tsx`).
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `cardSize` | `'small'` \| `'normal'` | `'small'` | Card display size throughout the game |
+| `handLayout` | `'fan'` \| `'classic'` | `'fan'` | Preferred layout for cards in hand during battle |
 | `showBattleLog` | `boolean` | `false` | Show/hide the battle log during gameplay |
 | `screenShake` | `boolean` | `true` | Enable/disable screen shake on combat impacts |
 | `turnBanner` | `boolean` | `true` | Show/hide the turn transition banner |
@@ -36,9 +37,13 @@ The settings UI is rendered in the profile screen (`app/(tabs)/profile.tsx`).
 ## Context API
 
 ```typescript
+type HandLayout = 'fan' | 'classic';
+
 interface SettingsContextType {
   cardSize: CardSize;
   setCardSize: (size: CardSize) => void;
+  handLayout: HandLayout;
+  setHandLayout: (layout: HandLayout) => void;
   showBattleLog: boolean;
   setShowBattleLog: (show: boolean) => void;
   screenShake: boolean;
@@ -54,7 +59,7 @@ interface SettingsContextType {
 ### Usage
 
 ```typescript
-const { cardSize, setCardSize, locale, setLocale } = useSettings();
+const { cardSize, setCardSize, handLayout, setHandLayout, locale, setLocale } = useSettings();
 ```
 
 ### Locale Change
@@ -71,6 +76,28 @@ const { cardSize, setCardSize, locale, setLocale } = useSettings();
 
 Settings are loaded once on mount and merged with defaults. Every change triggers an immediate save.
 
+### Stored Shape
+
+```typescript
+interface Settings {
+  cardSize: 'small' | 'normal';
+  handLayout: 'fan' | 'classic';
+  showBattleLog: boolean;
+  screenShake: boolean;
+  turnBanner: boolean;
+  locale?: string;
+}
+```
+
+### Default Values
+
+- `cardSize`: `'small'`
+- `handLayout`: `'fan'`
+- `showBattleLog`: `false`
+- `screenShake`: `true`
+- `turnBanner`: `true`
+- `locale`: `'en'`
+
 ---
 
 ## i18n Keys
@@ -85,6 +112,10 @@ Settings are loaded once on mount and merged with defaults. Every change trigger
 | `profile.cardSizeDesc` | Choose how cards are displayed throughout the game | Choisissez l'affichage des cartes dans le jeu |
 | `profile.cardSizeSmall` | Small | Petite |
 | `profile.cardSizeNormal` | Normal | Normale |
+| `profile.handLayout` | Hand Layout | Disposition de la main |
+| `profile.handLayoutDesc` | Choose how cards are arranged in your hand during battle | Choisissez comment les cartes sont disposées dans votre main pendant les combats |
+| `profile.handLayoutFan` | Fan | Éventail |
+| `profile.handLayoutClassic` | Classic | Classique |
 | `profile.battleLog` | Battle Log | Journal de combat |
 | `profile.battleLogDesc` | Show or hide the battle log during gameplay | Afficher ou masquer le journal pendant les combats |
 | `profile.battleLogHidden` | Hidden | Masqué |
@@ -100,4 +131,4 @@ Settings are loaded once on mount and merged with defaults. Every change trigger
 
 ---
 
-*Last updated: February 2026*
+*Last updated: April 2026*
