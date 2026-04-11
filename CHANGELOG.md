@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.33.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.32.3...v0.33.0) (2026-04-11)
+
+
+### Features
+
+* add configurable win conditions with tutorial override ([9555e01](https://github.com/Jondari/creature-nexus-tcg/commit/9555e01408d0f505a437aee971573b60f5e5e1c4))
+
 ### [0.32.3](https://github.com/Jondari/creature-nexus-tcg/compare/v0.32.2...v0.32.3) (2026-04-09)
 
 ### [0.32.2](https://github.com/Jondari/creature-nexus-tcg/compare/v0.32.1...v0.32.2) (2026-04-07)
