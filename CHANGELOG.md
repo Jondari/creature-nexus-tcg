@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.33.1](https://github.com/Jondari/creature-nexus-tcg/compare/v0.33.0...v0.33.1) (2026-04-12)
+
+
+### Bug Fixes
+
+* route tutorial game over actions through tutorial flow ([a6e70dd](https://github.com/Jondari/creature-nexus-tcg/commit/a6e70dd163600db8edab600d6ffe74f36596f739))
+
 ## [0.33.0](https://github.com/Jondari/creature-nexus-tcg/compare/v0.32.3...v0.33.0) (2026-04-11)
 
 
