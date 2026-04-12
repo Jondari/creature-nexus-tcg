@@ -11,7 +11,11 @@ import Colors from '@/constants/Colors';
 const BATTLE_SCENE_ID = 'tutorial_battle_basics';
 const TUTORIAL_GAME_CONFIG = { pointsToWin: 1 };
 
-function BattleTutorialContent() {
+interface BattleTutorialContentProps {
+  onRestartBattle: () => void;
+}
+
+function BattleTutorialContent({ onRestartBattle }: BattleTutorialContentProps) {
   const router = useRouter();
   const sceneManager = useSceneManager();
   const sceneTrigger = useSceneTrigger();
@@ -77,6 +81,7 @@ function BattleTutorialContent() {
         aiDeck={battleTutorialAIDeck}
         gameConfig={TUTORIAL_GAME_CONFIG}
         onExit={handleExit}
+        onRestart={onRestartBattle}
         onReady={() => setBoardReady(true)}
       />
     </View>
@@ -85,6 +90,10 @@ function BattleTutorialContent() {
 
 export default function BattleTutorialScreen() {
   const [resetKey, setResetKey] = useState(0);
+
+  const handleRestartBattle = React.useCallback(() => {
+    setResetKey(prev => prev + 1);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -95,7 +104,9 @@ export default function BattleTutorialScreen() {
 
   return (
     <GameProvider key={resetKey}>
-      <BattleTutorialContent />
+      <BattleTutorialContent
+        onRestartBattle={handleRestartBattle}
+      />
     </GameProvider>
   );
 }

@@ -70,7 +70,12 @@ const renderEnergy = (energy: number) => {
 };
 
 
-export function GameBoard() {
+interface GameBoardProps {
+  onGameOverPlayAgain?: () => void;
+  onGameOverReturnToMenu?: () => void;
+}
+
+export function GameBoard({ onGameOverPlayAgain, onGameOverReturnToMenu }: GameBoardProps = {}) {
   const { setQuestRewardOverlayEnabled } = useQuests();
   const { 
     gameState, 
@@ -598,7 +603,7 @@ export function GameBoard() {
     : null;
 
   if (gameState.isGameOver) {
-    const handlePlayAgain = () => {
+    const handleDefaultPlayAgain = () => {
       const humanPlayer = playerAtBottom;
       const aiPlayer = playerAtTop;
       const currentConfig = gameState.config;
@@ -608,10 +613,13 @@ export function GameBoard() {
       }, 100);
     };
 
-    const handleReturnToMenu = () => {
+    const handleDefaultReturnToMenu = () => {
       resetGame();
       setShowDeckSelection(true);
     };
+
+    const handlePlayAgain = onGameOverPlayAgain ?? handleDefaultPlayAgain;
+    const handleReturnToMenu = onGameOverReturnToMenu ?? handleDefaultReturnToMenu;
 
     const isPlayerVictory = gameState.winner === playerAtBottom.id;
     const winnerName = isPlayerVictory ? (pseudo || playerAtBottom.name) : playerAtTop.name;

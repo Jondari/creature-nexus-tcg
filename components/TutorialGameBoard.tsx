@@ -15,6 +15,7 @@ export interface TutorialGameBoardProps {
   aiDeck: Card[];
   onExit?: () => void;
   gameConfig?: Partial<GameConfig>;
+  onRestart?: () => void;
   /**
    * Called once the game state is initialised and the GameBoard is displayed.
    */
@@ -32,6 +33,7 @@ export const TutorialGameBoard: React.FC<TutorialGameBoardProps> = ({
   onExit,
   onReady,
   gameConfig,
+  onRestart,
 }) => {
   const { gameState, initializeGame, resetGame, isLoading, error } = useGame();
   const sceneManager = useSceneManager();
@@ -39,6 +41,7 @@ export const TutorialGameBoard: React.FC<TutorialGameBoardProps> = ({
   const [readyFired, setReadyFired] = useState(false);
   const resetGameRef = useRef(resetGame);
   const sceneManagerRef = useRef(sceneManager);
+  const preventAutoRestartRef = useRef(false);
 
   useEffect(() => {
     resetGameRef.current = resetGame;
@@ -48,28 +51,43 @@ export const TutorialGameBoard: React.FC<TutorialGameBoardProps> = ({
     sceneManagerRef.current = sceneManager;
   }, [sceneManager]);
 
-  const performCleanup = useCallback(() => {
+  const performCleanup = useCallback((preventAutoRestart = false) => {
+    if (preventAutoRestart) {
+      preventAutoRestartRef.current = true;
+    }
+
     sceneManagerRef.current.stopCurrentScene();
     resetGameRef.current();
   }, []);
 
-  const confirmExit = useCallback(() => {
-    performCleanup();
+  const exitTutorial = useCallback(() => {
+    performCleanup(true);
     onExit?.();
   }, [performCleanup, onExit]);
+
+  const handleGameOverPlayAgain = useCallback(() => {
+    performCleanup(true);
+    onRestart?.();
+  }, [performCleanup, onRestart]);
+
+  const handleGameOverReturnToMenu = exitTutorial;
 
   const handleExit = useCallback(() => {
     showConfirmAlert(
       t('tutorial.battle.exitTitle'),
       t('tutorial.battle.exitMessage'),
-      confirmExit,
+      exitTutorial,
       undefined,
       t('tutorial.battle.exitConfirm'),
       t('common.cancel')
     );
-  }, [confirmExit]);
+  }, [exitTutorial]);
 
   useEffect(() => {
+    if (preventAutoRestartRef.current) {
+      return;
+    }
+
     if (!hasBootstrappedRef.current) {
       hasBootstrappedRef.current = true;
       initializeGame(t('player.you'), playerDeck, aiDeck, gameConfig);
@@ -122,7 +140,10 @@ export const TutorialGameBoard: React.FC<TutorialGameBoardProps> = ({
 
   return (
     <View style={styles.container}>
-      <GameBoard />
+      <GameBoard
+        onGameOverPlayAgain={handleGameOverPlayAgain}
+        onGameOverReturnToMenu={handleGameOverReturnToMenu}
+      />
     </View>
   );
 };
