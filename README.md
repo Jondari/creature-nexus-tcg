@@ -50,7 +50,9 @@ EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
 EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
-4. Start the development server:
+4. For Android native builds, add a valid `google-services.json` file at the project root. This file is required by `app.json` and must stay local or be provided by CI secrets.
+
+5. Start the development server:
 ```bash
 npm run dev
 ```

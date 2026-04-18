@@ -56,3 +56,7 @@ data/quests.shared.js
 
 # Electron build output
 release/
+
+# Firebase native config
+/google-services.json*
+GoogleService-Info.plist
