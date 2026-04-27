@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -438,4 +438,25 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 16,
   },
-});
+}) as {
+  container: ViewStyle;
+  background: ViewStyle;
+  scrollContent: ViewStyle;
+  header: ViewStyle;
+  title: TextStyle;
+  subtitle: TextStyle;
+  lastUpdated: TextStyle;
+  introText: TextStyle;
+  section: ViewStyle;
+  sectionTitle: TextStyle;
+  sectionText: TextStyle;
+  bulletPoint: ViewStyle;
+  bullet: TextStyle;
+  bulletText: TextStyle;
+  bold: TextStyle;
+  link: TextStyle;
+  divider: ViewStyle;
+  frenchSection: ViewStyle;
+  frenchTitle: TextStyle;
+  footnote: TextStyle;
+};

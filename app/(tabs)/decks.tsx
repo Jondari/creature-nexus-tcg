@@ -32,7 +32,7 @@ export default function DecksScreen() {
   const [editingDeck, setEditingDeck] = useState<any>(null);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const sceneTrigger = useSceneTrigger();
-  const createButtonRef = useRef<TouchableOpacity | null>(null);
+  const createButtonRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
   const sceneManagerRef = useRef(sceneManager);
 
   useAnchorRegister(COMMON_ANCHORS.DECK_BUILDER_ENTRY, createButtonRef);

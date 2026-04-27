@@ -172,7 +172,7 @@ export function GameBoard({ onGameOverPlayAgain, onGameOverReturnToMenu }: GameB
   const bottomHandRef = useRef<View | null>(null);
   const bottomStatsRef = useRef<View | null>(null);
   const topStatsRef = useRef<View | null>(null);
-  const endTurnBtnRef = useRef<TouchableOpacity | null>(null);
+  const endTurnBtnRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
   const turnStatusRef = useRef<View | null>(null);
 
   // Register anchors (measured by AnchorsContext)

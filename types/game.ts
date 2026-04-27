@@ -110,7 +110,8 @@ export type AIStatus =
   | 'selecting_attack'
   | 'selecting_target'
   | 'executing_action'
-  | 'ending_turn';
+  | 'ending_turn'
+  | 'selecting_card_to_retire';
 
 export interface AIVisualState {
   status: AIStatus;

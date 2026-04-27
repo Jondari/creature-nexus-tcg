@@ -31,7 +31,7 @@ export default function ChapterSelection({ chapters, onChapterSelect }: ChapterS
     return (unlocked ?? chapters[0])?.id;
   }, [chapters]);
 
-  const chapterAnchorRef = useRef<TouchableOpacity | null>(null);
+  const chapterAnchorRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
   useAnchorRegister(COMMON_ANCHORS.CHAPTER_NODE, chapterAnchorRef, [firstHighlightChapterId]);
 
   const renderChapterCard = (chapter: StoryChapter) => {

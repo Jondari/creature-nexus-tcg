@@ -81,8 +81,8 @@ export default function OpenPackScreen() {
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [claimingQuestId, setClaimingQuestId] = useState<string | null>(null);
-  const giftRef = useRef<TouchableOpacity | null>(null);
-  const openPackRef = useRef<TouchableOpacity | null>(null);
+  const giftRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
+  const openPackRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
   const nextFreePackTimerRef = useRef<View | null>(null);
 
   // Quests: map playerQuests by id and compute sorted home list (max 3, non-hidden)

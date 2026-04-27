@@ -17,7 +17,7 @@ interface StatusBarProps {
   showEndTurnButton?: boolean;
   endTurnLabel?: string;
   onEndTurn?: () => void;
-  endTurnButtonRef?: React.Ref<TouchableOpacity>;
+  endTurnButtonRef?: React.Ref<React.ElementRef<typeof TouchableOpacity>>;
 }
 
 export function StatusBar({

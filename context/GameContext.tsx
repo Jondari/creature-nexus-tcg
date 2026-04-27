@@ -714,9 +714,6 @@ const showAIActionVisuals = async (action: GameAction, dispatch: React.Dispatch<
         dispatch({ type: 'SET_AI_STATUS', payload: { status: 'selecting_target', message: t('game.aiAction.selectingTarget') } });
         dispatch({ type: 'SET_AI_HIGHLIGHT', payload: { cardId: action.cardId, targetCardId: action.targetCardId } });
         await delay(1500); // 1000 + 500
-      } else {
-        dispatch({ type: 'SET_AI_STATUS', payload: { status: 'attacking_directly', message: t('game.aiAction.attackingDirectly') } });
-        await delay(1300); // 800 + 500
       }
       break;
       

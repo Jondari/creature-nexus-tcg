@@ -43,8 +43,8 @@ export function DeckBuilder({
   const gridAnchorRef = useRef<View | null>(null);
   const deckInfoRef = useRef<View | null>(null);
   const filterSectionRef = useRef<View | null>(null);
-  const currentDeckButtonRef = useRef<TouchableOpacity | null>(null);
-  const saveButtonRef = useRef<TouchableOpacity | null>(null);
+  const currentDeckButtonRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
+  const saveButtonRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
 
   // Group available cards and current deck by model (memoized)
   const groupedAvailable: CardGrouped[] = useMemo(() => groupByModel(availableCards), [availableCards]);

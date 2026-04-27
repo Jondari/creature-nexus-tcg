@@ -38,7 +38,7 @@ export default function StoryMap({ chapter, onBattleSelect }: StoryMapProps) {
     return (accessible ?? chapter.battles[0])?.id;
   }, [chapter]);
 
-  const battleAnchorRef = useRef<TouchableOpacity | null>(null);
+  const battleAnchorRef = useRef<React.ElementRef<typeof TouchableOpacity> | null>(null);
   useAnchorRegister(COMMON_ANCHORS.BATTLE_NODE, battleAnchorRef, [chapter.id, firstAccessibleBattleId]);
 
   useEffect(() => {
