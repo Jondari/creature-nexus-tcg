@@ -45,7 +45,7 @@ export class AffinityCalculator {
 
   static calculateFinalDamage(baseDamage: number, attackerElement: Element, defenderElement: Element): number {
     const modifier = this.calculateDamageModifier(attackerElement, defenderElement);
-    return baseDamage + modifier;
+    return Math.max(0, baseDamage + modifier);
   }
 
   static hasAdvantage(attackerElement: Element, defenderElement: Element): boolean {

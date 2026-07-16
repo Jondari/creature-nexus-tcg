@@ -8,6 +8,18 @@
       "developmentClient": true,
       "distribution": "internal"
     },
+    "e2e-test": {
+      "withoutCredentials": true,
+      "env": {
+        "EXPO_PUBLIC_DEMO_MODE": "true"
+      },
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "preview": {
       "distribution": "internal"            // generate APK
     },

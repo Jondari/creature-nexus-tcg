@@ -184,7 +184,8 @@ export const PACK_CATEGORIES = {
 
 // Helper function to get pack by ID
 export const getPackById = (id: string): BoosterPack | undefined => {
-  return ALL_BOOSTER_PACKS.find(pack => pack.id === id);
+  const normalizedId = id === 'standard' ? STANDARD_PACK.id : id;
+  return ALL_BOOSTER_PACKS.find(pack => pack.id === normalizedId);
 };
 
 // Helper function to get available packs

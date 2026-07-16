@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, Platform } from 'react-native';
 import { formatTimeRemaining } from '../utils/cardUtils';
 import Colors from '../constants/Colors';
@@ -13,51 +13,53 @@ interface CountdownTimerProps {
 export default function CountdownTimer({ timeRemaining, onComplete }: CountdownTimerProps) {
   const [remainingTime, setRemainingTime] = useState(timeRemaining);
   const progress = useSharedValue(0);
-  
+  const onCompleteRef = useRef(onComplete);
+  const completionNotifiedRef = useRef(false);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
   useEffect(() => {
     setRemainingTime(timeRemaining);
     progress.value = 0;
-    
-    // Set the initial progress based on time remaining
+
+    const notifyComplete = () => {
+      if (completionNotifiedRef.current) return;
+      completionNotifiedRef.current = true;
+      onCompleteRef.current?.();
+    };
+
+    const updateProgress = (nextTime: number) => {
+      const totalTime = 12 * 60 * 60 * 1000;
+      const elapsed = totalTime - nextTime;
+      const nextProgress = Math.max(0, Math.min(1, elapsed / totalTime));
+      progress.value = withTiming(nextProgress, { duration: 500 });
+    };
+
     if (timeRemaining > 0) {
-      const totalTime = 12 * 60 * 60 * 1000; // 12 hours in ms
-      const elapsed = totalTime - timeRemaining;
-      const initialProgress = Math.max(0, Math.min(1, elapsed / totalTime));
-      progress.value = withTiming(initialProgress, { duration: 500 });
+      completionNotifiedRef.current = false;
+      updateProgress(timeRemaining);
     } else {
       progress.value = withTiming(1, { duration: 500 });
+      notifyComplete();
+      return;
     }
+
+    const interval = setInterval(() => {
+      setRemainingTime((previousTime) => {
+        const nextTime = Math.max(0, previousTime - 1000);
+        updateProgress(nextTime);
+        if (nextTime === 0) {
+          clearInterval(interval);
+          notifyComplete();
+        }
+        return nextTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, [timeRemaining]);
-  
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    
-    if (remainingTime > 0) {
-      interval = setInterval(() => {
-        setRemainingTime((prev) => {
-          const newTime = Math.max(0, prev - 1000);
-          
-          // Update progress bar
-          const totalTime = 12 * 60 * 60 * 1000; // 12 hours
-          const elapsed = totalTime - newTime;
-          const newProgress = Math.max(0, Math.min(1, elapsed / totalTime));
-          progress.value = withTiming(newProgress, { duration: 500 });
-          
-          if (newTime === 0 && onComplete) {
-            onComplete();
-          }
-          
-          return newTime;
-        });
-      }, 1000);
-    } else if (onComplete) {
-      onComplete();
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [remainingTime, onComplete]);
   
   const progressBarStyle = useAnimatedStyle(() => {
     return {

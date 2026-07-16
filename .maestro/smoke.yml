@@ -1,0 +1,20 @@
+appId: com.jondari.creaturenexustcg
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Choose Your Language"
+    timeout: 30000
+- tapOn: "English"
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+- extendedWaitUntil:
+    visible: "Creature Nexus"
+    timeout: 60000
+- tapOn: "Collection"
+- extendedWaitUntil:
+    visible: "My Collection"
+    timeout: 30000

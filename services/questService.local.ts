@@ -12,7 +12,7 @@ import {
   updateDemoUser,
   DEMO_STORAGE_KEYS,
 } from '@/utils/localStorageUtils';
-import { STANDARD_PACK } from '@/data/boosterPacks';
+import { getPackById } from '@/data/boosterPacks';
 import type {
   QuestService,
   QuestTemplate,
@@ -98,15 +98,16 @@ export class QuestServiceLocal implements QuestService {
       await addDemoCoins(rewards.nexusCoins);
     }
 
-    // Grant packs (standard only in local mode)
+    // Grant packs using the same canonical identifiers as Firebase mode.
     if (rewards.packs && rewards.packs.length > 0) {
       for (const packId of rewards.packs) {
-        if (packId === 'standard') {
-          grantedPacks.push(STANDARD_PACK);
+        const pack = getPackById(packId);
+        if (pack) {
+          grantedPacks.push(pack);
           await addDemoPack({
-            packId: STANDARD_PACK.id,
-            packName: STANDARD_PACK.name,
-            packType: STANDARD_PACK.type,
+            packId: pack.id,
+            packName: pack.name,
+            packType: pack.type,
             earnedAt: now,
             reason: 'Quest Reward',
           });
