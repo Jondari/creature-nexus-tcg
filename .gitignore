@@ -47,6 +47,8 @@ expo-env.d.ts
 
 # ide
 .idea/
+/.claude/
+/AGENTS.md
 
 # Development tracking (internal use only)
 *.internal.md
