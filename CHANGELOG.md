@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.33.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.33.4...v0.33.5) (2026-07-16)
+
+
+### Bug Fixes
+
+* **typescript:** add typed platform billing service exports ([3439c2d](https://github.com/Jondari/creature-nexus-tcg/commit/3439c2d1dffca8434a4f4b91dccd424fac945fa5))
+
 ### [0.33.4](https://github.com/Jondari/creature-nexus-tcg/compare/v0.33.3...v0.33.4) (2026-05-01)
 
 
