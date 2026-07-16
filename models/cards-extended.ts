@@ -280,7 +280,7 @@ export class CardValidator {
 }
 
 // Export legacy types for backwards compatibility
-export type { Element, Rarity, Attack } from './game';
+export type { Element, Rarity, Attack } from '../types/game';
 
 // Re-export the original Card type as MonsterCard for backwards compatibility
 export type Card = MonsterCard;

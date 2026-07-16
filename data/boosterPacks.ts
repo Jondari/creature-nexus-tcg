@@ -1,6 +1,8 @@
 import { BoosterPack, StandardPack, ElementalPack, PremiumPack } from '../models/BoosterPack';
 import { CardRarity } from '../models/Card';
 
+export type { BoosterPack };
+
 // Pack pricing configuration with fallback defaults
 const PACK_PRICES = {
   STANDARD_NEXUS: parseInt(process.env.EXPO_PUBLIC_STANDARD_PACK_NEXUS_PRICE!) || 100,
