@@ -8,7 +8,7 @@
 // Scene trigger conditions
 export type SceneTrigger =
   | { type: 'onFirstLaunch' }
-  | { type: 'onEnterScreen'; screen: 'home' | 'battle' | 'story-mode' | 'chapter-map' | 'collection' | 'decks' | 'store' }
+  | { type: 'onEnterScreen'; screen: 'home' | 'battle' | 'battle-tutorial' | 'story-mode' | 'chapter-map' | 'collection' | 'decks' | 'store' }
   | { type: 'onBattleStart'; chapterId?: number; battleId?: string }
   | { type: 'onBattleEnd'; result: 'win' | 'lose' | 'any' }
   | { type: 'onBattleAction'; action: 'cardPlayed' | 'attackUsed' | 'cardRetired' | 'turnEnded' }
@@ -51,7 +51,7 @@ export type SceneCommand =
   
   // Game actions
   | { type: 'triggerBattle'; chapterId: number; battleId: string }
-  | { type: 'triggerReward'; type: 'pack' | 'cards' | 'coins'; data: any }
+  | { type: 'triggerReward'; rewardType: 'pack' | 'cards' | 'coins'; data: any }
   | { type: 'navigateTo'; screen: string; params?: Record<string, any> };
 
 // Highlight styling options
