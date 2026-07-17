@@ -18,7 +18,7 @@ export default function WebSpritesheetAttack({ progress, attackElement }: Props)
   const [layout, setLayout] = React.useState<{ width: number; height: number } | null>(null);
   const asset = React.useMemo(() => {
     if (!source) return null;
-    return Asset.fromModule(source as number);
+    return Asset.fromModule(source);
   }, [source]);
 
   const onLayout = (e: any) => {
@@ -28,13 +28,18 @@ export default function WebSpritesheetAttack({ progress, attackElement }: Props)
     }
   };
 
-  const frameWidth = asset ? asset.width / SPRITESHEET_COLUMNS : 1;
-  const numRows = asset ? Math.max(1, Math.round(asset.height / frameWidth)) : 1;
-  const frameHeight = asset ? asset.height / numRows : 1;
+  const assetWidth = asset?.width ?? 0;
+  const assetHeight = asset?.height ?? 0;
+  const hasValidAssetDimensions = assetWidth > 0 && assetHeight > 0;
+  const frameWidth = hasValidAssetDimensions ? assetWidth / SPRITESHEET_COLUMNS : 1;
+  const numRows = hasValidAssetDimensions
+    ? Math.max(1, Math.round(assetHeight / frameWidth))
+    : 1;
+  const frameHeight = hasValidAssetDimensions ? assetHeight / numRows : 1;
   const totalFrames = SPRITESHEET_COLUMNS * numRows;
 
   const animatedStyle = useAnimatedStyle(() => {
-    if (!asset || !layout) {
+    if (!hasValidAssetDimensions || !layout) {
       return { transform: [{ translateX: 0 }, { translateY: 0 }] };
     }
     const idx = Math.min(Math.floor(progress.value * totalFrames), totalFrames - 1);
@@ -48,7 +53,7 @@ export default function WebSpritesheetAttack({ progress, attackElement }: Props)
     };
   });
 
-  if (!asset) return null;
+  if (!asset || !hasValidAssetDimensions) return null;
   if (!layout) return <View style={styles.overlay} pointerEvents="none" onLayout={onLayout} />;
 
   const scaleX = layout.width / frameWidth;
@@ -62,8 +67,8 @@ export default function WebSpritesheetAttack({ progress, attackElement }: Props)
         style={[
           styles.image,
           {
-            width: asset.width * scaleX,
-            height: asset.height * scaleY,
+            width: assetWidth * scaleX,
+            height: assetHeight * scaleY,
           },
           animatedStyle,
         ]}
