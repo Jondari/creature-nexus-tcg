@@ -25,6 +25,8 @@ export class CardLoader {
         type: 'spell' as const,
         element: spell.element as Element,
         rarity: spell.rarity as Rarity,
+        spellType: spell.spellType as SpellCard['spellType'],
+        targetType: spell.targetType as SpellCard['targetType'],
         id: spell.name.toLowerCase().replace(/\s+/g, '_') + '_spell_' + index,
       }));
 
