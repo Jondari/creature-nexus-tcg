@@ -3,11 +3,7 @@ import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { Platform } from 'react-native';
-
-// Load Skia CanvasKit on web before any Skia component renders
-const LoadSkiaWeb = Platform.OS === 'web'
-  ? require('@shopify/react-native-skia/lib/module/web').LoadSkiaWeb
-  : null;
+import { loadSkia } from '@/utils/loadSkia';
 
 // Providers are facades that conditionally load Firebase or Local implementations
 import { AuthProvider, useAuth } from '@/context/AuthContext';
@@ -47,14 +43,11 @@ export default function RootLayout() {
   useFrameworkReady();
 
   // Skia CanvasKit must be loaded before any Skia Canvas renders on web
-  const isWeb = Platform.OS === 'web';
   const hasCheckedLocaleRef = useRef(false);
   const lastMusicTypeRef = useRef<MusicType | null>(null);
 
   useEffect(() => {
-    if (isWeb && LoadSkiaWeb) {
-      LoadSkiaWeb();
-    }
+    void loadSkia();
   }, []);
 
   const [fontsLoaded, fontError] = useFonts({
