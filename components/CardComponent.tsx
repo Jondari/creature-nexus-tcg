@@ -32,6 +32,40 @@ const hexToRgba = (hex: string, opacity: number): string => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
+const DEFAULT_TEXT_SHADOW = {
+  textShadowColor: 'rgba(0, 0, 0, 0.8)',
+  textShadowOffset: { width: 1, height: 1 },
+  textShadowRadius: 2,
+};
+
+const SMALL_TEXT_SHADOW = {
+  textShadowColor: 'rgba(0, 0, 0, 0.8)',
+  textShadowOffset: { width: 0.5, height: 0.5 },
+  textShadowRadius: 1,
+};
+
+const AVAILABLE_ATTACK_TEXT_SHADOW = {
+  textShadowColor: 'rgba(76, 175, 80, 0.3)',
+  textShadowOffset: { width: 1, height: 1 },
+  textShadowRadius: 2,
+};
+
+const AVAILABLE_DAMAGE_TEXT_SHADOW = {
+  ...AVAILABLE_ATTACK_TEXT_SHADOW,
+  textShadowRadius: 3,
+};
+
+const AVAILABLE_ATTACK_TEXT_SHADOW_SMALL = {
+  textShadowColor: 'rgba(76, 175, 80, 0.3)',
+  textShadowOffset: { width: 0.5, height: 0.5 },
+  textShadowRadius: 1,
+};
+
+const AVAILABLE_DAMAGE_TEXT_SHADOW_SMALL = {
+  ...AVAILABLE_ATTACK_TEXT_SHADOW_SMALL,
+  textShadowRadius: 1.5,
+};
+
 interface CardComponentProps {
   card: Card | ExtendedCard;
   onPress?: () => void;
@@ -284,7 +318,7 @@ const CardComponent = React.memo(({
             >
               {/* Header */}
               <View style={styles.cardHeader}>
-                <Text style={[creatureNameStyle, { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }]}>
+                <Text style={[creatureNameStyle, { color: colors.text, ...DEFAULT_TEXT_SHADOW }]}>
                   {card.name}
                 </Text>
                 {/* HP section - only for monster cards */}
@@ -293,8 +327,8 @@ const CardComponent = React.memo(({
                     <Text style={[
                       hpTextStyle, 
                       { 
-                        color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text, 
-                        textShadow: '1px 1px 2px rgba(0,0,0,0.8)' 
+                        color: card.maxHp && card.hp < card.maxHp ? '#FF4444' : colors.text,
+                        ...DEFAULT_TEXT_SHADOW,
                       }
                     ]}>
                       HP {card.hp}
@@ -371,7 +405,7 @@ const CardComponent = React.memo(({
                     <View style={styles.attackInfoPremium}>
                       <Text style={[
                         attackNameStyle, 
-                        { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' },
+                        { color: colors.text, ...DEFAULT_TEXT_SHADOW },
                         attackAvailable && showActions && (size === 'small' ? styles.availableAttackTextSmall : styles.availableAttackText)
                       ]}>
                         {(() => {
@@ -382,7 +416,7 @@ const CardComponent = React.memo(({
                       </Text>
                       <Text style={[
                         attackDamageStyle, 
-                        { color: colors.text, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' },
+                        { color: colors.text, ...DEFAULT_TEXT_SHADOW },
                         attackAvailable && showActions && (size === 'small' ? styles.availableDamageTextSmall : styles.availableDamageText)
                       ]}>
                         {attack.damage || '??'}
@@ -934,23 +968,23 @@ const styles = StyleSheet.create({
     fontSize: 12, // Half of original 18
     fontWeight: 'bold',
     flex: 1,
-    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
+    ...SMALL_TEXT_SHADOW,
   },
   hpTextSmall: {
     fontSize: 10, // Half of original 16
     fontWeight: 'bold',
-    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
+    ...SMALL_TEXT_SHADOW,
   },
   attackNameSmall: {
     fontSize: 8, // Half of original 14
     fontWeight: 'bold',
-    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
+    ...SMALL_TEXT_SHADOW,
     marginBottom: 1,
   },
   attackDamageSmall: {
     fontSize: 14, // Half of original 24
     fontWeight: 'bold',
-    textShadow: '0.5px 0.5px 1px rgba(0, 0, 0, 0.8)',
+    ...SMALL_TEXT_SHADOW,
   },
   // Small card layout styles
   contentAreaWithHeaderSmall: {
@@ -1022,7 +1056,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     flex: 1,
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+    ...DEFAULT_TEXT_SHADOW,
   },
   hpSection: {
     flexDirection: 'row',
@@ -1032,7 +1066,7 @@ const styles = StyleSheet.create({
   hpText: {
     fontSize: 16,
     fontWeight: 'bold',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+    ...DEFAULT_TEXT_SHADOW,
   },
   elementIcon: {
     width: 20,
@@ -1099,13 +1133,13 @@ const styles = StyleSheet.create({
   attackName: {
     fontSize: 14,
     fontWeight: 'bold',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+    ...DEFAULT_TEXT_SHADOW,
     marginBottom: 2,
   },
   attackDamage: {
     fontSize: 24,
     fontWeight: 'bold',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+    ...DEFAULT_TEXT_SHADOW,
   },
   placeholderContainer: {
     position: 'relative',
@@ -1129,7 +1163,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+    ...DEFAULT_TEXT_SHADOW,
     marginBottom: 5,
   },
   placeholderSubtext: {
@@ -1137,7 +1171,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+    ...DEFAULT_TEXT_SHADOW,
     opacity: 0.8,
   },
   contentAreaWithHeader: {
@@ -1319,13 +1353,13 @@ const styles = StyleSheet.create({
   availableAttackText: {
     color: '#4CAF50',
     fontWeight: '700',
-    textShadow: '1px 1px 2px rgba(76, 175, 80, 0.3)',
+    ...AVAILABLE_ATTACK_TEXT_SHADOW,
   },
   availableDamageText: {
     color: '#4CAF50',
     fontWeight: 'bold',
     fontSize: 26,
-    textShadow: '1px 1px 3px rgba(76, 175, 80, 0.3)',
+    ...AVAILABLE_DAMAGE_TEXT_SHADOW,
   },
   // Attack availability styles - small size
   availableAttackSmall: {
@@ -1352,13 +1386,13 @@ const styles = StyleSheet.create({
   availableAttackTextSmall: {
     color: '#4CAF50',
     fontWeight: '700',
-    textShadow: '0.5px 0.5px 1px rgba(76, 175, 80, 0.3)',
+    ...AVAILABLE_ATTACK_TEXT_SHADOW_SMALL,
   },
   availableDamageTextSmall: {
     color: '#4CAF50',
     fontWeight: 'bold',
     fontSize: 14,
-    textShadow: '0.5px 0.5px 1.5px rgba(76, 175, 80, 0.3)',
+    ...AVAILABLE_DAMAGE_TEXT_SHADOW_SMALL,
   },
   spellInfoSection: {
     padding: 8,
