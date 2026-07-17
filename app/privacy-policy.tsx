@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   link: {
-    color: Colors.accent?.[500] || Colors.primary || '#007AFF',
+    color: Colors.accent[500],
     textDecorationLine: 'underline',
   },
   divider: {
