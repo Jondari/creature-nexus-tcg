@@ -1,9 +1,10 @@
+import type { ImageRequireSource } from 'react-native';
 import { AvatarFrameDefinition } from '@/types/avatarFrame';
 
 // Shared with scripts/redeem-code.js — edit data/frames.shared.js to add new frames
 export const AVAILABLE_FRAMES: AvatarFrameDefinition[] = (require('../data/frames.shared') as { AVAILABLE_FRAMES: AvatarFrameDefinition[] }).AVAILABLE_FRAMES;
 
-const FRAME_IMAGES: Record<string, ReturnType<typeof require>> = {
+const FRAME_IMAGES: Record<string, ImageRequireSource> = {
   backer: require('@/assets/images/frame/avatar/backer.png'),
   beta_tester: require('@/assets/images/frame/avatar/beta_tester.png'),
   beta_tester_golden: require('@/assets/images/frame/avatar/beta_tester_golden.png'),
@@ -14,7 +15,7 @@ const FRAME_IMAGES: Record<string, ReturnType<typeof require>> = {
   vortex: require('@/assets/images/frame/avatar/vortex.png'),
 };
 
-export function getFrameImage(frameId: string): ReturnType<typeof require> | null {
+export function getFrameImage(frameId: string): ImageRequireSource | null {
   return FRAME_IMAGES[frameId] ?? null;
 }
 
