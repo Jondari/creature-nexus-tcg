@@ -1,8 +1,9 @@
+import type { ImageRequireSource } from 'react-native';
 import type { Element } from '../../types/game';
 
 export const SPRITESHEET_COLUMNS = 5;
 
-export const ATTACK_SPRITESHEETS: Partial<Record<Exclude<Element, 'all'>, ReturnType<typeof require>>> = {
+export const ATTACK_SPRITESHEETS: Partial<Record<Exclude<Element, 'all'>, ImageRequireSource>> = {
   fire: require('../../assets/images/attack/Fire.png'),
   water: require('../../assets/images/attack/Water.png'),
   air: require('../../assets/images/attack/Wind.png'),
