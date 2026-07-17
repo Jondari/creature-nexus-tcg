@@ -120,8 +120,8 @@ export function Battlefield({
     const previewTextStyle = [
       styles.previewTextBase,
       isSmall ? styles.previewTextSmall : styles.previewTextNormal,
-      preview?.affinity && preview.affinity > 0 && { color: '#4ECDC4' },
-      preview?.affinity && preview.affinity < 0 && { color: '#FF6B6B' },
+      preview !== null && preview.affinity > 0 && { color: '#4ECDC4' },
+      preview !== null && preview.affinity < 0 && { color: '#FF6B6B' },
     ];
 
     const extraCardProps = cardComponentProps?.(card) ?? {};

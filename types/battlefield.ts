@@ -5,7 +5,7 @@ export interface BattlefieldTheme {
 
   backgroundImage?: string;
   backgroundGradient?: {
-    colors: string[];
+    colors: [string, string, ...string[]];
     start: { x: number; y: number };
     end: { x: number; y: number };
   };
