@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Card, DamageAnimation, Attack } from '../types/game';
-import { ExtendedCard, MonsterCard, SpellCard, isMonsterCard, isSpellCard } from '../models/cards-extended';
+import { ExtendedCard, isMonsterCard, isSpellCard } from '../models/cards-extended';
 import { DamageEffect } from './DamageEffect';
 import { t } from '../utils/i18n';
 import Colors from '../constants/Colors';
@@ -234,6 +234,9 @@ const CardComponent = React.memo(({
   // Check if an attack is available based on player's energy and game rules
   const isAttackAvailable = (attack: Attack): boolean => {
     if (!showActions) return false; // No highlighting when actions are disabled
+
+    // Spells cannot attack. This also narrows the supported card models to monsters.
+    if (!('attacks' in card)) return false;
     
     // Check if card can attack based on game rules (first turn restriction, mythic cooldown)
     if (!CardUtils.canAttack(card, currentTurn, isFirstPlayer)) {
@@ -712,7 +715,9 @@ const CardComponent = React.memo(({
   
   // Card data comparison
   if (prevProps.card.id !== nextProps.card.id) return false;
-  if (prevProps.card.hp !== nextProps.card.hp) return false;
+  const prevHp = isMonsterCard(prevProps.card) ? prevProps.card.hp : null;
+  const nextHp = isMonsterCard(nextProps.card) ? nextProps.card.hp : null;
+  if (prevHp !== nextHp) return false;
   if (prevProps.card.name !== nextProps.card.name) return false;
   if (prevProps.card.element !== nextProps.card.element) return false;
   if (prevProps.card.rarity !== nextProps.card.rarity) return false;
@@ -757,7 +762,7 @@ const CardComponent = React.memo(({
 
 export { CardComponent };
 
-function getCardImage(card: Card) {
+function getCardImage(card: Pick<Card, 'name' | 'rarity'>) {
   // Static image mappings for React Native require
   const cardImages = {
     // Common

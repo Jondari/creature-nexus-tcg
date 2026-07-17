@@ -21,7 +21,11 @@ export class CardUtils {
     };
   }
 
-  static canAttack(card: Card, currentTurn: number, isFirstPlayer: boolean = false): boolean {
+  static canAttack(
+    card: Pick<Card, 'isMythic' | 'lastAttackTurn'>,
+    currentTurn: number,
+    isFirstPlayer: boolean = false
+  ): boolean {
     // First player cannot attack on turn 1
     if (currentTurn === 1 && isFirstPlayer) {
       return false;
