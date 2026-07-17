@@ -1,3 +1,4 @@
+import type { ImageSourcePropType } from 'react-native';
 import { Element, CardRarity, Card } from './Card';
 
 export type BoosterPackType = 
@@ -25,7 +26,7 @@ export interface BoosterPackBase {
   isPremium: boolean;
   
   // Visual
-  imageUrl: string;
+  imageUrl: string | ImageSourcePropType;
   backgroundColor: string;
   
   // Bundle options

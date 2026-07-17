@@ -376,7 +376,7 @@ export default function StoreScreen() {
           
           <View style={styles.packDetails}>
             <Text style={styles.cardCount}>{t('packs.cardCount', { count: String(pack.cardCount) })}</Text>
-            {pack.guaranteedRarity && (
+            {pack.type === 'premium' && pack.guaranteedRarity && (
               <Text style={styles.guaranteed}>
                 {t('packs.guaranteed', { rarity: t(`rarities.${pack.guaranteedRarity}`) })}
               </Text>
@@ -386,7 +386,11 @@ export default function StoreScreen() {
           {/* Pack Image */}
           {pack.imageUrl && (
               <Image
-                  source={pack.imageUrl}
+                  source={
+                    typeof pack.imageUrl === 'string'
+                      ? { uri: pack.imageUrl }
+                      : pack.imageUrl
+                  }
                   style={styles.packImage}
                   resizeMode="contain"
                   onError={(error) => { if (__DEV__) {console.log('Pack image failed to load:', pack.imageUrl, error)}}}
