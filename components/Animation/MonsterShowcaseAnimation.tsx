@@ -75,9 +75,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
   const showcaseMonsters = isWebMobile ? MOBILE_MONSTERS : (Platform.OS === 'web' ? PC_MONSTERS : MOBILE_MONSTERS);
   const [visibleImages, setVisibleImages] = useState<number[]>([]); // Array of visible image indices
   const [isAnimating, setIsAnimating] = useState(false);
-  const [animationComplete, setAnimationComplete] = useState(false);
   const [shouldHide, setShouldHide] = useState(false);
-  const [currentTransitionDuration, setCurrentTransitionDuration] = useState(transitionDuration);
   const overlayFadeAnim = useRef(new Animated.Value(1)).current;
   const containerFadeAnim = useRef(new Animated.Value(0)).current; // For fade-in/out effect
   
@@ -89,17 +87,9 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
       scale: new Animated.Value(0.8),
     }));
   }
-  const intervalRef = useRef<NodeJS.Timeout>();
-
   const handleSkip = () => {
-    // Clear any running intervals
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
     // Stop current animation and hide immediately
     setIsAnimating(false);
-    setAnimationComplete(true);
     setShouldHide(true);
     
     // Call the skip callback if provided
@@ -128,7 +118,6 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
     if (imageIndex >= showcaseMonsters.length) {
       // Animation complete
       setIsAnimating(false);
-      setAnimationComplete(true);
       
       // Wait a moment to show the final image, then start fade-out sequence
       setTimeout(() => {
@@ -209,21 +198,7 @@ const MonsterShowcaseAnimation: React.FC<MonsterShowcaseAnimationProps> = ({
 
       return () => clearTimeout(timer);
     }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
   }, [autoStart]);
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
 
   const containerStyle = fullScreen
     ? [styles.fullScreenContainer, Platform.OS === 'web' ? ({ position: 'fixed' } as any) : null]
