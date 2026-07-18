@@ -4,6 +4,7 @@ module.exports = {
   restoreMocks: true,
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   moduleNameMapper: {
+    '^@/data/quests\\.shared$': '<rootDir>/test/fixtures/quests.ts',
     '^@/(.*)$': '<rootDir>/$1',
   },
   testPathIgnorePatterns: [

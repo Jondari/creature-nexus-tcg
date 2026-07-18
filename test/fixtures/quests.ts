@@ -60,3 +60,6 @@ export const TEST_SHARED_QUESTS: QuestTemplate[] = [
     enabled: true,
   },
 ];
+
+// Jest replacement for the private, gitignored data/quests.shared.js module.
+export const SHARED_QUESTS = TEST_SHARED_QUESTS;

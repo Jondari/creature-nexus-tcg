@@ -9,14 +9,6 @@ import {
   type DemoUserProfile,
 } from '@/utils/localStorageUtils';
 
-jest.mock(
-  '@/data/quests.shared',
-  () => ({
-    SHARED_QUESTS: require('@/test/fixtures/quests').TEST_SHARED_QUESTS,
-  }),
-  { virtual: true }
-);
-
 const userId = 'demo-user';
 
 function makeEvent(
