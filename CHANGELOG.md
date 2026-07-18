@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.33.6](https://github.com/Jondari/creature-nexus-tcg/compare/v0.33.5...v0.33.6) (2026-07-18)
+
+
+### Bug Fixes
+
+* **animation:** type attack spritesheet sources correctly ([2ecebf5](https://github.com/Jondari/creature-nexus-tcg/commit/2ecebf5839b49a29b7da86f9a3232630b0398ddd))
+* **animation:** validate web spritesheet dimensions ([f4adc62](https://github.com/Jondari/creature-nexus-tcg/commit/f4adc6299fed8d8ad9320decdd78d7cf737d1216))
+* **avatar:** type static frame image sources ([84a7074](https://github.com/Jondari/creature-nexus-tcg/commit/84a7074d2906e43068b932d8d5f4eef9e0249278))
+* **battlefield:** validate gradients and affinity preview styles ([34075b8](https://github.com/Jondari/creature-nexus-tcg/commit/34075b8c0ecd2e1f94393a56e8438f9d7ea3b332))
+* **cards:** type spell data loaded from JSON ([c9a9368](https://github.com/Jondari/creature-nexus-tcg/commit/c9a93689607e04bc6b25f047183ddbc057c90473))
+* **card:** support shared monster and spell card contracts ([0c8a4e4](https://github.com/Jondari/creature-nexus-tcg/commit/0c8a4e4548e364ad25fb07d69d4f5885af173e84))
+* **card:** use cross-platform text shadow styles ([5d03944](https://github.com/Jondari/creature-nexus-tcg/commit/5d0394411abc8de0f933ca50e10a483ab2ec4a6a))
+* **skia:** isolate CanvasKit loader from native bundle ([d17e03b](https://github.com/Jondari/creature-nexus-tcg/commit/d17e03b42a23c0f045bf256363c3da785527bf9c))
+* **types:** correct booster pack image and rarity handling ([d87d067](https://github.com/Jondari/creature-nexus-tcg/commit/d87d06724c6453d7745cacc39a6ab583fa270bd5))
+* **types:** correct privacy policy link color ([b440ade](https://github.com/Jondari/creature-nexus-tcg/commit/b440adee5231bf45e87795a5e2818faf1c127b5f))
+* **types:** correct scene command and trigger definitions ([54eec31](https://github.com/Jondari/creature-nexus-tcg/commit/54eec3153e8785eefbc13bf3007cc05a8c6abf10))
+
 ### [0.33.5](https://github.com/Jondari/creature-nexus-tcg/compare/v0.33.4...v0.33.5) (2026-07-16)
 
 
